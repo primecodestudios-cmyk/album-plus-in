@@ -454,7 +454,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       u.city,
       u.devices_count || 0,
       u.active_license?.plan_name || "—",
-      u.sub_end ? new Date(u.sub_end).toLocaleDateString("en-IN") : "—",
+      u.sub_end ? formatDateTime(u.sub_end) : "—",
       u.days_left ?? "—",
       u.is_blocked ? "Blocked" : u.activation === 1 ? "Active" : "Inactive",
     ]);

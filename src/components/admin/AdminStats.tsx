@@ -143,6 +143,33 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     }
   };
 
+  const handleActivateAndSubscribe = async () => {
+    if (!subForm) return;
+    try {
+      // Activate user
+      await supabase.functions.invoke("admin-users", {
+        body: { action: "activate_user", user_id: subForm.userId },
+      });
+      // Set subscription
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "update_subscription",
+          user_id: subForm.userId,
+          sub_start: subForm.startDate,
+          sub_end: subForm.endDate,
+          activation: 1,
+        },
+      });
+      if (error) throw error;
+      const syncMsg = data?.cpanel_sync ? " (cPanel synced ✅)" : "";
+      toast({ title: "User activated & subscription enabled" + syncMsg });
+      setSubForm(null);
+      fetchAll(true);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
   if (loading) return <div className="text-muted-foreground py-8 text-center">Loading stats...</div>;
 
   const overviewCards = [

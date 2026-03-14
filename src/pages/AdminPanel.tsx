@@ -34,7 +34,7 @@ import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens";
+type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {

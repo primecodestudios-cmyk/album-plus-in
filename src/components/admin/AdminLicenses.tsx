@@ -11,6 +11,8 @@ interface License {
   starts_at: string;
   expires_at: string;
   is_active: boolean;
+  license_key: string | null;
+  device_id: string | null;
 }
 
 interface Profile {

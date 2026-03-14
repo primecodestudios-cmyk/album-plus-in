@@ -23,6 +23,7 @@ export function AdminEnquiries() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [page, setPage] = useState(1);
   const { toast } = useToast();
 
   const fetchEnquiries = async () => {

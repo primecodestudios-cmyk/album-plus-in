@@ -225,6 +225,19 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     return result;
   }, [users, searchQuery, filterStatus]);
 
+  const getSyncStatusMessage = (cpanelSync: any): { text: string; isError: boolean } => {
+    if (!cpanelSync) return { text: "", isError: false };
+    if (cpanelSync.success) return { text: "✅ cPanel MySQL synced successfully", isError: false };
+    switch (cpanelSync.reason) {
+      case "no_url": return { text: "⚠️ CPANEL_SYNC_URL not configured", isError: true };
+      case "no_identifier": return { text: "⚠️ No cPanel ID or email found for this user", isError: true };
+      case "login_redirect": return { text: "❌ cPanel Directory Privacy blocking access. Disable it for apiV1 folder.", isError: true };
+      case "http_error": return { text: `❌ cPanel HTTP error (status ${cpanelSync.status})`, isError: true };
+      case "network_error": return { text: `❌ Network error: ${cpanelSync.message}`, isError: true };
+      default: return { text: `⚠️ cPanel sync issue: ${cpanelSync.reason || "unknown"}`, isError: true };
+    }
+  };
+
   const invokeAction = async (actionName: string, userId: string, label: string) => {
     try {
       const { data, error } = await supabase.functions.invoke("admin-users", {
@@ -232,8 +245,12 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       });
       if (error) throw error;
       if (data?.success) {
-        const syncInfo = data.cpanel_sync ? " (cPanel synced ✅)" : "";
-        toast({ title: label + syncInfo });
+        const syncStatus = getSyncStatusMessage(data.cpanel_sync);
+        toast({
+          title: label,
+          description: syncStatus.text || undefined,
+          variant: syncStatus.isError ? "destructive" : "default",
+        });
         fetchUsers();
       }
     } catch (err: any) {
@@ -248,7 +265,12 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: label });
+        const syncStatus = getSyncStatusMessage(data.cpanel_sync);
+        toast({
+          title: label,
+          description: syncStatus.text || undefined,
+          variant: syncStatus.isError ? "destructive" : "default",
+        });
         fetchUsers();
       }
     } catch (err: any) {

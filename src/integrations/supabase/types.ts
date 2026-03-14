@@ -191,27 +191,36 @@ export type Database = {
       pricing_plans: {
         Row: {
           created_at: string
+          data_pack: string | null
           duration_days: number
+          duration_type: string
           id: string
           is_active: boolean
+          max_pcs: number
           plan_name: string
           price: number
           updated_at: string
         }
         Insert: {
           created_at?: string
+          data_pack?: string | null
           duration_days: number
+          duration_type?: string
           id?: string
           is_active?: boolean
+          max_pcs?: number
           plan_name: string
           price?: number
           updated_at?: string
         }
         Update: {
           created_at?: string
+          data_pack?: string | null
           duration_days?: number
+          duration_type?: string
           id?: string
           is_active?: boolean
+          max_pcs?: number
           plan_name?: string
           price?: number
           updated_at?: string

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop, UserPlus, Play, CalendarPlus } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop, UserPlus, Play, CalendarPlus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

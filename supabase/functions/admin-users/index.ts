@@ -326,7 +326,52 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify({ success: true }), {
+      // === REVERSE SYNC: Push changes back to cPanel MySQL ===
+      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      let cpanelSyncResult = null;
+      if (cpanelSyncUrl) {
+        try {
+          // Get user's cpanel_id and email for MySQL lookup
+          const { data: cpanelRow } = await supabaseAdmin
+            .from("cpanel_user_data")
+            .select("cpanel_id, pc_id")
+            .eq("user_id", body.user_id)
+            .maybeSingle();
+
+          const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(body.user_id);
+
+          if (cpanelRow?.cpanel_id || authUser?.email) {
+            const syncPayload = {
+              action: "update_subscription",
+              cpanel_id: cpanelRow?.cpanel_id || null,
+              email: authUser?.email || "",
+              pc_id: cpanelRow?.pc_id || "",
+              sub_start: sub_start || null,
+              sub_end: sub_end || null,
+              activation: is_enabled !== undefined ? (is_enabled ? 1 : 0) : undefined,
+              sync_secret: Deno.env.get("SYNC_API_SECRET") || "",
+            };
+
+            console.log("Reverse sync to cPanel:", JSON.stringify({ cpanel_id: syncPayload.cpanel_id, email: syncPayload.email }));
+
+            const syncResp = await fetch(cpanelSyncUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(syncPayload),
+            });
+
+            cpanelSyncResult = await syncResp.text();
+            console.log("cPanel sync response:", cpanelSyncResult);
+          }
+        } catch (syncErr: any) {
+          console.error("cPanel reverse sync error:", syncErr.message);
+          cpanelSyncResult = `Error: ${syncErr.message}`;
+        }
+      } else {
+        console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
+      }
+
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpanelSyncResult }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

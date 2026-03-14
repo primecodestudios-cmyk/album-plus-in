@@ -189,6 +189,11 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
   useEffect(() => {
     fetchUsers();
     fetchPlans();
+    // Auto-refresh every 30 seconds for real-time sync
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const filteredUsers = useMemo(() => {

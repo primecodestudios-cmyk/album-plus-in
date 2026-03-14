@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 const smartFeatures = [
   {
     icon: Brain,
-    badge: "AI Powered",
-    title: "AI Album Layout Generator",
-    description: "Select your photos, choose a style, and let our AI engine create stunning album layouts in seconds. Supports Wedding, Birthday, Engagement, and Traditional album styles.",
+    badge: "Smart Tools",
+    title: "Smart Album Layout Generator",
+    description: "Select your photos, choose a style, and let our automation engine create stunning album layouts in seconds. Supports Wedding, Birthday, Engagement, and Traditional album styles.",
     highlights: ["Auto photo arrangement", "Style-aware layouts", "One-click generation"],
     gradient: "from-[hsl(280,80%,60%)] to-[hsl(320,80%,55%)]",
   },

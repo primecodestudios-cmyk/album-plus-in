@@ -798,7 +798,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                         {d.expires_at && (
                           <div>
                             <span className="text-muted-foreground">Expires</span>
-                            <p>{new Date(d.expires_at).toLocaleDateString("en-IN")}</p>
+                            <p>{formatDateTime(d.expires_at)}</p>
                           </div>
                         )}
                       </div>

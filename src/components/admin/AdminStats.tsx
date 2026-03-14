@@ -481,7 +481,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
       </div>
 
       {/* PC Users Dialog */}
-      <Dialog open={selectedPcCount !== null} onOpenChange={(open) => !open && setSelectedPcCount(null)}>
+      <Dialog open={selectedPcCount !== null} onOpenChange={(open) => { if (!open) { setPcUserSearch(""); setSelectedPcCount(null); } }}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -489,80 +489,105 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
               {selectedPcCount} PC Activation — Users ({pcFilteredUsers.length})
             </DialogTitle>
           </DialogHeader>
-          {pcFilteredUsers.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">No users with {selectedPcCount} PC activation</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>PC Count</TableHead>
-                    <TableHead>Subscription</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pcFilteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="font-medium text-sm">{user.full_name || "—"}</div>
-                        {user.studio_name && <div className="text-xs text-muted-foreground">{user.studio_name}</div>}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
-                      <TableCell className="text-sm">{user.phone || "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs font-bold">
-                          {user.devices_count} PC{user.devices_count > 1 ? "s" : ""}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        <div>{user.active_license?.plan_name || "—"}</div>
-                        {user.days_left !== null && (
-                          <div className={`font-semibold ${user.days_left <= 0 ? "text-destructive" : user.days_left <= 15 ? "text-amber-400" : "text-foreground"}`}>
-                            {user.days_left <= 0 ? "Expired" : `${user.days_left}d left`}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`text-xs font-bold ${getStatusClass(user)}`}>
-                          {getStatusText(user)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-1 justify-end flex-wrap">
-                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
-                            onClick={() => { setSelectedPcCount(null); onNavigateToUsers("all"); }}>
-                            <Eye size={12} /> View
-                          </Button>
-                          {!user.is_blocked && user.activation === 1 && (
-                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-amber-400"
-                              onClick={() => invokeAction("deactivate_user", user.id, "User deactivated")}>
-                              <ShieldOff size={12} /> Deactivate
-                            </Button>
-                          )}
-                          {!user.is_blocked ? (
-                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
-                              onClick={() => invokeAction("block_user", user.id, "User blocked")}>
-                              <Ban size={12} /> Block
-                            </Button>
-                          ) : (
-                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-green-400"
-                              onClick={() => invokeAction("unblock_user", user.id, "User unblocked")}>
-                              <ShieldCheck size={12} /> Unblock
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
+          {/* Search */}
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by name, email, mobile, studio..."
+              value={pcUserSearch}
+              onChange={(e) => setPcUserSearch(e.target.value)}
+              className="w-full bg-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+          </div>
+          {(() => {
+            const q = pcUserSearch.toLowerCase().trim();
+            const filtered = q
+              ? pcFilteredUsers.filter((u) =>
+                  (u.full_name || "").toLowerCase().includes(q) ||
+                  (u.email || "").toLowerCase().includes(q) ||
+                  (u.phone || "").toLowerCase().includes(q) ||
+                  (u.studio_name || "").toLowerCase().includes(q)
+                )
+              : pcFilteredUsers;
+            return filtered.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                {q ? `No results for "${pcUserSearch}"` : `No users with ${selectedPcCount} PC activation`}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="text-xs text-muted-foreground mb-2">Showing {filtered.length} of {pcFilteredUsers.length} users</div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead>PC Count</TableHead>
+                      <TableHead>Subscription</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="font-medium text-sm">{user.full_name || "—"}</div>
+                          {user.studio_name && <div className="text-xs text-muted-foreground">{user.studio_name}</div>}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
+                        <TableCell className="text-sm">{user.phone || "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="text-xs font-bold">
+                            {user.devices_count} PC{user.devices_count > 1 ? "s" : ""}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <div>{user.active_license?.plan_name || "—"}</div>
+                          {user.days_left !== null && (
+                            <div className={`font-semibold ${user.days_left <= 0 ? "text-destructive" : user.days_left <= 15 ? "text-amber-400" : "text-foreground"}`}>
+                              {user.days_left <= 0 ? "Expired" : `${user.days_left}d left`}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`text-xs font-bold ${getStatusClass(user)}`}>
+                            {getStatusText(user)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end flex-wrap">
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
+                              onClick={() => { setSelectedPcCount(null); onNavigateToUsers("all"); }}>
+                              <Eye size={12} /> View
+                            </Button>
+                            {!user.is_blocked && user.activation === 1 && (
+                              <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-amber-400"
+                                onClick={() => invokeAction("deactivate_user", user.id, "User deactivated")}>
+                                <ShieldOff size={12} /> Deactivate
+                              </Button>
+                            )}
+                            {!user.is_blocked ? (
+                              <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
+                                onClick={() => invokeAction("block_user", user.id, "User blocked")}>
+                                <Ban size={12} /> Block
+                              </Button>
+                            ) : (
+                              <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-green-400"
+                                onClick={() => invokeAction("unblock_user", user.id, "User unblocked")}>
+                                <ShieldCheck size={12} /> Unblock
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

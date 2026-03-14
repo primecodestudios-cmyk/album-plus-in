@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, RefreshCw, Monitor, HardDrive, IndianRupee, Calendar } from "lucide-react";
+import { Save, Plus, Trash2, RefreshCw, Monitor, HardDrive, IndianRupee, Calendar, Percent, Edit3 } from "lucide-react";
 import {
   Dialog,
   DialogContent,

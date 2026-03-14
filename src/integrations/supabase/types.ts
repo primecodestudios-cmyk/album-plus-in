@@ -44,6 +44,51 @@ export type Database = {
         }
         Relationships: []
       }
+      device_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          device_id: string
+          email: string
+          id: string
+          ip_address: string | null
+          request_date: string
+          software_version: string | null
+          status: string
+          system_name: string | null
+          user_id: string
+          windows_version: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          device_id: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          request_date?: string
+          software_version?: string | null
+          status?: string
+          system_name?: string | null
+          user_id: string
+          windows_version?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          device_id?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          request_date?: string
+          software_version?: string | null
+          status?: string
+          system_name?: string | null
+          user_id?: string
+          windows_version?: string | null
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           created_at: string

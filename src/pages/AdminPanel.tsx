@@ -15,6 +15,7 @@ import {
   CreditCard,
   Key,
   MessageSquare,
+  Monitor,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";
@@ -22,9 +23,10 @@ import { AdminLicenses } from "@/components/admin/AdminLicenses";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
+import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "licenses" | "pricing" | "templates" | "enquiries";
+type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -68,6 +70,7 @@ const AdminPanel = () => {
 
   const tabs: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "stats", label: "Dashboard", icon: Settings },
+    { id: "device_requests", label: "Device Requests", icon: Monitor },
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
@@ -119,6 +122,7 @@ const AdminPanel = () => {
         {/* Tab Content */}
         <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           {activeTab === "stats" && <AdminStats />}
+          {activeTab === "device_requests" && <AdminDeviceRequests />}
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}

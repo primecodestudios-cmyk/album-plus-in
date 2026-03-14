@@ -106,6 +106,10 @@ export function AdminEnquiries() {
     return true;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   const dateFilters: { id: typeof dateFilter; label: string }[] = [
     { id: "all", label: "All" },
     { id: "today", label: "Today" },
@@ -125,7 +129,7 @@ export function AdminEnquiries() {
             <Input
               placeholder="Search name, email, subject..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9 h-9 text-sm w-full sm:w-64"
             />
           </div>
@@ -133,7 +137,7 @@ export function AdminEnquiries() {
             {dateFilters.map((f) => (
               <button
                 key={f.id}
-                onClick={() => setDateFilter(f.id)}
+                onClick={() => { setDateFilter(f.id); setPage(1); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   dateFilter === f.id
                     ? "bg-accent/15 text-accent border border-accent/30"
@@ -154,7 +158,7 @@ export function AdminEnquiries() {
         </div>
       )}
 
-      {filtered.map((enquiry, i) => (
+      {paginated.map((enquiry, i) => (
         <motion.div
           key={enquiry.id}
           initial={{ opacity: 0, y: 12 }}
@@ -164,12 +168,9 @@ export function AdminEnquiries() {
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              {/* Subject */}
               <h3 className="font-display font-semibold text-foreground mb-2 truncate">
                 {enquiry.subject}
               </h3>
-
-              {/* Contact info */}
               <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground mb-3">
                 <span className="flex items-center gap-1.5">
                   <User size={12} className="text-accent" />
@@ -190,8 +191,6 @@ export function AdminEnquiries() {
                   {formatDate(enquiry.created_at)}
                 </span>
               </div>
-
-              {/* Message */}
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {enquiry.message}
               </p>
@@ -203,7 +202,7 @@ export function AdminEnquiries() {
                   variant="ghost"
                   size="icon"
                   asChild
-                  className="text-muted-foreground hover:text-green-500 hover:bg-green-500/10"
+                  className="text-muted-foreground hover:text-accent hover:bg-accent/10"
                 >
                   <a
                     href={`https://wa.me/${enquiry.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
@@ -238,6 +237,59 @@ export function AdminEnquiries() {
           </div>
         </motion.div>
       ))}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <p className="text-xs text-muted-foreground">
+            Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft size={14} />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | "ellipsis")[]>((acc, p, idx, arr) => {
+                if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("ellipsis");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) =>
+                p === "ellipsis" ? (
+                  <span key={`e-${idx}`} className="px-1 text-xs text-muted-foreground">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`h-8 w-8 rounded-lg text-xs font-medium transition-all ${
+                      p === safePage
+                        ? "bg-accent/15 text-accent border border-accent/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight size={14} />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

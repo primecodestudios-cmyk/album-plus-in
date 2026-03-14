@@ -48,6 +48,35 @@ serve(async (req) => {
       }
     }
 
+    const pick = (...values: any[]) => values.find((v) => v !== undefined && v !== null && v !== "");
+    const toInt = (value: any, fallback = 0) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    function normalizeCpanelUser(raw: any) {
+      return {
+        id: pick(raw.id, raw.cpanel_id, raw.cpanelId),
+        email: (pick(raw.email, raw.mail) || "").toString().trim(),
+        pcId: pick(raw.pcId, raw.pcid, raw.pc_id, raw.pcID, ""),
+        subStart: pick(raw.subStart, raw.sub_start, null),
+        subEnd: pick(raw.subEnd, raw.sub_end, null),
+        userName: pick(raw.userName, raw.user_name, raw.username, ""),
+        shortName: pick(raw.shortName, raw.short_name, ""),
+        studioName: pick(raw.studioName, raw.studio_name, ""),
+        mobile: pick(raw.mobile, raw.phone, ""),
+        city: pick(raw.city, ""),
+        address: pick(raw.address, ""),
+        activation: toInt(pick(raw.activation, raw.activated), 0),
+        blockUser: toInt(pick(raw.block_user, raw.blockedUser), 0),
+        runningVersion: pick(raw.running_version, raw.runningVersion, ""),
+        systemInfo: pick(raw.system_info, raw.systemInfo, ""),
+        created: pick(raw.created, raw.cpanel_created, ""),
+        note1: pick(raw.note1, ""),
+        note2: pick(raw.note2, ""),
+      };
+    }
+
     // === BULK SYNC from cPanel ===
     if (action === "sync_users" && Array.isArray(body.users)) {
       const results = { created: 0, updated: 0, errors: [] as string[] };

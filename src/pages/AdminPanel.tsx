@@ -33,6 +33,7 @@ import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { useToast } from "@/hooks/use-toast";
 
 type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens";
+type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -41,6 +42,7 @@ const AdminPanel = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingRole, setCheckingRole] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("stats");
+  const [userFilter, setUserFilter] = useState<UserFilter>("all");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -65,6 +67,11 @@ const AdminPanel = () => {
 
     checkAdmin();
   }, [user, authLoading, navigate, toast]);
+
+  const handleNavigateToUsers = (filter: UserFilter) => {
+    setUserFilter(filter);
+    setActiveTab("users");
+  };
 
   if (authLoading || checkingRole || !isAdmin) {
     return (
@@ -116,7 +123,10 @@ const AdminPanel = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id === "users") setUserFilter("all");
+              }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 activeTab === tab.id
                   ? "bg-gradient-gold text-accent-foreground shadow-gold"
@@ -131,8 +141,8 @@ const AdminPanel = () => {
 
         {/* Tab Content */}
         <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          {activeTab === "stats" && <AdminStats />}
-          {activeTab === "users" && <AdminUsers />}
+          {activeTab === "stats" && <AdminStats onNavigateToUsers={handleNavigateToUsers} />}
+          {activeTab === "users" && <AdminUsers initialFilter={userFilter} />}
           {activeTab === "device_requests" && <AdminDeviceRequests />}
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}

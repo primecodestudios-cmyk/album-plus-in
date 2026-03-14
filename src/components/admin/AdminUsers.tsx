@@ -167,29 +167,31 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
 
   const lastInboundSyncAtRef = useRef(0);
 
-  const triggerInboundSyncIfConfigured = async () => {
-    const syncUrl = localStorage.getItem(SYNC_URL_KEY)?.trim();
-    if (!syncUrl) return;
-
+  const getInboundPullConfig = () => {
     const now = Date.now();
-    if (now - lastInboundSyncAtRef.current < INBOUND_SYNC_THROTTLE_MS) return;
-    lastInboundSyncAtRef.current = now;
-
-    try {
-      await fetch(syncUrl, { method: "GET", mode: "no-cors" });
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    } catch (error) {
-      console.warn("Inbound cPanel sync trigger failed:", error);
+    if (now - lastInboundSyncAtRef.current < INBOUND_SYNC_THROTTLE_MS) {
+      return { includePull: false, syncPullUrl: undefined as string | undefined };
     }
+
+    lastInboundSyncAtRef.current = now;
+    const syncUrl = localStorage.getItem(SYNC_URL_KEY)?.trim();
+    return {
+      includePull: true,
+      syncPullUrl: syncUrl || undefined,
+    };
   };
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      await triggerInboundSyncIfConfigured();
+      const { includePull, syncPullUrl } = getInboundPullConfig();
 
       const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "list_users", include_cpanel_pull: true },
+        body: {
+          action: "list_users",
+          include_cpanel_pull: includePull,
+          sync_pull_url: syncPullUrl,
+        },
       });
       if (error) throw error;
       if (data?.users) setUsers(data.users);

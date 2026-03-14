@@ -218,7 +218,7 @@ export function AdminSyncUsers() {
         </Button>
 
         {syncStatus === "success" && (
-          <p className="text-xs text-green-600 mt-2">
+          <p className="text-xs text-primary mt-2">
             ✅ Sync triggered! Stats will auto-refresh. Check the Users tab in ~30 seconds.
           </p>
         )}

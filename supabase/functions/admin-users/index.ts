@@ -164,6 +164,8 @@ serve(async (req) => {
     }
 
     if (action === "list_users") {
+      const pullTriggered = body.include_cpanel_pull ? await triggerInboundSyncFromCpanel() : false;
+
       const { data: authUsers, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,
       });

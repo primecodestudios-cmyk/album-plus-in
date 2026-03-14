@@ -294,12 +294,31 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     }
   };
 
+  // Helper: format date to YYYY-MM-DD using local timezone (not UTC)
+  const formatLocalDate = (dateStr: string): string => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper: parse YYYY-MM-DD to local date ISO string (avoid UTC shift)
+  const parseLocalDateToISO = (dateStr: string): string => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const d = new Date(year, month - 1, day, 12, 0, 0); // noon to avoid timezone edge
+    return d.toISOString();
+  };
+
   const handleOpenSubEdit = (user: UserRow) => {
     setSubEditUser(user);
     const start = user.sub_start || user.active_license?.starts_at || "";
     const end = user.sub_end || user.active_license?.expires_at || "";
-    setSubStart(start ? new Date(start).toISOString().split("T")[0] : "");
-    setSubEnd(end ? new Date(end).toISOString().split("T")[0] : "");
+    setSubStart(formatLocalDate(start));
+    setSubEnd(formatLocalDate(end));
     setSubPlan(user.active_license?.plan_name || "28 Days");
     setSubEnabled(user.activation === 1);
   };

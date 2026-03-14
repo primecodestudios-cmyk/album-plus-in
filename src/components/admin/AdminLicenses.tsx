@@ -176,7 +176,9 @@ export function AdminLicenses() {
             <thead>
               <tr className="border-b border-border text-xs text-muted-foreground">
                 <th className="text-left p-4 font-medium">User</th>
+                <th className="text-left p-4 font-medium">License Key</th>
                 <th className="text-left p-4 font-medium">Plan</th>
+                <th className="text-left p-4 font-medium">Device</th>
                 <th className="text-left p-4 font-medium">Remaining</th>
                 <th className="text-left p-4 font-medium">Status</th>
                 <th className="text-left p-4 font-medium">Action</th>

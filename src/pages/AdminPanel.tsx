@@ -24,9 +24,11 @@ import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
+import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
+import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries";
+type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -75,6 +77,8 @@ const AdminPanel = () => {
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
     { id: "enquiries", label: "Enquiries", icon: MessageSquare },
+    { id: "sync", label: "Sync Users", icon: Users },
+    { id: "activate", label: "Activate", icon: ShieldCheck },
   ];
 
   return (
@@ -127,6 +131,8 @@ const AdminPanel = () => {
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}
           {activeTab === "enquiries" && <AdminEnquiries />}
+          {activeTab === "sync" && <AdminSyncUsers />}
+          {activeTab === "activate" && <AdminActivateLicense />}
         </motion.div>
       </div>
     </div>

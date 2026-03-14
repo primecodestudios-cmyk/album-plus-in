@@ -11,7 +11,7 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative rounded-3xl bg-gradient-blue p-10 md:p-16 text-center overflow-hidden"
+          className="relative rounded-2xl md:rounded-3xl bg-gradient-blue p-8 md:p-16 text-center overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-accent/10 blur-[100px]" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-primary/20 blur-[80px]" />

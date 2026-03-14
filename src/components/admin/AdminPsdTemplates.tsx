@@ -32,7 +32,7 @@ export function AdminPsdTemplates() {
     description: "",
     preview_url: "",
     file_size: "",
-    photoshop_version: "CS6 — CC 2024",
+    photoshop_version: "CS6 — CC 2026",
     pages: 1,
     price: 0,
     is_free: false,

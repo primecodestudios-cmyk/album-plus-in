@@ -25,9 +25,9 @@ const slides = [
   },
   {
     image: heroSlide2,
-    badge: "✨ AI Powered",
-    title: "AI Powered Album Designing",
-    subtitle: "Let artificial intelligence do the heavy lifting",
+    badge: "✨ Smart Automation",
+    title: "Advanced Album Designing System",
+    subtitle: "Let smart automation tools do the heavy lifting",
     features: [
       { icon: Sparkles, text: "Auto Album Design" },
       { icon: Cpu, text: "Auto Photo Cutting" },

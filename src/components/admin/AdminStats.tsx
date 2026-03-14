@@ -191,6 +191,9 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     return { pcCount, userCount: pcStats[pcCount] || 0 };
   });
 
+  // New users: activation=0 and not blocked
+  const newUsers = allUsers.filter((u) => u.activation === 0 && !u.is_blocked);
+
   // Users for selected PC count
   const pcFilteredUsers = selectedPcCount !== null
     ? allUsers.filter((u) => u.devices_count === selectedPcCount)

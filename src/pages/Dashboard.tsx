@@ -11,6 +11,7 @@ import {
   User,
   LogOut,
   Home,
+  Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -48,6 +49,7 @@ const Dashboard = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [downloads, setDownloads] = useState<DownloadRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -59,17 +61,19 @@ const Dashboard = () => {
     if (!user) return;
 
     const fetchData = async () => {
-      const [profileRes, licensesRes, purchasesRes, downloadsRes] = await Promise.all([
+      const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes] = await Promise.all([
         supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
         supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
         supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),
+        supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
       if (licensesRes.data) setLicenses(licensesRes.data);
       if (purchasesRes.data) setPurchases(purchasesRes.data);
       if (downloadsRes.data) setDownloads(downloadsRes.data);
+      if (roleRes.data) setIsAdmin(true);
       setLoading(false);
     };
 
@@ -103,6 +107,11 @@ const Dashboard = () => {
             Album<span className="text-gradient-gold">Plus</span>
           </Link>
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-2 text-destructive font-semibold">
+                <Settings size={16} /> Admin Panel
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">
               <Home size={16} /> Home
             </Button>

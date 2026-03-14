@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search } from "lucide-react";
+import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+
+const PAGE_SIZE = 10;
 
 interface Enquiry {
   id: string;

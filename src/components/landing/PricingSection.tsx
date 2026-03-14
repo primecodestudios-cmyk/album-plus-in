@@ -120,7 +120,7 @@ export function PricingSection() {
               </div>
 
               <div className="mb-5">
-                <span className="font-display text-3xl md:text-4xl font-extrabold text-foreground">
+                <span className="font-display text-2xl md:text-4xl font-extrabold text-foreground">
                   {plan.price}
                 </span>
               </div>

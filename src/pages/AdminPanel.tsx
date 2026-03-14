@@ -29,6 +29,7 @@ import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
 import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
+import { AdminDeviceManagement } from "@/components/admin/AdminDeviceManagement";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";

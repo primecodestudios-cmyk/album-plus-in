@@ -430,6 +430,8 @@ export function AdminPricing() {
             </Button>
           </DialogFooter>
         </DialogContent>
+      </Dialog>
+
       {/* Bulk Update Dialog */}
       <Dialog open={showBulk} onOpenChange={setShowBulk}>
         <DialogContent className="max-w-lg">

@@ -34,7 +34,7 @@ export function WhatsAppButton() {
 
       {/* Button */}
       <a
-        href="https://wa.me/1234567890"
+        href="https://wa.me/91994342555"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"

@@ -1,6 +1,9 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSlider } from "@/components/landing/HeroSlider";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { BeforeAfterSection } from "@/components/landing/BeforeAfterSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { DemoVideoSection } from "@/components/landing/DemoVideoSection";
 import { BonusSection } from "@/components/landing/BonusSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { CTASection } from "@/components/landing/CTASection";
@@ -14,6 +17,9 @@ const Index = () => {
       <main>
         <HeroSlider />
         <FeaturesSection />
+        <BeforeAfterSection />
+        <DemoVideoSection />
+        <TestimonialsSection />
         <BonusSection />
         <PricingSection />
         <CTASection />

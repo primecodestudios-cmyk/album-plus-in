@@ -55,6 +55,71 @@ serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    const CPANEL_STATUS_PATHS = ["apiV1/cpanel_sync.php", "cpanel_sync.php"];
+    const CPANEL_PULL_PATHS = [
+      "apiV1/sync_to_lovable.php",
+      "sync_to_lovable.php",
+      "apiV1/sync_users.php",
+      "sync_users.php",
+      "apiV1/cpanel_sync.php",
+      "cpanel_sync.php",
+    ];
+
+    function isLikelyLoginPage(html: string) {
+      return /<title>\s*cPanel Login\s*<\/title>/i.test(html) || /action="\/login\//i.test(html) || /cpsrvd/i.test(html);
+    }
+
+    function safeSnippet(text: string, max = 240) {
+      return (text || "").replace(/\s+/g, " ").trim().slice(0, max);
+    }
+
+    function sanitizeUrl(rawUrl?: string | null): string | null {
+      if (!rawUrl) return null;
+      const trimmed = rawUrl.trim();
+      if (!trimmed) return null;
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      return `https://${trimmed.replace(/^\/+/, "")}`;
+    }
+
+    function uniqueStrings(values: string[]) {
+      return Array.from(new Set(values.filter(Boolean)));
+    }
+
+    function buildEndpointCandidates(rawUrl: string | null | undefined, fallbackPaths: string[]) {
+      const normalized = sanitizeUrl(rawUrl);
+      if (!normalized) return [] as string[];
+
+      try {
+        const parsed = new URL(normalized);
+        const exact = `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, "");
+        const pathNoSlash = parsed.pathname.replace(/^\/+|\/+$/g, "");
+        const origins = uniqueStrings([
+          parsed.origin,
+          `${parsed.protocol}//${parsed.hostname}`,
+        ]);
+
+        const candidates: string[] = [];
+        if (pathNoSlash.endsWith(".php")) {
+          candidates.push(exact);
+        } else {
+          candidates.push(normalized.replace(/\/+$/, ""));
+        }
+
+        for (const origin of origins) {
+          for (const p of fallbackPaths) {
+            candidates.push(`${origin.replace(/\/+$/, "")}/${p}`);
+            if (pathNoSlash && !pathNoSlash.endsWith(".php")) {
+              candidates.push(`${origin.replace(/\/+$/, "")}/${pathNoSlash}/${p}`);
+            }
+          }
+        }
+
+        return uniqueStrings(candidates);
+      } catch {
+        return [] as string[];
+      }
+    }
+
     // Helper: reverse sync status changes to cPanel MySQL
     function withLegacyCpanelAliases(updates: Record<string, any>) {
       const mapped: Record<string, any> = { ...updates };
@@ -73,9 +138,11 @@ serve(async (req) => {
     }
 
     async function syncToCpanel(userId: string, updates: Record<string, any>) {
-      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
-      const syncSecret = Deno.env.get("SYNC_API_SECRET") || "";
-      if (!cpanelSyncUrl) {
+      const configuredSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      const syncSecret = (Deno.env.get("SYNC_API_SECRET") || "").trim();
+      const endpointCandidates = buildEndpointCandidates(configuredSyncUrl, CPANEL_STATUS_PATHS);
+
+      if (!endpointCandidates.length) {
         console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
         return { success: false, reason: "no_url" };
       }
@@ -97,102 +164,234 @@ serve(async (req) => {
 
         let lastFailure: Record<string, any> = { success: false, reason: "unknown" };
 
-        for (const syncAction of actionCandidates) {
-          const syncPayload = {
-            action: syncAction,
-            cpanel_id: cpanelRow?.cpanel_id || null,
-            id: cpanelRow?.cpanel_id || null,
-            email: authUser?.email || "",
-            pc_id: cpanelRow?.pc_id || "",
-            pcId: cpanelRow?.pc_id || "",
-            sync_secret: syncSecret,
-            ...withLegacyCpanelAliases(updates),
-          };
-
-          console.log("Reverse sync to cPanel:", JSON.stringify({
-            url: cpanelSyncUrl,
-            action: syncAction,
-            cpanel_id: syncPayload.cpanel_id,
-            email: syncPayload.email,
-            updates,
-          }));
-
-          const resp = await fetch(cpanelSyncUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-sync-secret": syncSecret,
-              "User-Agent": "AlbumPlus-Admin/1.0",
-            },
-            body: JSON.stringify(syncPayload),
-          });
-
-          const result = await resp.text();
-          const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result) || /cpsrvd/i.test(result);
-
-          if (isLoginPage) {
-            console.error("cPanel reverse sync BLOCKED by login gate. Fix: Disable Directory Privacy for apiV1 folder in cPanel → Directory Privacy. Current URL:", cpanelSyncUrl);
-            return { success: false, reason: "login_redirect", message: "cPanel Directory Privacy is blocking access. Disable it for the apiV1 folder." };
-          }
-
-          if (!resp.ok) {
-            lastFailure = {
-              success: false,
-              reason: "http_error",
-              status: resp.status,
+        for (const endpointUrl of endpointCandidates) {
+          for (const syncAction of actionCandidates) {
+            const syncPayload = {
               action: syncAction,
-              message: result.slice(0, 200),
+              cpanel_id: cpanelRow?.cpanel_id || null,
+              id: cpanelRow?.cpanel_id || null,
+              email: authUser?.email || "",
+              pc_id: cpanelRow?.pc_id || "",
+              pcId: cpanelRow?.pc_id || "",
+              sync_secret: syncSecret,
+              ...withLegacyCpanelAliases(updates),
             };
-            console.error("cPanel reverse sync HTTP error", lastFailure);
-            continue;
-          }
 
-          let parsed: any = null;
-          try {
-            parsed = JSON.parse(result);
-          } catch {
-            parsed = null;
-          }
+            console.log("Reverse sync to cPanel:", JSON.stringify({
+              url: endpointUrl,
+              action: syncAction,
+              cpanel_id: syncPayload.cpanel_id,
+              email: syncPayload.email,
+              updates,
+            }));
 
-          if (parsed && typeof parsed === "object") {
-            const parsedSuccess = parsed.success === true || parsed.status === "success";
-            const parsedFailure = parsed.success === false || parsed.status === "error" || typeof parsed.error === "string";
-
-            if (parsedSuccess) {
-              console.log("cPanel sync SUCCESS via", syncAction);
-              return { success: true, action: syncAction, response: parsed };
-            }
-
-            if (parsedFailure) {
+            let resp: Response;
+            let result = "";
+            try {
+              resp = await fetch(endpointUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-sync-secret": syncSecret,
+                  "User-Agent": "AlbumPlus-Admin/1.0",
+                },
+                body: JSON.stringify(syncPayload),
+                signal: AbortSignal.timeout(15000),
+              });
+              result = await resp.text();
+            } catch (fetchErr: any) {
               lastFailure = {
                 success: false,
-                reason: "cpanel_rejected",
+                reason: "network_error",
                 action: syncAction,
-                message: parsed.error || parsed.message || "cPanel rejected update",
-                response: parsed,
+                endpoint: endpointUrl,
+                message: fetchErr?.message || "Failed to reach cPanel endpoint",
               };
-              console.error("cPanel rejected sync payload", lastFailure);
               continue;
             }
-          }
 
-          console.log("cPanel sync SUCCESS (non-JSON) via", syncAction, result.slice(0, 200));
-          return { success: true, action: syncAction, response: parsed || result.slice(0, 200) };
+            if (isLikelyLoginPage(result)) {
+              lastFailure = {
+                success: false,
+                reason: "login_redirect",
+                action: syncAction,
+                endpoint: endpointUrl,
+                message: "cPanel Directory Privacy/login gate is blocking API access.",
+              };
+              console.error("cPanel reverse sync blocked by login gate:", endpointUrl);
+              break;
+            }
+
+            if (!resp.ok) {
+              lastFailure = {
+                success: false,
+                reason: "http_error",
+                status: resp.status,
+                action: syncAction,
+                endpoint: endpointUrl,
+                message: safeSnippet(result),
+              };
+              console.error("cPanel reverse sync HTTP error", lastFailure);
+              continue;
+            }
+
+            let parsed: any = null;
+            try {
+              parsed = JSON.parse(result);
+            } catch {
+              parsed = null;
+            }
+
+            if (parsed && typeof parsed === "object") {
+              const parsedSuccess = parsed.success === true || parsed.status === "success";
+              const parsedFailure = parsed.success === false || parsed.status === "error" || typeof parsed.error === "string";
+
+              if (parsedSuccess) {
+                console.log("cPanel sync SUCCESS via", syncAction, "@", endpointUrl);
+                return { success: true, action: syncAction, endpoint: endpointUrl, response: parsed };
+              }
+
+              if (parsedFailure) {
+                lastFailure = {
+                  success: false,
+                  reason: "cpanel_rejected",
+                  action: syncAction,
+                  endpoint: endpointUrl,
+                  message: parsed.error || parsed.message || "cPanel rejected update",
+                  response: parsed,
+                };
+                console.error("cPanel rejected sync payload", lastFailure);
+                continue;
+              }
+            }
+
+            console.log("cPanel sync SUCCESS (non-JSON) via", syncAction, "@", endpointUrl, safeSnippet(result));
+            return { success: true, action: syncAction, endpoint: endpointUrl, response: parsed || safeSnippet(result) };
+          }
         }
 
-        console.error("cPanel reverse sync failed after all actions", lastFailure);
-        return lastFailure;
+        console.error("cPanel reverse sync failed after all actions/endpoints", lastFailure);
+        return {
+          ...lastFailure,
+          tried_endpoints: endpointCandidates,
+        };
       } catch (err: any) {
         console.error("cPanel reverse sync network error:", err.message);
-        return { success: false, reason: "network_error", message: err.message };
+        return { success: false, reason: "network_error", message: err.message, tried_endpoints: endpointCandidates };
       }
     }
 
-    // Helper: trigger inbound sync from cPanel (disabled - cpanel_sync.php only supports POST)
-    async function triggerInboundSyncFromCpanel() {
-      // Skipped: cpanel_sync.php requires POST with JSON body, GET returns login page
-      console.log("Inbound cPanel sync trigger skipped (not applicable for POST-only endpoint)");
-      return false;
+    // Helper: trigger inbound sync from cPanel to backend
+    async function triggerInboundSyncFromCpanel(preferredPullUrl?: string | null) {
+      const syncSecret = (Deno.env.get("SYNC_API_SECRET") || "").trim();
+      const configuredSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+
+      const endpointCandidates = uniqueStrings([
+        ...buildEndpointCandidates(preferredPullUrl, CPANEL_PULL_PATHS),
+        ...buildEndpointCandidates(configuredSyncUrl, CPANEL_PULL_PATHS),
+      ]);
+
+      if (!endpointCandidates.length) {
+        console.log("Inbound cPanel sync skipped: no pull URL available");
+        return { success: false, reason: "no_pull_url" };
+      }
+
+      let lastFailure: Record<string, any> = { success: false, reason: "unknown" };
+
+      for (const endpointUrl of endpointCandidates) {
+        for (const method of ["POST", "GET"] as const) {
+          try {
+            const requestInit: RequestInit = {
+              method,
+              headers: {
+                "x-sync-secret": syncSecret,
+                "User-Agent": "AlbumPlus-Admin/1.0",
+              },
+              signal: AbortSignal.timeout(15000),
+            };
+
+            if (method === "POST") {
+              requestInit.headers = {
+                ...requestInit.headers,
+                "Content-Type": "application/json",
+              };
+              requestInit.body = JSON.stringify({ action: "sync_users", sync_secret: syncSecret });
+            }
+
+            const resp = await fetch(endpointUrl, requestInit);
+            const resultText = await resp.text();
+
+            if (isLikelyLoginPage(resultText)) {
+              lastFailure = {
+                success: false,
+                reason: "login_redirect",
+                endpoint: endpointUrl,
+                method,
+                message: "cPanel login gate blocked inbound sync endpoint.",
+              };
+              continue;
+            }
+
+            if (!resp.ok) {
+              lastFailure = {
+                success: false,
+                reason: "http_error",
+                endpoint: endpointUrl,
+                method,
+                status: resp.status,
+                message: safeSnippet(resultText),
+              };
+              continue;
+            }
+
+            let parsed: any = null;
+            try {
+              parsed = JSON.parse(resultText);
+            } catch {
+              parsed = null;
+            }
+
+            if (parsed && typeof parsed === "object") {
+              const parsedSuccess = parsed.success === true || parsed.status === "success";
+              const parsedFailure = parsed.success === false || parsed.status === "error" || typeof parsed.error === "string";
+
+              if (parsedFailure) {
+                lastFailure = {
+                  success: false,
+                  reason: "cpanel_rejected",
+                  endpoint: endpointUrl,
+                  method,
+                  message: parsed.error || parsed.message || "cPanel rejected inbound sync",
+                  response: parsed,
+                };
+                continue;
+              }
+
+              if (parsedSuccess) {
+                console.log("Inbound cPanel sync SUCCESS via", method, endpointUrl);
+                return { success: true, endpoint: endpointUrl, method, response: parsed };
+              }
+            }
+
+            console.log("Inbound cPanel sync triggered via", method, endpointUrl, safeSnippet(resultText));
+            return { success: true, endpoint: endpointUrl, method, response: parsed || safeSnippet(resultText) };
+          } catch (err: any) {
+            lastFailure = {
+              success: false,
+              reason: "network_error",
+              endpoint: endpointUrl,
+              method,
+              message: err?.message || "Could not reach cPanel inbound sync endpoint",
+            };
+          }
+        }
+      }
+
+      console.error("Inbound cPanel sync failed", lastFailure);
+      return {
+        ...lastFailure,
+        tried_endpoints: endpointCandidates,
+      };
     }
 
     if (action === "list_users") {

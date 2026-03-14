@@ -334,6 +334,7 @@ serve(async (req) => {
       if (body.address !== undefined) cpanelUpdate.address = body.address;
       if (body.note1 !== undefined) cpanelUpdate.note1 = body.note1;
       if (body.note2 !== undefined) cpanelUpdate.note2 = body.note2;
+      if (body.short_name !== undefined) cpanelUpdate.short_name = body.short_name;
 
       if (Object.keys(cpanelUpdate).length > 0) {
         await supabaseAdmin
@@ -348,7 +349,18 @@ serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ success: true }), {
+      // Reverse sync profile changes to cPanel
+      const syncData: Record<string, any> = {};
+      if (body.full_name) syncData.full_name = body.full_name;
+      if (body.phone) syncData.phone = body.phone;
+      if (body.studio_name) syncData.studio_name = body.studio_name;
+      if (body.city) syncData.city = body.city;
+      if (body.address) syncData.address = body.address;
+      if (body.short_name) syncData.short_name = body.short_name;
+      if (body.email) syncData.email = body.email;
+      const cpSync = await syncToCpanel(body.user_id, syncData);
+
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

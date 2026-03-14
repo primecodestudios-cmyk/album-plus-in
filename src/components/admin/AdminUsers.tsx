@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Trash2,
   Edit,
-  X,
   Check,
   ShieldCheck,
   ShieldOff,
@@ -18,6 +17,10 @@ import {
   Unlock,
   AlertTriangle,
   Download,
+  Eye,
+  X,
+  Monitor,
+  MapPin,
 } from "lucide-react";
 import {
   Table,
@@ -35,17 +38,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -61,6 +53,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 
 interface UserRow {
   id: string;
@@ -72,6 +65,22 @@ interface UserRow {
   active_license: any;
   licenses_count: number;
   is_blocked: boolean;
+  days_left: number | null;
+  cpanel_id: number | null;
+  pc_id: string;
+  sub_start: string | null;
+  sub_end: string | null;
+  short_name: string;
+  studio_name: string;
+  city: string;
+  address: string;
+  activation: number;
+  block_user: number;
+  running_version: string;
+  system_info: string;
+  cpanel_created: string;
+  note1: string;
+  note2: string;
 }
 
 interface PricingPlan {
@@ -87,14 +96,22 @@ export function AdminUsers() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "expired" | "blocked" | "expiring">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive" | "blocked" | "expiring">("all");
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [editStudio, setEditStudio] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+  const [editNote1, setEditNote1] = useState("");
+  const [editNote2, setEditNote2] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // View details dialog
+  const [viewUser, setViewUser] = useState<UserRow | null>(null);
 
   // Activate dialog
   const [activateUser, setActivateUser] = useState<UserRow | null>(null);
@@ -131,13 +148,6 @@ export function AdminUsers() {
     fetchPlans();
   }, []);
 
-  const getRemainingDays = (license: any) => {
-    if (!license) return null;
-    return Math.ceil(
-      (new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-  };
-
   const filteredUsers = useMemo(() => {
     let result = users;
     if (searchQuery.trim()) {
@@ -146,74 +156,29 @@ export function AdminUsers() {
         (u) =>
           u.full_name?.toLowerCase().includes(q) ||
           u.email?.toLowerCase().includes(q) ||
-          u.phone?.toLowerCase().includes(q)
+          u.phone?.toLowerCase().includes(q) ||
+          u.studio_name?.toLowerCase().includes(q) ||
+          u.city?.toLowerCase().includes(q) ||
+          u.pc_id?.toLowerCase().includes(q)
       );
     }
-    if (filterStatus === "active") result = result.filter((u) => u.has_active_license && !u.is_blocked);
-    if (filterStatus === "expired") result = result.filter((u) => !u.has_active_license && !u.is_blocked);
-    if (filterStatus === "blocked") result = result.filter((u) => u.is_blocked);
+    if (filterStatus === "active") result = result.filter((u) => u.activation === 1 && !u.is_blocked);
+    if (filterStatus === "inactive") result = result.filter((u) => u.activation !== 1 && !u.is_blocked);
+    if (filterStatus === "blocked") result = result.filter((u) => u.is_blocked || u.block_user === 1);
     if (filterStatus === "expiring") {
-      result = result.filter((u) => {
-        const days = getRemainingDays(u.active_license);
-        return days !== null && days > 0 && days <= 15;
-      });
+      result = result.filter((u) => u.days_left !== null && u.days_left > 0 && u.days_left <= 15);
     }
     return result;
   }, [users, searchQuery, filterStatus]);
 
-  const handleDelete = async (userId: string) => {
+  const invokeAction = async (actionName: string, userId: string, label: string) => {
     try {
       const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "delete_user", user_id: userId },
+        body: { action: actionName, user_id: userId },
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: "User deleted" });
-        setUsers((prev) => prev.filter((u) => u.id !== userId));
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
-  const handleDeactivate = async (userId: string, userName: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "deactivate_user", user_id: userId },
-      });
-      if (error) throw error;
-      if (data?.success) {
-        toast({ title: "License deactivated", description: userName });
-        fetchUsers();
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
-  const handleBlock = async (userId: string, userName: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "block_user", user_id: userId },
-      });
-      if (error) throw error;
-      if (data?.success) {
-        toast({ title: "User blocked", description: userName });
-        fetchUsers();
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
-  const handleUnblock = async (userId: string, userName: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "unblock_user", user_id: userId },
-      });
-      if (error) throw error;
-      if (data?.success) {
-        toast({ title: "User unblocked", description: userName });
+        toast({ title: label });
         fetchUsers();
       }
     } catch (err: any) {
@@ -226,6 +191,11 @@ export function AdminUsers() {
     setEditName(user.full_name);
     setEditPhone(user.phone);
     setEditEmail(user.email);
+    setEditStudio(user.studio_name);
+    setEditCity(user.city);
+    setEditAddress(user.address);
+    setEditNote1(user.note1);
+    setEditNote2(user.note2);
   };
 
   const handleSaveEdit = async () => {
@@ -239,6 +209,11 @@ export function AdminUsers() {
           full_name: editName,
           phone: editPhone,
           email: editEmail,
+          studio_name: editStudio,
+          city: editCity,
+          address: editAddress,
+          note1: editNote1,
+          note2: editNote2,
         },
       });
       if (error) throw error;
@@ -268,12 +243,17 @@ export function AdminUsers() {
       const { error } = await supabase.from("user_licenses").insert({
         user_id: activateUser.id,
         plan_name: plan.plan_name,
-        device_id: activateDeviceId.trim() || null,
+        device_id: activateDeviceId.trim() || activateUser.pc_id || null,
         starts_at: startsAt.toISOString(),
         expires_at: expiresAt.toISOString(),
         is_active: true,
       });
       if (error) throw error;
+
+      // Also set activation=1 in cpanel_user_data
+      await supabase.functions.invoke("admin-users", {
+        body: { action: "activate_user", user_id: activateUser.id },
+      });
 
       toast({ title: "License activated!", description: `${plan.plan_name} for ${activateUser.full_name || activateUser.email}` });
       setActivateUser(null);
@@ -288,19 +268,20 @@ export function AdminUsers() {
   };
 
   const exportCSV = () => {
-    const headers = ["Name", "Email", "Phone", "Status", "Plan", "Expires", "Days Left"];
-    const rows = filteredUsers.map((u) => {
-      const days = getRemainingDays(u.active_license);
-      return [
-        u.full_name,
-        u.email,
-        u.phone,
-        u.is_blocked ? "Blocked" : u.has_active_license ? "Active" : "Expired",
-        u.active_license?.plan_name || "—",
-        u.active_license?.expires_at ? new Date(u.active_license.expires_at).toLocaleDateString() : "—",
-        days !== null ? days : "—",
-      ];
-    });
+    const headers = ["ID", "Name", "Studio", "Email", "Phone", "PCID", "City", "Plan", "Expiry", "Days Left", "Status"];
+    const rows = filteredUsers.map((u) => [
+      u.cpanel_id || "",
+      u.full_name,
+      u.studio_name,
+      u.email,
+      u.phone,
+      u.pc_id,
+      u.city,
+      u.active_license?.plan_name || "—",
+      u.sub_end ? new Date(u.sub_end).toLocaleDateString("en-IN") : "—",
+      u.days_left ?? "—",
+      u.is_blocked ? "Blocked" : u.activation === 1 ? "Active" : "Inactive",
+    ]);
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -311,60 +292,54 @@ export function AdminUsers() {
   };
 
   const getStatusBadge = (user: UserRow) => {
-    if (user.is_blocked) {
+    if (user.is_blocked || user.block_user === 1) {
       return <Badge variant="destructive" className="text-xs">🚫 Blocked</Badge>;
     }
-    const days = getRemainingDays(user.active_license);
-    if (user.has_active_license && days !== null && days <= 15 && days > 0) {
+    if (user.days_left !== null && user.days_left > 0 && user.days_left <= 15) {
       return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">🔴 Expiring</Badge>;
     }
-    if (user.has_active_license) {
+    if (user.activation === 1) {
       return <Badge className="bg-green-600/20 text-green-400 border-green-600/30 text-xs">✅ Active</Badge>;
     }
-    return <Badge variant="secondary" className="text-xs">Expired</Badge>;
+    return <Badge variant="secondary" className="text-xs">Inactive</Badge>;
   };
 
   if (loading) {
     return <div className="text-muted-foreground py-8 text-center">Loading users...</div>;
   }
 
-  // Summary counts
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.has_active_license && !u.is_blocked).length;
-  const blockedUsers = users.filter((u) => u.is_blocked).length;
-  const expiringUsers = users.filter((u) => {
-    const d = getRemainingDays(u.active_license);
-    return d !== null && d > 0 && d <= 15;
-  }).length;
+  const activeUsers = users.filter((u) => u.activation === 1 && !u.is_blocked).length;
+  const blockedUsers = users.filter((u) => u.is_blocked || u.block_user === 1).length;
+  const expiringUsers = users.filter((u) => u.days_left !== null && u.days_left > 0 && u.days_left <= 15).length;
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <button onClick={() => setFilterStatus("all")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "all" ? "border-primary shadow-gold" : "border-border"}`}>
-          <div className="text-xs text-muted-foreground mb-1">Total Users</div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><Users size={14} /> Total Users</div>
           <div className="font-display text-2xl font-bold text-foreground">{totalUsers}</div>
         </button>
-        <button onClick={() => setFilterStatus("active")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "active" ? "border-green-500 shadow-gold" : "border-border"}`}>
-          <div className="text-xs text-muted-foreground mb-1">Active</div>
+        <button onClick={() => setFilterStatus("active")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "active" ? "border-green-500" : "border-border"}`}>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><ShieldCheck size={14} /> Active Users</div>
           <div className="font-display text-2xl font-bold text-green-400">{activeUsers}</div>
         </button>
-        <button onClick={() => setFilterStatus("expiring")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "expiring" ? "border-amber-500 shadow-gold" : "border-border"}`}>
-          <div className="text-xs text-muted-foreground mb-1">🔴 Expiring ≤15d</div>
+        <button onClick={() => setFilterStatus("expiring")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "expiring" ? "border-amber-500" : "border-border"}`}>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><AlertTriangle size={14} /> Expiring ≤15d</div>
           <div className="font-display text-2xl font-bold text-amber-400">{expiringUsers}</div>
         </button>
-        <button onClick={() => setFilterStatus("blocked")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "blocked" ? "border-destructive shadow-gold" : "border-border"}`}>
-          <div className="text-xs text-muted-foreground mb-1">Blocked</div>
+        <button onClick={() => setFilterStatus("blocked")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "blocked" ? "border-destructive" : "border-border"}`}>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><Ban size={14} /> Blocked</div>
           <div className="font-display text-2xl font-bold text-destructive">{blockedUsers}</div>
         </button>
       </div>
 
+      {/* Actions bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">
-            Users <span className="text-muted-foreground font-normal text-base">({filteredUsers.length})</span>
-          </h2>
-        </div>
+        <h2 className="font-display text-xl font-bold text-foreground">
+          Users <span className="text-muted-foreground font-normal text-base">({filteredUsers.length})</span>
+        </h2>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
             <Download size={14} /> Export CSV
@@ -379,7 +354,7 @@ export function AdminUsers() {
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search by name, email, or phone..."
+          placeholder="Search by name, email, phone, studio, city, PCID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -392,8 +367,11 @@ export function AdminUsers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
+                <TableHead className="w-[40px]">ID</TableHead>
+                <TableHead>User Name</TableHead>
+                <TableHead>Studio</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>PCID</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Expiry</TableHead>
                 <TableHead>Days Left</TableHead>
@@ -404,34 +382,43 @@ export function AdminUsers() {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
                     No users found
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredUsers.map((user) => {
-                  const days = getRemainingDays(user.active_license);
-                  const isExpiring = days !== null && days <= 15 && days > 0;
+                  const isExpiring = user.days_left !== null && user.days_left > 0 && user.days_left <= 15;
                   return (
-                    <TableRow key={user.id} className={isExpiring ? "bg-amber-500/5" : user.is_blocked ? "bg-destructive/5" : ""}>
+                    <TableRow
+                      key={user.id}
+                      className={isExpiring ? "bg-amber-500/5" : user.is_blocked ? "bg-destructive/5" : ""}
+                    >
+                      <TableCell className="text-xs text-muted-foreground">{user.cpanel_id || "—"}</TableCell>
                       <TableCell>
                         <div className="font-medium text-sm">{user.full_name || "—"}</div>
                         <div className="text-xs text-muted-foreground">{user.phone || ""}</div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{user.email}</TableCell>
+                      <TableCell className="text-sm">{user.studio_name || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="text-xs font-mono text-muted-foreground max-w-[120px] truncate" title={user.pc_id}>
+                        {user.pc_id ? user.pc_id.substring(0, 12) + "..." : "—"}
+                      </TableCell>
                       <TableCell className="text-sm">{user.active_license?.plan_name || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {user.active_license?.expires_at
+                        {user.sub_end
+                          ? new Date(user.sub_end).toLocaleDateString("en-IN")
+                          : user.active_license?.expires_at
                           ? new Date(user.active_license.expires_at).toLocaleDateString("en-IN")
                           : "—"}
                       </TableCell>
                       <TableCell>
-                        {days !== null ? (
+                        {user.days_left !== null ? (
                           <span className={`text-sm font-semibold ${
-                            days <= 0 ? "text-destructive" : isExpiring ? "text-amber-400" : "text-foreground"
+                            user.days_left <= 0 ? "text-destructive" : isExpiring ? "text-amber-400" : "text-foreground"
                           }`}>
-                            {days <= 0 ? "Expired" : `${days}d`}
-                            {isExpiring && <AlertTriangle size={12} className="inline ml-1 text-amber-400" />}
+                            {user.days_left <= 0 ? "Expired" : `${user.days_left}d`}
+                            {isExpiring && <AlertTriangle size={12} className="inline ml-1" />}
                           </span>
                         ) : "—"}
                       </TableCell>
@@ -443,34 +430,47 @@ export function AdminUsers() {
                               Actions ▾
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              setActivateUser(user);
-                              setSelectedPlan("");
-                              setActivateDeviceId("");
-                            }}>
-                              <ShieldCheck size={14} className="mr-2 text-primary" /> Activate
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => setViewUser(user)}>
+                              <Eye size={14} className="mr-2" /> View Details
                             </DropdownMenuItem>
-                            {user.has_active_license && (
-                              <DropdownMenuItem onClick={() => handleDeactivate(user.id, user.full_name || user.email)}>
+                            <DropdownMenuSeparator />
+                            {user.activation !== 1 && (
+                              <DropdownMenuItem onClick={() => invokeAction("activate_user", user.id, "User activated")}>
+                                <ShieldCheck size={14} className="mr-2 text-green-400" /> Activate
+                              </DropdownMenuItem>
+                            )}
+                            {user.activation === 1 && (
+                              <DropdownMenuItem onClick={() => invokeAction("deactivate_user", user.id, "User deactivated")}>
                                 <ShieldOff size={14} className="mr-2 text-amber-400" /> Deactivate
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem onClick={() => {
+                              setActivateUser(user);
+                              setSelectedPlan("");
+                              setActivateDeviceId(user.pc_id || "");
+                            }}>
+                              <ShieldCheck size={14} className="mr-2 text-primary" /> New License
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(user)}>
-                              <Edit size={14} className="mr-2 text-muted-foreground" /> Edit
+                              <Edit size={14} className="mr-2" /> Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {user.is_blocked ? (
-                              <DropdownMenuItem onClick={() => handleUnblock(user.id, user.full_name || user.email)}>
+                            {user.is_blocked || user.block_user === 1 ? (
+                              <DropdownMenuItem onClick={() => invokeAction("unblock_user", user.id, "User unblocked")}>
                                 <Unlock size={14} className="mr-2 text-green-400" /> Unblock
                               </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem onClick={() => handleBlock(user.id, user.full_name || user.email)} className="text-amber-400">
+                              <DropdownMenuItem onClick={() => invokeAction("block_user", user.id, "User blocked")} className="text-amber-400">
                                 <Ban size={14} className="mr-2" /> Block
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() => {
+                                if (confirm(`Delete ${user.full_name || user.email}? This cannot be undone.`)) {
+                                  invokeAction("delete_user", user.id, "User deleted");
+                                }
+                              }}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 size={14} className="mr-2" /> Delete
@@ -487,24 +487,165 @@ export function AdminUsers() {
         </div>
       </div>
 
+      {/* View Details Dialog */}
+      <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {viewUser && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">cPanel ID</div>
+                  <div className="font-medium">{viewUser.cpanel_id || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">Short Name</div>
+                  <div className="font-medium">{viewUser.short_name || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">User Name</div>
+                  <div className="font-medium">{viewUser.full_name || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">Studio Name</div>
+                  <div className="font-medium">{viewUser.studio_name || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">Email</div>
+                  <div className="font-medium">{viewUser.email}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">Mobile</div>
+                  <div className="font-medium">{viewUser.phone || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground flex items-center gap-1"><MapPin size={12} /> City</div>
+                  <div className="font-medium">{viewUser.city || "—"}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground">Address</div>
+                  <div className="font-medium">{viewUser.address || "—"}</div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-3 mt-3">
+                <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Monitor size={14} /> System Info</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">PC ID</div>
+                    <div className="font-mono text-xs break-all">{viewUser.pc_id || "—"}</div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Running Version</div>
+                    <div className="font-medium">{viewUser.running_version || "—"}</div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 col-span-2">
+                    <div className="text-xs text-muted-foreground">System Info</div>
+                    <div className="font-medium">{viewUser.system_info || "—"}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-3 mt-3">
+                <h4 className="font-semibold text-foreground mb-2">Subscription</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Start Date</div>
+                    <div className="font-medium">
+                      {viewUser.sub_start ? new Date(viewUser.sub_start).toLocaleDateString("en-IN") : "—"}
+                    </div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">End Date</div>
+                    <div className="font-medium">
+                      {viewUser.sub_end ? new Date(viewUser.sub_end).toLocaleDateString("en-IN") : "—"}
+                    </div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Days Left</div>
+                    <div className={`font-bold ${
+                      viewUser.days_left !== null && viewUser.days_left <= 15 ? "text-amber-400" :
+                      viewUser.days_left !== null && viewUser.days_left <= 0 ? "text-destructive" : "text-foreground"
+                    }`}>
+                      {viewUser.days_left !== null ? (viewUser.days_left <= 0 ? "Expired" : `${viewUser.days_left} days`) : "—"}
+                    </div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Status</div>
+                    <div>{getStatusBadge(viewUser)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-3 mt-3">
+                <h4 className="font-semibold text-foreground mb-2">Notes</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Note 1</div>
+                    <div className="font-medium">{viewUser.note1 || "—"}</div>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-xs text-muted-foreground">Note 2</div>
+                    <div className="font-medium">{viewUser.note2 || "—"}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 rounded-lg p-3">
+                <div className="text-xs text-muted-foreground">Account Created</div>
+                <div className="font-medium">{viewUser.cpanel_created || new Date(viewUser.created_at).toLocaleDateString("en-IN")}</div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Dialog */}
       <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div>
-              <Label>Full Name</Label>
-              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Full Name</Label>
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+              </div>
+              <div>
+                <Label>Studio Name</Label>
+                <Input value={editStudio} onChange={(e) => setEditStudio(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Email</Label>
+                <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>City</Label>
+                <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+              </div>
+              <div>
+                <Label>Address</Label>
+                <Input value={editAddress} onChange={(e) => setEditAddress(e.target.value)} />
+              </div>
             </div>
             <div>
-              <Label>Email</Label>
-              <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+              <Label>Note 1</Label>
+              <Textarea value={editNote1} onChange={(e) => setEditNote1(e.target.value)} rows={2} />
             </div>
             <div>
-              <Label>Phone</Label>
-              <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+              <Label>Note 2</Label>
+              <Textarea value={editNote2} onChange={(e) => setEditNote2(e.target.value)} rows={2} />
             </div>
           </div>
           <DialogFooter>
@@ -529,6 +670,9 @@ export function AdminUsers() {
             <div className="bg-muted/30 rounded-xl p-3 text-sm">
               <span className="text-muted-foreground">User: </span>
               <strong>{activateUser?.full_name || activateUser?.email}</strong>
+              {activateUser?.studio_name && (
+                <span className="text-muted-foreground"> • {activateUser.studio_name}</span>
+              )}
             </div>
             <div>
               <Label>Plan *</Label>
@@ -546,7 +690,7 @@ export function AdminUsers() {
               </Select>
             </div>
             <div>
-              <Label>Device ID (optional)</Label>
+              <Label>Device ID</Label>
               <Input
                 value={activateDeviceId}
                 onChange={(e) => setActivateDeviceId(e.target.value)}

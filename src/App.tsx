@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/downloads" element={<DownloadCenter />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/activate" element={<ActivateLicense />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

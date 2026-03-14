@@ -314,7 +314,10 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: "Subscription updated" });
+        const syncMsg = data.cpanel_sync 
+          ? "Subscription updated & synced to cPanel ✅" 
+          : "Subscription updated (cPanel sync not configured)";
+        toast({ title: syncMsg });
         setSubEditUser(null);
         fetchUsers();
       }

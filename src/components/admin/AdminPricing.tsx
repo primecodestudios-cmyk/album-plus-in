@@ -430,6 +430,81 @@ export function AdminPricing() {
             </Button>
           </DialogFooter>
         </DialogContent>
+      {/* Bulk Update Dialog */}
+      <Dialog open={showBulk} onOpenChange={setShowBulk}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent size={18} /> Bulk Price Update
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Update Mode</Label>
+                <select
+                  value={bulkMode}
+                  onChange={(e) => setBulkMode(e.target.value as "fixed" | "percent")}
+                  className="w-full h-10 px-3 rounded-md bg-secondary border border-border text-foreground text-sm"
+                >
+                  <option value="percent">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount (₹)</option>
+                </select>
+              </div>
+              <div>
+                <Label>{bulkMode === "percent" ? "Change %" : "Change ₹"}</Label>
+                <Input
+                  type="number"
+                  value={bulkValue}
+                  onChange={(e) => setBulkValue(Number(e.target.value))}
+                  placeholder={bulkMode === "percent" ? "e.g., 10 or -20" : "e.g., 50 or -100"}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Use negative values to decrease</p>
+              </div>
+            </div>
+
+            {/* Preview table */}
+            <div className="rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-secondary/50 text-xs text-muted-foreground">
+                    <th className="text-left p-2.5">Plan</th>
+                    <th className="text-right p-2.5">Current (₹)</th>
+                    <th className="text-right p-2.5">New (₹)</th>
+                    <th className="text-right p-2.5">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((plan) => {
+                    const newPrice = bulkPreviews[plan.id] ?? plan.price;
+                    const diff = newPrice - plan.price;
+                    return (
+                      <tr key={plan.id} className="border-t border-border">
+                        <td className="p-2.5 font-medium text-foreground">{plan.plan_name}</td>
+                        <td className="p-2.5 text-right text-muted-foreground">₹{plan.price}</td>
+                        <td className="p-2.5 text-right font-semibold text-foreground">₹{newPrice}</td>
+                        <td className={`p-2.5 text-right text-xs font-semibold ${
+                          diff > 0 ? "text-green-400" : diff < 0 ? "text-destructive" : "text-muted-foreground"
+                        }`}>
+                          {diff > 0 ? "+" : ""}{diff !== 0 ? `₹${diff}` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleBulkUpdate} disabled={bulkSaving || bulkValue === 0} className="gap-2">
+              {bulkSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+              Update All Prices
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

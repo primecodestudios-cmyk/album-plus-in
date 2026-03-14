@@ -190,8 +190,8 @@ serve(async (req) => {
 
     // === SINGLE USER SYNC ===
     if (action === "sync_single" && body.user) {
-      const u = body.user;
-      const email = u.email?.trim();
+      const u = normalizeCpanelUser(body.user);
+      const email = u.email;
       if (!email) {
         return new Response(
           JSON.stringify({ success: false, error: "Email is required" }),
@@ -232,7 +232,7 @@ serve(async (req) => {
 
       await supabase.from("cpanel_user_data").upsert({
         user_id: userId,
-        cpanel_id: parseInt(u.id) || null,
+        cpanel_id: toInt(u.id, 0) || null,
         pc_id: u.pcId || "",
         sub_start: u.subStart || null,
         sub_end: u.subEnd || null,
@@ -240,10 +240,10 @@ serve(async (req) => {
         studio_name: u.studioName || "",
         city: u.city || "",
         address: u.address || "",
-        activation: parseInt(u.activation) || 0,
-        block_user: parseInt(u.block_user) || 0,
-        running_version: u.running_version || "",
-        system_info: u.system_info || "",
+        activation: u.activation,
+        block_user: u.blockUser,
+        running_version: u.runningVersion || "",
+        system_info: u.systemInfo || "",
         cpanel_created: u.created || "",
         note1: u.note1 || "",
         note2: u.note2 || "",

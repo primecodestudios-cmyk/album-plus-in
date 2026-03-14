@@ -353,12 +353,16 @@ serve(async (req) => {
     if (action === "unblock_user" && body.user_id) {
       await supabaseAdmin
         .from("cpanel_user_data")
-        .update({ block_user: 0 })
+        .update({ block_user: 0, activation: 1 })
+        .eq("user_id", body.user_id);
+      await supabaseAdmin
+        .from("user_licenses")
+        .update({ is_active: true })
         .eq("user_id", body.user_id);
       await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
         ban_duration: "none",
       });
-      const cpSync = await syncToCpanel(body.user_id, { block_user: 0 });
+      const cpSync = await syncToCpanel(body.user_id, { block_user: 0, activation: 1 });
       return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

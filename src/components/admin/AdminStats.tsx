@@ -155,7 +155,37 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     <div className="space-y-8">
       {/* Overview Cards - Clickable */}
       <div>
-        <h2 className="font-display text-xl font-bold text-foreground mb-5">Overview</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display text-xl font-bold text-foreground">Overview</h2>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Last: {lastRefresh.toLocaleTimeString("en-IN")}</span>
+              {autoRefresh && (
+                <span className="flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? "bg-accent animate-pulse" : "bg-green-500"}`} />
+                  {countdown}s
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                autoRefresh
+                  ? "bg-accent/10 border-accent/30 text-accent"
+                  : "bg-secondary border-border text-muted-foreground"
+              }`}
+            >
+              {autoRefresh ? "Auto ⏸" : "Auto ▶"}
+            </button>
+            <button
+              onClick={() => fetchAll(true)}
+              disabled={refreshing}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-accent/30 transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {overviewCards.map((c) => (
             <button

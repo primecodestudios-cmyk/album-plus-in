@@ -150,7 +150,7 @@ const Support = () => {
                   </Button>
                 </a>
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  +91 99434 2555 • Mon–Sat, 9 AM – 9 PM
+                  {supportNumber} • Mon–Sat, 10 AM – 6 PM
                 </p>
               </motion.div>
 

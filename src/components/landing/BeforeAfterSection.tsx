@@ -13,7 +13,7 @@ const comparisons = [
   },
   {
     label: "Engagement Album — Flat vs Professional",
-    description: "Plain photo placement vs AI-powered cinematic layouts",
+    description: "Plain photo placement vs smart cinematic layouts",
     beforeColor: "hsl(var(--muted))",
     afterColor: "hsl(var(--accent))",
     beforeStats: { time: "4 Hours", quality: "Flat", pages: "16 Pages" },

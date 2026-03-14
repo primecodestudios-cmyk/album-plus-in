@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 const smartFeatures = [
   {
     icon: Brain,
-    badge: "AI Powered",
-    title: "AI Album Layout Generator",
-    description: "Select your photos, choose a style, and let our AI engine create stunning album layouts in seconds. Supports Wedding, Birthday, Engagement, and Traditional album styles.",
+    badge: "Smart Tools",
+    title: "Smart Album Layout Generator",
+    description: "Select your photos, choose a style, and let our automation engine create stunning album layouts in seconds. Supports Wedding, Birthday, Engagement, and Traditional album styles.",
     highlights: ["Auto photo arrangement", "Style-aware layouts", "One-click generation"],
     gradient: "from-[hsl(280,80%,60%)] to-[hsl(320,80%,55%)]",
   },
@@ -61,10 +61,10 @@ export function SmartFeaturesSection() {
             <Sparkles size={14} /> Smart Features
           </div>
           <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-4">
-            Powered by <span className="text-gradient-gold">Intelligence</span>
+            Powered by <span className="text-gradient-gold">Smart Automation</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Advanced AI and automation features that make Album Plus the smartest album designing software in India.
+            Advanced automation features that make Album Plus the smartest album designing software in India.
           </p>
         </div>
 

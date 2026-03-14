@@ -11,7 +11,7 @@ const videos = [
   },
   {
     id: "dQw4w9WgXcQ",
-    title: "AI Auto Album Designing Tutorial",
+    title: "Auto Album Designing Tutorial",
     description: "Design 200 sheets in minutes",
     duration: "8:30",
   },

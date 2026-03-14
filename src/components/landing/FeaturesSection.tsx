@@ -14,42 +14,42 @@ const features = [
   {
     icon: PenTool,
     title: "Manual Album Designing",
-    description: "Create albums manually with full creative control.",
+    description: "Design album sheets manually with full creative control.",
   },
   {
     icon: Wand2,
-    title: "Semi Auto Designing",
-    description: "Automatically generate layouts quickly.",
+    title: "Semi Automatic Album Designing",
+    description: "Generate album layouts quickly using smart automation features.",
   },
   {
-    icon: Paintbrush,
-    title: "Oil Painting Effect",
-    description: "Convert photos to oil painting style instantly.",
+    icon: Scissors,
+    title: "Auto Photo Cutting",
+    description: "Easily remove photo backgrounds and prepare images for album layouts.",
   },
   {
     icon: SunMedium,
     title: "Auto Color Correction",
-    description: "Fix lighting and skin tones automatically.",
+    description: "Automatically adjust lighting, colors and skin tones for better results.",
+  },
+  {
+    icon: Paintbrush,
+    title: "Oil Painting Effect",
+    description: "Convert photos into beautiful oil painting style artwork.",
   },
   {
     icon: Camera,
     title: "Multi Camera Editing",
-    description: "Edit photos captured from multiple cameras.",
+    description: "Edit photos taken from multiple cameras efficiently.",
   },
   {
     icon: LayoutGrid,
     title: "Multi Window Editing",
-    description: "Work with multiple images simultaneously.",
+    description: "Work on multiple photos at the same time.",
   },
   {
     icon: FileStack,
-    title: "PSD Automation",
-    description: "Convert PSD templates into auto layouts.",
-  },
-  {
-    icon: Scissors,
-    title: "Background Removal",
-    description: "AI powered photo cutting.",
+    title: "PSD Template Conversion",
+    description: "Convert market PSD templates into auto-ready album layouts.",
   },
 ];
 

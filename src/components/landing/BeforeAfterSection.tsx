@@ -13,7 +13,7 @@ const comparisons = [
   },
   {
     label: "Engagement Album — Flat vs Professional",
-    description: "Plain photo placement vs AI-powered cinematic layouts",
+    description: "Plain photo placement vs smart cinematic layouts",
     beforeColor: "hsl(var(--muted))",
     afterColor: "hsl(var(--accent))",
     beforeStats: { time: "4 Hours", quality: "Flat", pages: "16 Pages" },
@@ -111,7 +111,7 @@ export function BeforeAfterSection() {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center mx-auto mb-3">
                     <span className="text-2xl">✨</span>
                   </div>
-                  <div className="text-sm font-medium text-foreground">AI Auto-Design</div>
+                  <div className="text-sm font-medium text-foreground">Smart Auto-Design</div>
                   <div className="text-xs text-muted-foreground">Fast, professional & consistent</div>
                 </div>
               </div>

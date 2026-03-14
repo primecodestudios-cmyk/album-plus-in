@@ -12,7 +12,7 @@ const faqs = [
   {
     category: "General",
     questions: [
-      { q: "What is Album Plus?", a: "Album Plus is India's #1 wedding album designing software. It helps photographers create stunning photo albums using AI-powered tools, PSD automation, and 500+ templates — all compatible with Adobe Photoshop CS3 to CC 2026." },
+      { q: "What is Album Plus?", a: "Album Plus is India's #1 wedding album designing software. It helps photographers create stunning photo albums using smart automation tools, PSD template conversion, and 500+ templates — all compatible with Adobe Photoshop CS3 to CC 2026." },
       { q: "Is Album Plus compatible with my Photoshop version?", a: "Yes! Album Plus supports all Adobe Photoshop versions from CS3 to CC 2026, including both 32-bit and 64-bit systems." },
       { q: "Can I try before buying?", a: "Absolutely! We offer a free demo version with limited features so you can evaluate the software before purchasing a license." },
       { q: "Does Album Plus work on Mac?", a: "Currently, Album Plus is designed for Windows operating systems. Mac support is planned for future releases." },

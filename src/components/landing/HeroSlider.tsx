@@ -13,7 +13,7 @@ const slides = [
     image: heroSlide1,
     badge: "🇮🇳 #1 in India",
     title: "India's Fastest Wedding Album Designing Software",
-    subtitle: "Design up to 200 Album Sheets Per Day",
+    subtitle: "Create professional album sheets faster with smart automation tools.",
     buttons: [
       { label: "Download Demo", icon: Download, variant: "outline" as const },
       { label: "Buy License", icon: ArrowRight, variant: "gold" as const },
@@ -25,16 +25,16 @@ const slides = [
   },
   {
     image: heroSlide2,
-    badge: "✨ AI Powered",
-    title: "AI Powered Album Designing",
-    subtitle: "Let artificial intelligence do the heavy lifting",
+    badge: "✨ Smart Automation",
+    title: "Advanced Album Designing System",
+    subtitle: "Let smart automation tools do the heavy lifting",
     features: [
       { icon: Sparkles, text: "Auto Album Design" },
       { icon: Cpu, text: "Auto Photo Cutting" },
       { icon: Monitor, text: "Auto Color Correction" },
     ],
     buttons: [
-      { label: "Try AI Features", icon: ArrowRight, variant: "gold" as const },
+      { label: "Try All Features", icon: ArrowRight, variant: "gold" as const },
     ],
   },
   {

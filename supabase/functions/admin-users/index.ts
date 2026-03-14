@@ -81,6 +81,7 @@ serve(async (req) => {
         const activeLicense = userLicenses.find(
           (l: any) => l.is_active && new Date(l.expires_at) > new Date()
         );
+        const isBanned = au.banned_until && new Date(au.banned_until) > new Date();
 
         return {
           id: au.id,
@@ -91,6 +92,7 @@ serve(async (req) => {
           has_active_license: !!activeLicense,
           active_license: activeLicense || null,
           licenses_count: userLicenses.length,
+          is_blocked: !!isBanned,
         };
       });
 
@@ -101,15 +103,52 @@ serve(async (req) => {
 
     // DELETE USER
     if (action === "delete_user" && body.user_id) {
-      // Delete from auth (cascades to profiles, licenses via FK)
       const { error } = await supabaseAdmin.auth.admin.deleteUser(body.user_id);
       if (error) throw error;
-
-      // Also clean up tables without FK
       await supabaseAdmin.from("profiles").delete().eq("user_id", body.user_id);
       await supabaseAdmin.from("user_licenses").delete().eq("user_id", body.user_id);
       await supabaseAdmin.from("user_roles").delete().eq("user_id", body.user_id);
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
+    // DEACTIVATE USER (set all active licenses to inactive)
+    if (action === "deactivate_user" && body.user_id) {
+      const { error } = await supabaseAdmin
+        .from("user_licenses")
+        .update({ is_active: false })
+        .eq("user_id", body.user_id)
+        .eq("is_active", true);
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // BLOCK USER (deactivate + ban from auth)
+    if (action === "block_user" && body.user_id) {
+      // Deactivate all licenses
+      await supabaseAdmin
+        .from("user_licenses")
+        .update({ is_active: false })
+        .eq("user_id", body.user_id);
+      // Ban user in auth
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
+        ban_duration: "876000h", // ~100 years
+      });
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, status: "blocked" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // UNBLOCK USER
+    if (action === "unblock_user" && body.user_id) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
+        ban_duration: "none",
+      });
+      if (error) throw error;
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

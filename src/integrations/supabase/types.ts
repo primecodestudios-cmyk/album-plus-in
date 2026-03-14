@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_downloads: {
+        Row: {
+          downloaded_at: string
+          id: string
+          template_id: string
+          template_name: string
+          user_id: string
+        }
+        Insert: {
+          downloaded_at?: string
+          id?: string
+          template_id: string
+          template_name: string
+          user_id: string
+        }
+        Update: {
+          downloaded_at?: string
+          id?: string
+          template_id?: string
+          template_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_licenses: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          plan_name: string
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          plan_name: string
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          plan_name?: string
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_purchases: {
+        Row: {
+          id: string
+          price: number
+          purchased_at: string
+          template_id: string
+          template_name: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          price?: number
+          purchased_at?: string
+          template_id: string
+          template_name: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          price?: number
+          purchased_at?: string
+          template_id?: string
+          template_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

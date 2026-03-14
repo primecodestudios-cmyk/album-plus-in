@@ -12,12 +12,20 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get("x-sync-secret");
-    const syncSecret = Deno.env.get("SYNC_API_SECRET");
+    // Support secret from header OR body
+    const headerSecret = (req.headers.get("x-sync-secret") || "").trim();
+    const syncSecret = (Deno.env.get("SYNC_API_SECRET") || "").trim();
+    
+    // Clone request to peek at body for sync_secret
+    const bodyText = await req.text();
+    let bodyJson: any = {};
+    try { bodyJson = JSON.parse(bodyText); } catch {}
+    const bodySecret = (bodyJson?.sync_secret || "").trim();
+    
+    const secretMatch = (headerSecret === syncSecret) || (bodySecret === syncSecret);
+    console.log("Sync request received, secret match:", secretMatch, "header:", !!headerSecret, "body:", !!bodySecret);
 
-    console.log("Sync request received, secret match:", authHeader === syncSecret);
-
-    if (!syncSecret || authHeader !== syncSecret) {
+    if (!syncSecret || !secretMatch) {
       return new Response(
         JSON.stringify({ success: false, error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -29,7 +37,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const body = await req.json();
+    const body = bodyJson;
     const { action } = body;
 
     console.log("Action:", action, "Users count:", body.users?.length || 0);

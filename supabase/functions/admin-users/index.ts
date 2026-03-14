@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -128,39 +128,11 @@ serve(async (req) => {
       }
     }
 
-    // Helper: trigger inbound sync from cPanel (best effort)
+    // Helper: trigger inbound sync from cPanel (disabled - cpanel_sync.php only supports POST)
     async function triggerInboundSyncFromCpanel() {
-      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
-      if (!cpanelSyncUrl) return false;
-
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
-
-        const resp = await fetch(cpanelSyncUrl, {
-          method: "GET",
-          headers: { "Accept": "application/json,text/plain,*/*" },
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-        const result = await resp.text();
-        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result);
-
-        if (!resp.ok || isLoginPage) {
-          console.warn("Inbound cPanel sync trigger skipped", {
-            status: resp.status,
-            isLoginPage,
-          });
-          return false;
-        }
-
-        console.log("Inbound cPanel sync trigger success");
-        return true;
-      } catch (err: any) {
-        console.warn("Inbound cPanel sync trigger failed:", err.message);
-        return false;
-      }
+      // Skipped: cpanel_sync.php requires POST with JSON body, GET returns login page
+      console.log("Inbound cPanel sync trigger skipped (not applicable for POST-only endpoint)");
+      return false;
     }
 
     if (action === "list_users") {

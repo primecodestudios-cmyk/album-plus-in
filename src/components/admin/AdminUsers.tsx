@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
+
+const SYNC_URL_KEY = "albumplus_sync_url";
+const INBOUND_SYNC_THROTTLE_MS = 25000;
 
 interface DeviceInfo {
   device_id: string;
@@ -162,9 +165,29 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     setFilterStatus(initialFilter);
   }, [initialFilter]);
 
+  const lastInboundSyncAtRef = useRef(0);
+
+  const triggerInboundSyncIfConfigured = async () => {
+    const syncUrl = localStorage.getItem(SYNC_URL_KEY)?.trim();
+    if (!syncUrl) return;
+
+    const now = Date.now();
+    if (now - lastInboundSyncAtRef.current < INBOUND_SYNC_THROTTLE_MS) return;
+    lastInboundSyncAtRef.current = now;
+
+    try {
+      await fetch(syncUrl, { method: "GET", mode: "no-cors" });
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    } catch (error) {
+      console.warn("Inbound cPanel sync trigger failed:", error);
+    }
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      await triggerInboundSyncIfConfigured();
+
       const { data, error } = await supabase.functions.invoke("admin-users", {
         body: { action: "list_users", include_cpanel_pull: true },
       });

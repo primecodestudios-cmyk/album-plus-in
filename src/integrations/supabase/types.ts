@@ -155,27 +155,36 @@ export type Database = {
       user_licenses: {
         Row: {
           created_at: string
+          device_id: string | null
           expires_at: string
           id: string
           is_active: boolean
+          license_key: string | null
+          max_devices: number
           plan_name: string
           starts_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          device_id?: string | null
           expires_at: string
           id?: string
           is_active?: boolean
+          license_key?: string | null
+          max_devices?: number
           plan_name: string
           starts_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          device_id?: string | null
           expires_at?: string
           id?: string
           is_active?: boolean
+          license_key?: string | null
+          max_devices?: number
           plan_name?: string
           starts_at?: string
           user_id?: string
@@ -232,6 +241,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_license: {
+        Args: { _device_id: string; _license_key: string }
+        Returns: Json
+      }
+      generate_license_key: { Args: never; Returns: string }
       get_admin_stats: { Args: never; Returns: Json }
       has_role: {
         Args: {

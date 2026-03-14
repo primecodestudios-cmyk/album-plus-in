@@ -1,0 +1,1 @@
+ALTER FUNCTION public.generate_license_key() SET search_path = public;

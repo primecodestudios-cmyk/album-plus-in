@@ -11,6 +11,7 @@ import Login from "./pages/Login.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import DownloadCenter from "./pages/DownloadCenter.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
+import ActivateLicense from "./pages/ActivateLicense.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/downloads" element={<DownloadCenter />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/activate" element={<ActivateLicense />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

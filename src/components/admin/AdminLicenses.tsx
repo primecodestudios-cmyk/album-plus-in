@@ -11,6 +11,8 @@ interface License {
   starts_at: string;
   expires_at: string;
   is_active: boolean;
+  license_key: string | null;
+  device_id: string | null;
 }
 
 interface Profile {
@@ -174,7 +176,9 @@ export function AdminLicenses() {
             <thead>
               <tr className="border-b border-border text-xs text-muted-foreground">
                 <th className="text-left p-4 font-medium">User</th>
+                <th className="text-left p-4 font-medium">License Key</th>
                 <th className="text-left p-4 font-medium">Plan</th>
+                <th className="text-left p-4 font-medium">Device</th>
                 <th className="text-left p-4 font-medium">Remaining</th>
                 <th className="text-left p-4 font-medium">Status</th>
                 <th className="text-left p-4 font-medium">Action</th>
@@ -183,7 +187,7 @@ export function AdminLicenses() {
             <tbody>
               {licenses.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center p-8 text-muted-foreground">No licenses found</td>
+                  <td colSpan={7} className="text-center p-8 text-muted-foreground">No licenses found</td>
                 </tr>
               ) : (
                 licenses.map((lic) => (
@@ -192,7 +196,13 @@ export function AdminLicenses() {
                       <div className="font-medium text-foreground">{profiles[lic.user_id] || "Unknown"}</div>
                       <div className="text-xs text-muted-foreground truncate max-w-[120px]">{lic.user_id.slice(0, 8)}...</div>
                     </td>
+                    <td className="p-4">
+                      <code className="text-xs font-mono text-accent bg-accent/10 px-2 py-1 rounded-lg">{lic.license_key || "—"}</code>
+                    </td>
                     <td className="p-4 text-foreground">{lic.plan_name}</td>
+                    <td className="p-4">
+                      <span className="text-xs text-muted-foreground font-mono">{lic.device_id || "Not bound"}</span>
+                    </td>
                     <td className="p-4 text-foreground">{remaining(lic.expires_at)}</td>
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${

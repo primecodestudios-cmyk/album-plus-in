@@ -164,7 +164,7 @@ export function AdminSyncUsers() {
         <div className="flex items-center gap-2 mb-4">
           <Zap size={20} className="text-primary" />
           <h3 className="font-display text-lg font-semibold text-foreground">Manual Bulk Sync</h3>
-          {syncStatus === "success" && <CheckCircle2 size={16} className="text-green-500" />}
+          {syncStatus === "success" && <CheckCircle2 size={16} className="text-primary" />}
           {syncStatus === "error" && <AlertCircle size={16} className="text-destructive" />}
         </div>
         <p className="text-sm text-muted-foreground mb-4">

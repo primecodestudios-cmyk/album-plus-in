@@ -84,6 +84,7 @@ const AdminPanel = () => {
     { id: "enquiries", label: "Enquiries", icon: MessageSquare },
     { id: "sync", label: "Sync Users", icon: Users },
     { id: "activate", label: "Activate", icon: ShieldCheck },
+    { id: "api_tokens", label: "API Tokens", icon: Key },
   ];
 
   return (

@@ -121,6 +121,7 @@ const AdminPanel = () => {
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}
+          {activeTab === "enquiries" && <AdminEnquiries />}
         </motion.div>
       </div>
     </div>

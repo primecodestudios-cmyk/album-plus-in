@@ -164,7 +164,7 @@ export function PricingSection() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-8">
-          Prices are managed by admin and may vary. All prices in INR (₹).
+          This is a digital software product. Due to the nature of digital downloads, refunds are not available after purchase. Prices are managed by admin and may vary. All prices in INR (₹).
         </p>
       </div>
     </section>

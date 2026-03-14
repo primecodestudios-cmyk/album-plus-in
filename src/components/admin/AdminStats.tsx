@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop, UserPlus, Play, CalendarPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +77,10 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   // PC activation dialog
   const [selectedPcCount, setSelectedPcCount] = useState<number | null>(null);
 
+  // New users dialog
+  const [showNewUsers, setShowNewUsers] = useState(false);
+  const [subForm, setSubForm] = useState<{ userId: string; userName: string; startDate: string; endDate: string } | null>(null);
+
   const fetchAll = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setRefreshing(true);
@@ -139,6 +143,33 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     }
   };
 
+  const handleActivateAndSubscribe = async () => {
+    if (!subForm) return;
+    try {
+      // Activate user
+      await supabase.functions.invoke("admin-users", {
+        body: { action: "activate_user", user_id: subForm.userId },
+      });
+      // Set subscription
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "update_subscription",
+          user_id: subForm.userId,
+          sub_start: subForm.startDate,
+          sub_end: subForm.endDate,
+          activation: 1,
+        },
+      });
+      if (error) throw error;
+      const syncMsg = data?.cpanel_sync ? " (cPanel synced ✅)" : "";
+      toast({ title: "User activated & subscription enabled" + syncMsg });
+      setSubForm(null);
+      fetchAll(true);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
   if (loading) return <div className="text-muted-foreground py-8 text-center">Loading stats...</div>;
 
   const overviewCards = [
@@ -159,6 +190,9 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     const pcCount = i + 1;
     return { pcCount, userCount: pcStats[pcCount] || 0 };
   });
+
+  // New users: activation=0 and not blocked
+  const newUsers = allUsers.filter((u) => u.activation === 0 && !u.is_blocked);
 
   // Users for selected PC count
   const pcFilteredUsers = selectedPcCount !== null
@@ -273,6 +307,126 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
           ))}
         </div>
       </div>
+
+      {/* New Users (Pending Activation) */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <UserPlus size={18} className="text-accent" />
+          <h2 className="font-display text-lg font-bold text-foreground">New Users</h2>
+        </div>
+        <button
+          onClick={() => setShowNewUsers(true)}
+          className="bg-card rounded-2xl border border-accent/30 p-5 shadow-card text-left transition-all hover:border-accent/50 hover:shadow-gold cursor-pointer w-full sm:w-auto sm:min-w-[220px]"
+        >
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
+            <UserPlus size={20} className="text-accent" />
+          </div>
+          <div className="text-xs text-muted-foreground mb-1">New Users (Pending Activation)</div>
+          <div className="font-display text-2xl font-bold text-accent">{newUsers.length}</div>
+        </button>
+      </div>
+
+      {/* New Users Dialog */}
+      <Dialog open={showNewUsers} onOpenChange={setShowNewUsers}>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus size={18} className="text-accent" />
+              New Users — Pending Activation ({newUsers.length})
+            </DialogTitle>
+          </DialogHeader>
+          {newUsers.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">No new users pending activation 🎉</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Mobile</TableHead>
+                    <TableHead>Studio</TableHead>
+                    <TableHead>Registered</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {newUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium text-sm">{user.full_name || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="text-sm">{user.phone || "—"}</TableCell>
+                      <TableCell className="text-sm">{user.studio_name || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {user.sub_end ? new Date(user.sub_end).toLocaleDateString("en-IN") : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end flex-wrap">
+                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-accent"
+                            onClick={() => invokeAction("activate_user", user.id, "User activated")}>
+                            <Play size={12} /> Activate
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-primary"
+                            onClick={() => setSubForm({
+                              userId: user.id,
+                              userName: user.full_name || user.email,
+                              startDate: new Date().toISOString().split("T")[0],
+                              endDate: new Date(Date.now() + 365 * 86400000).toISOString().split("T")[0],
+                            })}>
+                            <CalendarPlus size={12} /> Activate + Subscribe
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
+                            onClick={() => { setShowNewUsers(false); onNavigateToUsers("all"); }}>
+                            <Edit size={12} /> Edit
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
+                            onClick={() => invokeAction("block_user", user.id, "User blocked")}>
+                            <Ban size={12} /> Block
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Activate + Subscribe Dialog */}
+      <Dialog open={subForm !== null} onOpenChange={(open) => !open && setSubForm(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarPlus size={18} className="text-primary" />
+              Activate & Enable Subscription
+            </DialogTitle>
+          </DialogHeader>
+          {subForm && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                User: <span className="text-foreground font-medium">{subForm.userName}</span>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Start Date</label>
+                <input type="date" value={subForm.startDate}
+                  onChange={(e) => setSubForm({ ...subForm, startDate: e.target.value })}
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">End Date</label>
+                <input type="date" value={subForm.endDate}
+                  onChange={(e) => setSubForm({ ...subForm, endDate: e.target.value })}
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground" />
+              </div>
+              <Button className="w-full" onClick={handleActivateAndSubscribe}>
+                <Play size={14} /> Activate & Enable Subscription
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* PC Activation Count — 1 to 10 PCs, clickable */}
       <div>

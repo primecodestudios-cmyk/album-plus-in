@@ -222,12 +222,12 @@ serve(async (req) => {
         .from("cpanel_user_data")
         .update({ activation: 1 })
         .eq("user_id", body.user_id);
-      // Also activate any licenses
       await supabaseAdmin
         .from("user_licenses")
         .update({ is_active: true })
         .eq("user_id", body.user_id);
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 1 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -243,7 +243,8 @@ serve(async (req) => {
         .update({ is_active: false })
         .eq("user_id", body.user_id)
         .eq("is_active", true);
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 0 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -261,7 +262,8 @@ serve(async (req) => {
       await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
         ban_duration: "876000h",
       });
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 0, block_user: 1 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -275,7 +277,8 @@ serve(async (req) => {
       await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
         ban_duration: "none",
       });
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { block_user: 0 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

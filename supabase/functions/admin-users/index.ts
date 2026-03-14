@@ -69,6 +69,7 @@ serve(async (req) => {
         .select("*")
         .order("expires_at", { ascending: false });
 
+      // Group all cpanel entries by email/phone for multi-PC tracking
       const userMap = (authUsers?.users || []).map((au: any) => {
         const profile = profiles?.find((p: any) => p.user_id === au.id);
         const cpanel = cpanelData?.find((c: any) => c.user_id === au.id);
@@ -90,6 +91,33 @@ serve(async (req) => {
           );
         }
 
+        // Collect all devices (from licenses with different device_ids)
+        const deviceMap = new Map<string, any>();
+        for (const lic of userLicenses) {
+          if (lic.device_id && !deviceMap.has(lic.device_id)) {
+            deviceMap.set(lic.device_id, {
+              device_id: lic.device_id,
+              plan_name: lic.plan_name,
+              is_active: lic.is_active,
+              expires_at: lic.expires_at,
+              starts_at: lic.starts_at,
+              license_id: lic.id,
+            });
+          }
+        }
+        // Also add cpanel pc_id if not already there
+        if (cpanel?.pc_id && !deviceMap.has(cpanel.pc_id)) {
+          deviceMap.set(cpanel.pc_id, {
+            device_id: cpanel.pc_id,
+            system_info: cpanel.system_info || "",
+            running_version: cpanel.running_version || "",
+            is_active: cpanel.activation === 1,
+            plan_name: activeLicense?.plan_name || "—",
+            expires_at: cpanel.sub_end || activeLicense?.expires_at || null,
+            starts_at: cpanel.sub_start || activeLicense?.starts_at || null,
+          });
+        }
+
         return {
           id: au.id,
           email: au.email,
@@ -98,7 +126,10 @@ serve(async (req) => {
           created_at: au.created_at,
           has_active_license: !!activeLicense,
           active_license: activeLicense || null,
+          all_licenses: userLicenses,
           licenses_count: userLicenses.length,
+          devices: Array.from(deviceMap.values()),
+          devices_count: deviceMap.size,
           is_blocked: !!(cpanel?.block_user === 1) || !!isBanned,
           days_left: daysLeft,
           // cPanel specific fields
@@ -120,7 +151,16 @@ serve(async (req) => {
         };
       });
 
-      return new Response(JSON.stringify({ success: true, users: userMap }), {
+      // Compute activation count stats
+      const pcCountMap: Record<number, number> = {};
+      for (const u of userMap) {
+        const count = u.devices_count;
+        if (count > 0) {
+          pcCountMap[count] = (pcCountMap[count] || 0) + 1;
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true, users: userMap, pc_activation_stats: pcCountMap }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -239,6 +279,80 @@ serve(async (req) => {
       });
     }
 
+    // === UPDATE SUBSCRIPTION ===
+    if (action === "update_subscription" && body.user_id) {
+      const { sub_start, sub_end, plan_name, is_enabled } = body;
+
+      // Update cpanel_user_data subscription dates
+      const cpanelUpdate: any = {};
+      if (sub_start !== undefined) cpanelUpdate.sub_start = sub_start;
+      if (sub_end !== undefined) cpanelUpdate.sub_end = sub_end;
+      if (is_enabled !== undefined) cpanelUpdate.activation = is_enabled ? 1 : 0;
+
+      if (Object.keys(cpanelUpdate).length > 0) {
+        await supabaseAdmin
+          .from("cpanel_user_data")
+          .update(cpanelUpdate)
+          .eq("user_id", body.user_id);
+      }
+
+      // Update active license if exists
+      if (body.license_id) {
+        const licUpdate: any = {};
+        if (sub_start !== undefined) licUpdate.starts_at = sub_start;
+        if (sub_end !== undefined) licUpdate.expires_at = sub_end;
+        if (plan_name !== undefined) licUpdate.plan_name = plan_name;
+        if (is_enabled !== undefined) licUpdate.is_active = is_enabled;
+
+        if (Object.keys(licUpdate).length > 0) {
+          await supabaseAdmin
+            .from("user_licenses")
+            .update(licUpdate)
+            .eq("id", body.license_id);
+        }
+      } else {
+        // Update all active licenses for this user
+        const licUpdate: any = {};
+        if (sub_start !== undefined) licUpdate.starts_at = sub_start;
+        if (sub_end !== undefined) licUpdate.expires_at = sub_end;
+        if (plan_name !== undefined) licUpdate.plan_name = plan_name;
+        if (is_enabled !== undefined) licUpdate.is_active = is_enabled;
+
+        if (Object.keys(licUpdate).length > 0) {
+          await supabaseAdmin
+            .from("user_licenses")
+            .update(licUpdate)
+            .eq("user_id", body.user_id);
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === DEACTIVATE DEVICE (specific license) ===
+    if (action === "deactivate_device" && body.license_id) {
+      await supabaseAdmin
+        .from("user_licenses")
+        .update({ is_active: false })
+        .eq("id", body.license_id);
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === ACTIVATE DEVICE (specific license) ===
+    if (action === "activate_device" && body.license_id) {
+      await supabaseAdmin
+        .from("user_licenses")
+        .update({ is_active: true })
+        .eq("id", body.license_id);
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // === EXPIRING USERS ===
     if (action === "expiring_users") {
       const days = body.days || 15;
@@ -310,6 +424,46 @@ serve(async (req) => {
           phone: profile?.phone || "",
           studio_name: c.studio_name,
           plan_name: c.pc_id ? "Subscription" : "—",
+          expires_at: c.sub_end,
+          days_left: daysLeft,
+        };
+      });
+
+      return new Response(JSON.stringify({ success: true, users: result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === EXPIRED USERS ===
+    if (action === "expired_users") {
+      const { data: cpanelUsers } = await supabaseAdmin
+        .from("cpanel_user_data")
+        .select("*")
+        .lt("sub_end", new Date().toISOString())
+        .order("sub_end", { ascending: false })
+        .limit(50);
+
+      const userIds = (cpanelUsers || []).map((c: any) => c.user_id);
+      let profiles: any[] = [];
+      if (userIds.length) {
+        const { data } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id, full_name, phone")
+          .in("user_id", userIds);
+        profiles = data || [];
+      }
+
+      const result = (cpanelUsers || []).map((c: any) => {
+        const profile = profiles.find((p: any) => p.user_id === c.user_id);
+        const daysLeft = Math.ceil(
+          (new Date(c.sub_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        );
+        return {
+          user_id: c.user_id,
+          full_name: profile?.full_name || c.studio_name || "",
+          phone: profile?.phone || "",
+          studio_name: c.studio_name,
+          plan_name: "Expired",
           expires_at: c.sub_end,
           days_left: daysLeft,
         };

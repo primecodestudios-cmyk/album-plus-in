@@ -65,8 +65,14 @@ interface DeviceInfo {
   expires_at?: string;
   starts_at?: string;
   license_id?: string;
+  record_id?: string;
   system_info?: string;
   running_version?: string;
+  windows_version?: string;
+  ip_address?: string;
+  activated_at?: string;
+  last_seen_at?: string;
+  device_name?: string;
 }
 
 interface UserRow {

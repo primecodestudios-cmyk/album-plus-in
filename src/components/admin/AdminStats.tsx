@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop, UserPlus, Play, CalendarPlus } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop, UserPlus, Play, CalendarPlus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,6 +80,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   // New users dialog
   const [showNewUsers, setShowNewUsers] = useState(false);
   const [subForm, setSubForm] = useState<{ userId: string; userName: string; startDate: string; endDate: string } | null>(null);
+  const [newUserSearch, setNewUserSearch] = useState("");
 
   const fetchAll = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -327,7 +328,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
       </div>
 
       {/* New Users Dialog */}
-      <Dialog open={showNewUsers} onOpenChange={setShowNewUsers}>
+      <Dialog open={showNewUsers} onOpenChange={(open) => { if (!open) { setNewUserSearch(""); } setShowNewUsers(open); }}>
         <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -335,62 +336,87 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
               New Users — Pending Activation ({newUsers.length})
             </DialogTitle>
           </DialogHeader>
-          {newUsers.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">No new users pending activation 🎉</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Studio</TableHead>
-                    <TableHead>Registered</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {newUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium text-sm">{user.full_name || "—"}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
-                      <TableCell className="text-sm">{user.phone || "—"}</TableCell>
-                      <TableCell className="text-sm">{user.studio_name || "—"}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {user.sub_end ? new Date(user.sub_end).toLocaleDateString("en-IN") : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-1 justify-end flex-wrap">
-                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-accent"
-                            onClick={() => invokeAction("activate_user", user.id, "User activated")}>
-                            <Play size={12} /> Activate
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-primary"
-                            onClick={() => setSubForm({
-                              userId: user.id,
-                              userName: user.full_name || user.email,
-                              startDate: new Date().toISOString().split("T")[0],
-                              endDate: new Date(Date.now() + 365 * 86400000).toISOString().split("T")[0],
-                            })}>
-                            <CalendarPlus size={12} /> Activate + Subscribe
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
-                            onClick={() => { setShowNewUsers(false); onNavigateToUsers("all"); }}>
-                            <Edit size={12} /> Edit
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
-                            onClick={() => invokeAction("block_user", user.id, "User blocked")}>
-                            <Ban size={12} /> Block
-                          </Button>
-                        </div>
-                      </TableCell>
+          {/* Search */}
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by name, email, mobile, studio..."
+              value={newUserSearch}
+              onChange={(e) => setNewUserSearch(e.target.value)}
+              className="w-full bg-secondary border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+            />
+          </div>
+          {(() => {
+            const q = newUserSearch.toLowerCase().trim();
+            const filtered = q
+              ? newUsers.filter((u) =>
+                  (u.full_name || "").toLowerCase().includes(q) ||
+                  (u.email || "").toLowerCase().includes(q) ||
+                  (u.phone || "").toLowerCase().includes(q) ||
+                  (u.studio_name || "").toLowerCase().includes(q)
+                )
+              : newUsers;
+            return filtered.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                {q ? `No results for "${newUserSearch}"` : "No new users pending activation 🎉"}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="text-xs text-muted-foreground mb-2">Showing {filtered.length} of {newUsers.length} users</div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead>Studio</TableHead>
+                      <TableHead>Registered</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium text-sm">{user.full_name || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
+                        <TableCell className="text-sm">{user.phone || "—"}</TableCell>
+                        <TableCell className="text-sm">{user.studio_name || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {user.sub_end ? new Date(user.sub_end).toLocaleDateString("en-IN") : "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end flex-wrap">
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-accent"
+                              onClick={() => invokeAction("activate_user", user.id, "User activated")}>
+                              <Play size={12} /> Activate
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-primary"
+                              onClick={() => setSubForm({
+                                userId: user.id,
+                                userName: user.full_name || user.email,
+                                startDate: new Date().toISOString().split("T")[0],
+                                endDate: new Date(Date.now() + 365 * 86400000).toISOString().split("T")[0],
+                              })}>
+                              <CalendarPlus size={12} /> Activate + Subscribe
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
+                              onClick={() => { setShowNewUsers(false); onNavigateToUsers("all"); }}>
+                              <Edit size={12} /> Edit
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
+                              onClick={() => invokeAction("block_user", user.id, "User blocked")}>
+                              <Ban size={12} /> Block
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

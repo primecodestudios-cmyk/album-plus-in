@@ -13,7 +13,7 @@ const slides = [
     image: heroSlide1,
     badge: "🇮🇳 #1 in India",
     title: "India's Fastest Wedding Album Designing Software",
-    subtitle: "Design up to 200 Album Sheets Per Day",
+    subtitle: "Create professional album sheets faster with smart automation tools.",
     buttons: [
       { label: "Download Demo", icon: Download, variant: "outline" as const },
       { label: "Buy License", icon: ArrowRight, variant: "gold" as const },

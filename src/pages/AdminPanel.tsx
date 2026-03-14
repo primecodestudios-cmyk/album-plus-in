@@ -77,6 +77,8 @@ const AdminPanel = () => {
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
     { id: "enquiries", label: "Enquiries", icon: MessageSquare },
+    { id: "sync", label: "Sync Users", icon: Users },
+    { id: "activate", label: "Activate", icon: ShieldCheck },
   ];
 
   return (

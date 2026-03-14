@@ -1,44 +1,71 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "PSD Store", href: "/store" },
-  { label: "Support", href: "#support" },
+  { label: "Support", href: "/#support" },
 ];
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <a href="/" className="font-display text-xl font-bold tracking-tight text-foreground">
+        <Link to="/" className="font-display text-xl font-bold tracking-tight text-foreground">
           Album<span className="text-gradient-gold">Plus</span>
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            )
+          )}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            Log In
-          </Button>
-          <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
-            Get Started
-          </Button>
+          {user ? (
+            <Link to="/dashboard">
+              <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity gap-2">
+                <User size={16} /> Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                  Log In
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -58,22 +85,47 @@ export function Navbar() {
             className="md:hidden bg-background border-b border-border overflow-hidden"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-base font-medium text-muted-foreground py-3 border-b border-border"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <Button variant="ghost" size="lg" className="justify-start text-muted-foreground mt-2">
-                Log In
-              </Button>
-              <Button size="lg" className="bg-gradient-gold text-accent-foreground font-semibold">
-                Get Started
-              </Button>
+              {navLinks.map((link) =>
+                link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className="text-base font-medium text-muted-foreground py-3 border-b border-border"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="text-base font-medium text-muted-foreground py-3 border-b border-border"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
+              {user ? (
+                <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold gap-2">
+                    <User size={16} /> Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
+                    <Button variant="ghost" size="lg" className="w-full justify-start text-muted-foreground">
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)}>
+                    <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}

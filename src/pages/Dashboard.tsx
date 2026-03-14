@@ -11,6 +11,7 @@ import {
   User,
   LogOut,
   Home,
+  Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
 

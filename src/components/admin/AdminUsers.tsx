@@ -332,6 +332,19 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     return `${year}-${month}-${day}`;
   };
 
+  // Helper: format date+time as YYYY-MM-DD HH:mm (matches cPanel phpMyAdmin format)
+  const formatDateTime = (dateStr: string | null | undefined): string => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const mins = String(d.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${mins}`;
+  };
+
   // Helper: parse YYYY-MM-DD to local date ISO string (avoid UTC shift)
   const parseLocalDateToISO = (dateStr: string): string => {
     if (!dateStr) return "";
@@ -441,7 +454,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       u.city,
       u.devices_count || 0,
       u.active_license?.plan_name || "—",
-      u.sub_end ? new Date(u.sub_end).toLocaleDateString("en-IN") : "—",
+      u.sub_end ? formatDateTime(u.sub_end) : "—",
       u.days_left ?? "—",
       u.is_blocked ? "Blocked" : u.activation === 1 ? "Active" : "Inactive",
     ]);
@@ -620,11 +633,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                       </TableCell>
                       <TableCell className="text-sm">{user.active_license?.plan_name || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {user.sub_end
-                          ? new Date(user.sub_end).toLocaleDateString("en-IN")
-                          : user.active_license?.expires_at
-                          ? new Date(user.active_license.expires_at).toLocaleDateString("en-IN")
-                          : "—"}
+                        {formatDateTime(user.sub_end || user.active_license?.expires_at)}
                       </TableCell>
                       <TableCell>
                         {user.days_left !== null ? (
@@ -789,7 +798,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                         {d.expires_at && (
                           <div>
                             <span className="text-muted-foreground">Expires</span>
-                            <p>{new Date(d.expires_at).toLocaleDateString("en-IN")}</p>
+                            <p>{formatDateTime(d.expires_at)}</p>
                           </div>
                         )}
                       </div>
@@ -818,11 +827,11 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Start Date</div>
-                    <div className="font-medium">{viewUser.sub_start ? new Date(viewUser.sub_start).toLocaleDateString("en-IN") : "—"}</div>
+                    <div className="font-medium">{formatDateTime(viewUser.sub_start)}</div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">End Date</div>
-                    <div className="font-medium">{viewUser.sub_end ? new Date(viewUser.sub_end).toLocaleDateString("en-IN") : "—"}</div>
+                    <div className="font-medium">{formatDateTime(viewUser.sub_end)}</div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Days Left</div>

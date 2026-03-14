@@ -91,7 +91,7 @@ export function FeaturesSection() {
             <motion.div
               key={feature.title}
               variants={item}
-              className="group relative bg-card rounded-2xl p-5 md:p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300 text-center"
+              className="group relative bg-card rounded-2xl p-4 md:p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300 text-center"
             >
               <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-gold group-hover:scale-110 transition-all duration-300">
                 <feature.icon

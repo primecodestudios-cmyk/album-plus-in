@@ -49,6 +49,7 @@ const Dashboard = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [downloads, setDownloads] = useState<DownloadRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {

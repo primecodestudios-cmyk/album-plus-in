@@ -140,6 +140,7 @@ const AdminPanel = () => {
           {activeTab === "enquiries" && <AdminEnquiries />}
           {activeTab === "sync" && <AdminSyncUsers />}
           {activeTab === "activate" && <AdminActivateLicense />}
+          {activeTab === "api_tokens" && <AdminApiTokens />}
         </motion.div>
       </div>
     </div>

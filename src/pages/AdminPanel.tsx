@@ -24,9 +24,11 @@ import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
+import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
+import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries";
+type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();

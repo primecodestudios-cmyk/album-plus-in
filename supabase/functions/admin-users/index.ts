@@ -539,7 +539,8 @@ serve(async (req) => {
         success: true,
         users: userMap,
         pc_activation_stats: pcCountMap,
-        cpanel_pull_triggered: pullTriggered,
+        cpanel_pull_triggered: !!pullResult?.success,
+        cpanel_pull: pullResult,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

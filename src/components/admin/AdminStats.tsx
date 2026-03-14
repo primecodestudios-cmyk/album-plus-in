@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Stats {
@@ -25,6 +25,8 @@ interface AdminStatsProps {
   onNavigateToUsers: (filter: UserFilter) => void;
 }
 
+const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+
 export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [expiringUsers15, setExpiringUsers15] = useState<ExpiringUser[]>([]);
@@ -32,34 +34,59 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   const [expiredUsers, setExpiredUsers] = useState<ExpiringUser[]>([]);
   const [pcStats, setPcStats] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [countdown, setCountdown] = useState(30);
+  const [refreshing, setRefreshing] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      const [statsRes, expiring15Res, expiring7Res, expiredRes, usersRes] = await Promise.all([
-        supabase.rpc("get_admin_stats"),
-        supabase.functions.invoke("admin-users", {
-          body: { action: "expiring_users", days: 15 },
-        }),
-        supabase.functions.invoke("admin-users", {
-          body: { action: "expiring_users", days: 7 },
-        }),
-        supabase.functions.invoke("admin-users", {
-          body: { action: "expired_users" },
-        }),
-        supabase.functions.invoke("admin-users", {
-          body: { action: "list_users" },
-        }),
-      ]);
+  const fetchAll = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    setRefreshing(true);
+    const [statsRes, expiring15Res, expiring7Res, expiredRes, usersRes] = await Promise.all([
+      supabase.rpc("get_admin_stats"),
+      supabase.functions.invoke("admin-users", {
+        body: { action: "expiring_users", days: 15 },
+      }),
+      supabase.functions.invoke("admin-users", {
+        body: { action: "expiring_users", days: 7 },
+      }),
+      supabase.functions.invoke("admin-users", {
+        body: { action: "expired_users" },
+      }),
+      supabase.functions.invoke("admin-users", {
+        body: { action: "list_users" },
+      }),
+    ]);
 
-      if (!statsRes.error && statsRes.data) setStats(statsRes.data as unknown as Stats);
-      if (expiring15Res.data?.users) setExpiringUsers15(expiring15Res.data.users);
-      if (expiring7Res.data?.users) setExpiringUsers7(expiring7Res.data.users);
-      if (expiredRes.data?.users) setExpiredUsers(expiredRes.data.users);
-      if (usersRes.data?.pc_activation_stats) setPcStats(usersRes.data.pc_activation_stats);
-      setLoading(false);
-    };
-    fetchAll();
+    if (!statsRes.error && statsRes.data) setStats(statsRes.data as unknown as Stats);
+    if (expiring15Res.data?.users) setExpiringUsers15(expiring15Res.data.users);
+    if (expiring7Res.data?.users) setExpiringUsers7(expiring7Res.data.users);
+    if (expiredRes.data?.users) setExpiredUsers(expiredRes.data.users);
+    if (usersRes.data?.pc_activation_stats) setPcStats(usersRes.data.pc_activation_stats);
+    setLoading(false);
+    setRefreshing(false);
+    setLastRefresh(new Date());
+    setCountdown(30);
   }, []);
+
+  // Initial fetch
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Auto refresh interval
+  useEffect(() => {
+    if (autoRefresh) {
+      intervalRef.current = setInterval(() => fetchAll(true), AUTO_REFRESH_INTERVAL);
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
+      }, 1000);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [autoRefresh, fetchAll]);
 
   if (loading) return <div className="text-muted-foreground py-8 text-center">Loading stats...</div>;
 
@@ -128,7 +155,37 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     <div className="space-y-8">
       {/* Overview Cards - Clickable */}
       <div>
-        <h2 className="font-display text-xl font-bold text-foreground mb-5">Overview</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display text-xl font-bold text-foreground">Overview</h2>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Last: {lastRefresh.toLocaleTimeString("en-IN")}</span>
+              {autoRefresh && (
+                <span className="flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? "bg-accent animate-pulse" : "bg-green-500"}`} />
+                  {countdown}s
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                autoRefresh
+                  ? "bg-accent/10 border-accent/30 text-accent"
+                  : "bg-secondary border-border text-muted-foreground"
+              }`}
+            >
+              {autoRefresh ? "Auto ⏸" : "Auto ▶"}
+            </button>
+            <button
+              onClick={() => fetchAll(true)}
+              disabled={refreshing}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-accent/30 transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {overviewCards.map((c) => (
             <button

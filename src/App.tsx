@@ -34,6 +34,8 @@ const App = () => (
             <Route path="/store" element={<PsdStore />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/downloads" element={<DownloadCenter />} />
             <Route path="/admin" element={<AdminPanel />} />

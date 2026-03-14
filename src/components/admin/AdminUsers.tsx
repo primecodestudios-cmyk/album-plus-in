@@ -331,8 +331,8 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
         body: {
           action: "update_subscription",
           user_id: subEditUser.id,
-          sub_start: subStart ? new Date(subStart).toISOString() : undefined,
-          sub_end: subEnd ? new Date(subEnd).toISOString() : undefined,
+          sub_start: subStart ? parseLocalDateToISO(subStart) : undefined,
+          sub_end: subEnd ? parseLocalDateToISO(subEnd) : undefined,
           plan_name: subPlan,
           is_enabled: subEnabled,
           license_id: subEditUser.active_license?.id || undefined,

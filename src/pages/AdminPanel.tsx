@@ -23,6 +23,7 @@ import { AdminLicenses } from "@/components/admin/AdminLicenses";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
+import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { useToast } from "@/hooks/use-toast";
 
 type Tab = "stats" | "licenses" | "pricing" | "templates" | "enquiries";

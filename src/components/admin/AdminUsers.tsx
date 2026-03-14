@@ -996,6 +996,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                     <TableHead>System Info</TableHead>
                     <TableHead>Version</TableHead>
                     <TableHead>Plan</TableHead>
+                    <TableHead>Last Seen</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search, ChevronLeft, ChevronRight, CheckSquare, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { motion, AnimatePresence } from "framer-motion";
 
 const PAGE_SIZE = 10;
 
@@ -24,6 +25,8 @@ export function AdminEnquiries() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
   const fetchEnquiries = async () => {
@@ -52,7 +55,41 @@ export function AdminEnquiries() {
     } else {
       toast({ title: "Enquiry deleted" });
       setEnquiries((prev) => prev.filter((e) => e.id !== id));
+      setSelected((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setDeleting(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("contact_enquiries").delete().in("id", ids);
+    if (error) {
+      toast({ title: "Failed to delete selected enquiries", variant: "destructive" });
+    } else {
+      toast({ title: `${ids.length} enquir${ids.length > 1 ? "ies" : "y"} deleted` });
+      setEnquiries((prev) => prev.filter((e) => !selected.has(e.id)));
+      setSelected(new Set());
+    }
+    setDeleting(false);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const pageIds = paginated.map((e) => e.id);
+    const allSelected = pageIds.every((id) => selected.has(id));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      pageIds.forEach((id) => allSelected ? next.delete(id) : next.add(id));
+      return next;
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -109,6 +146,7 @@ export function AdminEnquiries() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const allPageSelected = paginated.length > 0 && paginated.every((e) => selected.has(e.id));
 
   const dateFilters: { id: typeof dateFilter; label: string }[] = [
     { id: "all", label: "All" },
@@ -151,6 +189,54 @@ export function AdminEnquiries() {
         </div>
       </div>
 
+      {/* Bulk action bar */}
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-destructive/5 border border-destructive/20"
+          >
+            <span className="text-sm font-medium text-foreground">
+              {selected.size} selected
+            </span>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-8 gap-1.5 text-xs"
+              disabled={deleting}
+              onClick={handleBulkDelete}
+            >
+              <Trash2 size={14} />
+              {deleting ? "Deleting..." : `Delete ${selected.size}`}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1.5 text-xs text-muted-foreground"
+              onClick={() => setSelected(new Set())}
+            >
+              <X size={14} /> Clear
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Select all for current page */}
+      {paginated.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={allPageSelected}
+            onCheckedChange={toggleSelectAll}
+            id="select-all"
+          />
+          <label htmlFor="select-all" className="text-xs text-muted-foreground cursor-pointer select-none">
+            Select all on this page
+          </label>
+        </div>
+      )}
+
       {filtered.length === 0 && (
         <div className="text-center py-12">
           <Search size={36} className="mx-auto text-muted-foreground/30 mb-3" />
@@ -164,40 +250,65 @@ export function AdminEnquiries() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: i * 0.04 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card hover:border-accent/20 transition-colors"
+          className={`bg-card rounded-2xl border p-5 shadow-card transition-colors ${
+            selected.has(enquiry.id)
+              ? "border-accent/40 bg-accent/[0.02]"
+              : "border-border hover:border-accent/20"
+          }`}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-display font-semibold text-foreground mb-2 truncate">
-                {enquiry.subject}
-              </h3>
-              <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground mb-3">
-                <span className="flex items-center gap-1.5">
-                  <User size={12} className="text-accent" />
-                  {enquiry.name}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Mail size={12} className="text-accent" />
-                  {enquiry.email}
-                </span>
-                {enquiry.phone && (
+          <div className="flex items-start gap-3">
+            <Checkbox
+              checked={selected.has(enquiry.id)}
+              onCheckedChange={() => toggleSelect(enquiry.id)}
+              className="mt-1 shrink-0"
+            />
+            <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display font-semibold text-foreground mb-2 truncate">
+                  {enquiry.subject}
+                </h3>
+                <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground mb-3">
                   <span className="flex items-center gap-1.5">
-                    <Phone size={12} className="text-accent" />
-                    {enquiry.phone}
+                    <User size={12} className="text-accent" />
+                    {enquiry.name}
                   </span>
-                )}
-                <span className="flex items-center gap-1.5">
-                  <Clock size={12} />
-                  {formatDate(enquiry.created_at)}
-                </span>
+                  <span className="flex items-center gap-1.5">
+                    <Mail size={12} className="text-accent" />
+                    {enquiry.email}
+                  </span>
+                  {enquiry.phone && (
+                    <span className="flex items-center gap-1.5">
+                      <Phone size={12} className="text-accent" />
+                      {enquiry.phone}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5">
+                    <Clock size={12} />
+                    {formatDate(enquiry.created_at)}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {enquiry.message}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {enquiry.message}
-              </p>
-            </div>
 
-            <div className="flex flex-col gap-1.5 shrink-0">
-              {enquiry.phone && (
+              <div className="flex flex-col gap-1.5 shrink-0">
+                {enquiry.phone && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className="text-muted-foreground hover:text-accent hover:bg-accent/10"
+                  >
+                    <a
+                      href={`https://wa.me/${enquiry.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle size={16} />
+                    </a>
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -205,34 +316,20 @@ export function AdminEnquiries() {
                   className="text-muted-foreground hover:text-accent hover:bg-accent/10"
                 >
                   <a
-                    href={`https://wa.me/${enquiry.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`mailto:${enquiry.email}?subject=Re: ${encodeURIComponent(enquiry.subject)}&body=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
                   >
-                    <MessageCircle size={16} />
+                    <Mail size={16} />
                   </a>
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                className="text-muted-foreground hover:text-accent hover:bg-accent/10"
-              >
-                <a
-                  href={`mailto:${enquiry.email}?subject=Re: ${encodeURIComponent(enquiry.subject)}&body=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(enquiry.id)}
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <Mail size={16} />
-                </a>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(enquiry.id)}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 size={16} />
-              </Button>
+                  <Trash2 size={16} />
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>

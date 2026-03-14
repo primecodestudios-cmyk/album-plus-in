@@ -57,28 +57,30 @@ const Dashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!user) return;
+    const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes] = await Promise.all([
+      supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
+      supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
+      supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+    ]);
 
-    const fetchData = async () => {
-      const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
-        supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
-        supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),
-        supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
-      ]);
-
-      if (profileRes.data) setProfile(profileRes.data);
-      if (licensesRes.data) setLicenses(licensesRes.data);
-      if (purchasesRes.data) setPurchases(purchasesRes.data);
-      if (downloadsRes.data) setDownloads(downloadsRes.data);
-      if (roleRes.data) setIsAdmin(true);
-      setLoading(false);
-    };
-
-    fetchData();
+    if (profileRes.data) setProfile(profileRes.data);
+    if (licensesRes.data) setLicenses(licensesRes.data);
+    if (purchasesRes.data) setPurchases(purchasesRes.data);
+    if (downloadsRes.data) setDownloads(downloadsRes.data);
+    if (roleRes.data) setIsAdmin(true);
+    setLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    fetchData();
+    // Auto-refresh every 30 seconds for real-time feel
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const activeLicense = licenses.find((l) => l.is_active);
   const remainingDays = activeLicense

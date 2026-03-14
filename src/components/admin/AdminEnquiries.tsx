@@ -102,6 +102,28 @@ export function AdminEnquiries() {
     });
   };
 
+  const exportCSV = () => {
+    const headers = ["Name", "Email", "Phone", "Subject", "Message", "Date"];
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const rows = filtered.map((e) => [
+      escape(e.name),
+      escape(e.email),
+      escape(e.phone || ""),
+      escape(e.subject),
+      escape(e.message),
+      escape(formatDate(e.created_at)),
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `enquiries-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `Exported ${filtered.length} enquiries` });
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">

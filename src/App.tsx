@@ -9,6 +9,7 @@ import PsdStore from "./pages/PsdStore.tsx";
 import Signup from "./pages/Signup.tsx";
 import Login from "./pages/Login.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import DownloadCenter from "./pages/DownloadCenter.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();

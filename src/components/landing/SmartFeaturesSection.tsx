@@ -61,10 +61,10 @@ export function SmartFeaturesSection() {
             <Sparkles size={14} /> Smart Features
           </div>
           <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-4">
-            Powered by <span className="text-gradient-gold">Intelligence</span>
+            Powered by <span className="text-gradient-gold">Smart Automation</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Advanced AI and automation features that make Album Plus the smartest album designing software in India.
+            Advanced automation features that make Album Plus the smartest album designing software in India.
           </p>
         </div>
 

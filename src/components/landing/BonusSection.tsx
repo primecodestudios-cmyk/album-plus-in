@@ -66,7 +66,7 @@ export function BonusSection() {
                 <HardDrive size={20} className="text-accent shrink-0" />
                 <div>
                   <div className="font-display font-bold text-2xl text-accent">500GB</div>
-                  <div className="text-sm text-muted-foreground">Data Free</div>
+                  <div className="text-sm text-muted-foreground">Data Storage</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20">

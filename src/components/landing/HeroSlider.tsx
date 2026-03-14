@@ -34,7 +34,7 @@ const slides = [
       { icon: Monitor, text: "Auto Color Correction" },
     ],
     buttons: [
-      { label: "Try AI Features", icon: ArrowRight, variant: "gold" as const },
+      { label: "Try All Features", icon: ArrowRight, variant: "gold" as const },
     ],
   },
   {

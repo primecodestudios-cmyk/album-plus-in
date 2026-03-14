@@ -111,7 +111,7 @@ export function BeforeAfterSection() {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center mx-auto mb-3">
                     <span className="text-2xl">✨</span>
                   </div>
-                  <div className="text-sm font-medium text-foreground">AI Auto-Design</div>
+                  <div className="text-sm font-medium text-foreground">Smart Auto-Design</div>
                   <div className="text-xs text-muted-foreground">Fast, professional & consistent</div>
                 </div>
               </div>

@@ -7,7 +7,7 @@ const plans = [
     name: "28 Days",
     price: "₹200",
     period: "",
-    description: "Quick start license",
+    description: "Subscription based software license",
     features: [
       "Full Software Access",
       "12GB Data Pack",

@@ -82,13 +82,74 @@ export function AdminEnquiries() {
     );
   }
 
+  const filtered = enquiries.filter((e) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      e.name.toLowerCase().includes(q) ||
+      e.email.toLowerCase().includes(q) ||
+      e.subject.toLowerCase().includes(q) ||
+      e.message.toLowerCase().includes(q) ||
+      (e.phone && e.phone.includes(q));
+
+    if (!matchesSearch) return false;
+
+    if (dateFilter === "all") return true;
+    const created = new Date(e.created_at);
+    const now = new Date();
+    if (dateFilter === "today") return created.toDateString() === now.toDateString();
+    if (dateFilter === "week") return now.getTime() - created.getTime() < 7 * 86400000;
+    if (dateFilter === "month") return now.getTime() - created.getTime() < 30 * 86400000;
+    return true;
+  });
+
+  const dateFilters: { id: typeof dateFilter; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "today", label: "Today" },
+    { id: "week", label: "This Week" },
+    { id: "month", label: "This Month" },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
         <h2 className="font-display text-lg font-bold text-foreground">
-          Contact Enquiries ({enquiries.length})
+          Contact Enquiries ({filtered.length})
         </h2>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search name, email, subject..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9 text-sm w-full sm:w-64"
+            />
+          </div>
+          <div className="flex gap-1">
+            {dateFilters.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setDateFilter(f.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  dateFilter === f.id
+                    ? "bg-accent/15 text-accent border border-accent/30"
+                    : "bg-card border border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12">
+          <Search size={36} className="mx-auto text-muted-foreground/30 mb-3" />
+          <p className="text-sm text-muted-foreground">No enquiries match your search.</p>
+        </div>
+      )}
 
       {enquiries.map((enquiry, i) => (
         <motion.div

@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   FileStack,
+  Laptop,
   CreditCard,
   Key,
   MessageSquare,

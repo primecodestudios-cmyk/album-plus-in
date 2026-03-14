@@ -827,7 +827,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Start Date</div>
-                    <div className="font-medium">{viewUser.sub_start ? new Date(viewUser.sub_start).toLocaleDateString("en-IN") : "—"}</div>
+                    <div className="font-medium">{formatDateTime(viewUser.sub_start)}</div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">End Date</div>

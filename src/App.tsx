@@ -35,6 +35,9 @@ const App = () => (
             <Route path="/downloads" element={<DownloadCenter />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/activate" element={<ActivateLicense />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

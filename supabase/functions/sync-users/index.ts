@@ -15,6 +15,8 @@ serve(async (req) => {
     const authHeader = req.headers.get("x-sync-secret");
     const syncSecret = Deno.env.get("SYNC_API_SECRET");
 
+    console.log("Sync request received, secret match:", authHeader === syncSecret);
+
     if (!syncSecret || authHeader !== syncSecret) {
       return new Response(
         JSON.stringify({ success: false, error: "Unauthorized" }),
@@ -30,6 +32,22 @@ serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    console.log("Action:", action, "Users count:", body.users?.length || 0);
+
+    // Helper: find user by email across all pages
+    async function findUserByEmail(email: string) {
+      let page = 1;
+      const perPage = 500;
+      while (true) {
+        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+        if (error || !data?.users?.length) return null;
+        const found = data.users.find((u: any) => u.email === email);
+        if (found) return found;
+        if (data.users.length < perPage) return null;
+        page++;
+      }
+    }
+
     // === BULK SYNC from cPanel ===
     if (action === "sync_users" && Array.isArray(body.users)) {
       const results = { created: 0, updated: 0, errors: [] as string[] };
@@ -42,10 +60,7 @@ serve(async (req) => {
             continue;
           }
 
-          // Check if user exists in auth
-          const { data: existingUsers } = await supabase.auth.admin.listUsers();
-          const existingUser = existingUsers?.users?.find((eu: any) => eu.email === email);
-
+          const existingUser = await findUserByEmail(email);
           let userId: string;
 
           if (existingUser) {
@@ -133,6 +148,8 @@ serve(async (req) => {
         }
       }
 
+      console.log("Sync results:", JSON.stringify(results));
+
       return new Response(
         JSON.stringify({ success: true, results }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -150,9 +167,7 @@ serve(async (req) => {
         );
       }
 
-      const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      const existingUser = existingUsers?.users?.find((eu: any) => eu.email === email);
-
+      const existingUser = await findUserByEmail(email);
       let userId: string;
 
       if (existingUser) {
@@ -213,6 +228,7 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: any) {
+    console.error("Sync error:", err.message);
     return new Response(
       JSON.stringify({ success: false, error: err.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

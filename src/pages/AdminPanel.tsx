@@ -150,6 +150,7 @@ const AdminPanel = () => {
           {activeTab === "stats" && <AdminStats onNavigateToUsers={handleNavigateToUsers} />}
           {activeTab === "users" && <AdminUsers initialFilter={userFilter} />}
           {activeTab === "device_requests" && <AdminDeviceRequests />}
+          {activeTab === "pc_management" && <AdminDeviceManagement />}
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}

@@ -12,6 +12,9 @@ import Dashboard from "./pages/Dashboard.tsx";
 import DownloadCenter from "./pages/DownloadCenter.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
 import ActivateLicense from "./pages/ActivateLicense.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import RefundPolicy from "./pages/RefundPolicy.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
             <Route path="/downloads" element={<DownloadCenter />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/activate" element={<ActivateLicense />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

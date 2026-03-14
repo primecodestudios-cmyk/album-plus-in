@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search, ChevronLeft, ChevronRight, CheckSquare, Square, X } from "lucide-react";
+import { Mail, Phone, Trash2, Clock, User, MessageSquare, MessageCircle, Search, ChevronLeft, ChevronRight, CheckSquare, Square, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -102,6 +102,28 @@ export function AdminEnquiries() {
     });
   };
 
+  const exportCSV = () => {
+    const headers = ["Name", "Email", "Phone", "Subject", "Message", "Date"];
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const rows = filtered.map((e) => [
+      escape(e.name),
+      escape(e.email),
+      escape(e.phone || ""),
+      escape(e.subject),
+      escape(e.message),
+      escape(formatDate(e.created_at)),
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `enquiries-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `Exported ${filtered.length} enquiries` });
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -158,9 +180,20 @@ export function AdminEnquiries() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-        <h2 className="font-display text-lg font-bold text-foreground">
-          Contact Enquiries ({filtered.length})
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-bold text-foreground">
+            Contact Enquiries ({filtered.length})
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={exportCSV}
+            disabled={filtered.length === 0}
+          >
+            <Download size={14} /> Export CSV
+          </Button>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

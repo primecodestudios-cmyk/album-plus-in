@@ -347,6 +347,65 @@ export type Database = {
         }
         Relationships: []
       }
+      user_devices: {
+        Row: {
+          activated_at: string
+          created_at: string
+          device_id: string
+          device_name: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          last_seen_at: string | null
+          license_id: string | null
+          running_version: string | null
+          system_info: string | null
+          updated_at: string
+          user_id: string
+          windows_version: string | null
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          device_id: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_seen_at?: string | null
+          license_id?: string | null
+          running_version?: string | null
+          system_info?: string | null
+          updated_at?: string
+          user_id: string
+          windows_version?: string | null
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          device_id?: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_seen_at?: string | null
+          license_id?: string | null
+          running_version?: string | null
+          system_info?: string | null
+          updated_at?: string
+          user_id?: string
+          windows_version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_devices_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "user_licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_downloads: {
         Row: {
           downloaded_at: string

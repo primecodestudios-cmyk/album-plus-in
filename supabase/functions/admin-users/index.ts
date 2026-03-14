@@ -108,6 +108,9 @@ serve(async (req) => {
         .order("expires_at", { ascending: false });
 
       // Group all cpanel entries by email/phone for multi-PC tracking
+      // Also fetch user_devices
+      const { data: userDevices } = await supabaseAdmin.from("user_devices").select("*");
+
       const userMap = (authUsers?.users || []).map((au: any) => {
         const profile = profiles?.find((p: any) => p.user_id === au.id);
         const cpanel = cpanelData?.find((c: any) => c.user_id === au.id);
@@ -129,8 +132,25 @@ serve(async (req) => {
           );
         }
 
-        // Collect all devices (from licenses with different device_ids)
+        // Collect devices from user_devices table first
+        const uDevices = (userDevices || []).filter((ud: any) => ud.user_id === au.id);
         const deviceMap = new Map<string, any>();
+        for (const ud of uDevices) {
+          deviceMap.set(ud.device_id, {
+            device_id: ud.device_id,
+            device_name: ud.device_name || "",
+            system_info: ud.system_info || "",
+            running_version: ud.running_version || "",
+            windows_version: ud.windows_version || "",
+            ip_address: ud.ip_address || "",
+            is_active: ud.is_active,
+            activated_at: ud.activated_at,
+            last_seen_at: ud.last_seen_at,
+            record_id: ud.id,
+            license_id: ud.license_id,
+          });
+        }
+        // Also add from licenses
         for (const lic of userLicenses) {
           if (lic.device_id && !deviceMap.has(lic.device_id)) {
             deviceMap.set(lic.device_id, {
@@ -143,7 +163,7 @@ serve(async (req) => {
             });
           }
         }
-        // Also add cpanel pc_id if not already there
+        // Also add cpanel pc_id
         if (cpanel?.pc_id && !deviceMap.has(cpanel.pc_id)) {
           deviceMap.set(cpanel.pc_id, {
             device_id: cpanel.pc_id,
@@ -156,6 +176,19 @@ serve(async (req) => {
           });
         }
 
+        // Enrich devices with license plan info
+        const devicesArray = Array.from(deviceMap.values()).map((d: any) => {
+          if (!d.plan_name && d.license_id) {
+            const lic = userLicenses.find((l: any) => l.id === d.license_id);
+            if (lic) {
+              d.plan_name = lic.plan_name;
+              d.expires_at = lic.expires_at;
+              d.starts_at = lic.starts_at;
+            }
+          }
+          return d;
+        });
+
         return {
           id: au.id,
           email: au.email,
@@ -166,8 +199,8 @@ serve(async (req) => {
           active_license: activeLicense || null,
           all_licenses: userLicenses,
           licenses_count: userLicenses.length,
-          devices: Array.from(deviceMap.values()),
-          devices_count: deviceMap.size,
+          devices: devicesArray,
+          devices_count: devicesArray.length,
           is_blocked: !!(cpanel?.block_user === 1) || !!isBanned,
           days_left: daysLeft,
           // cPanel specific fields
@@ -385,7 +418,16 @@ serve(async (req) => {
         .from("user_licenses")
         .update({ is_active: false })
         .eq("id", body.license_id);
-      return new Response(JSON.stringify({ success: true }), {
+      // Also deactivate in user_devices
+      if (body.device_id) {
+        await supabaseAdmin
+          .from("user_devices")
+          .update({ is_active: false })
+          .eq("device_id", body.device_id)
+          .eq("user_id", body.user_id);
+      }
+      const cpSync = await syncToCpanel(body.user_id || "", { activation: 0 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -396,7 +438,129 @@ serve(async (req) => {
         .from("user_licenses")
         .update({ is_active: true })
         .eq("id", body.license_id);
+      // Also activate in user_devices
+      if (body.device_id) {
+        await supabaseAdmin
+          .from("user_devices")
+          .update({ is_active: true })
+          .eq("device_id", body.device_id)
+          .eq("user_id", body.user_id);
+      }
+      const cpSync = await syncToCpanel(body.user_id || "", { activation: 1 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === LIST ALL DEVICES (admin overview) ===
+    if (action === "list_devices") {
+      const { data: devices } = await supabaseAdmin
+        .from("user_devices")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      // Enrich with user info
+      const userIds = [...new Set((devices || []).map((d: any) => d.user_id))];
+      let profiles: any[] = [];
+      if (userIds.length) {
+        const { data } = await supabaseAdmin.from("profiles").select("user_id, full_name, phone").in("user_id", userIds);
+        profiles = data || [];
+      }
+      const { data: authUsers } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+
+      const enriched = (devices || []).map((d: any) => {
+        const profile = profiles.find((p: any) => p.user_id === d.user_id);
+        const authUser = authUsers?.users?.find((u: any) => u.id === d.user_id);
+        return {
+          ...d,
+          full_name: profile?.full_name || "",
+          phone: profile?.phone || "",
+          email: authUser?.email || "",
+        };
+      });
+
+      return new Response(JSON.stringify({ success: true, devices: enriched }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === ADD DEVICE ===
+    if (action === "add_device" && body.user_id && body.device_id) {
+      const { data, error } = await supabaseAdmin
+        .from("user_devices")
+        .upsert({
+          user_id: body.user_id,
+          device_id: body.device_id,
+          device_name: body.device_name || "",
+          system_info: body.system_info || "",
+          windows_version: body.windows_version || "",
+          running_version: body.running_version || "",
+          ip_address: body.ip_address || "",
+          is_active: true,
+          license_id: body.license_id || null,
+          last_seen_at: new Date().toISOString(),
+        }, { onConflict: "user_id,device_id" })
+        .select()
+        .single();
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, device: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === REMOVE DEVICE ===
+    if (action === "remove_device" && body.device_record_id) {
+      // Get device info before deleting
+      const { data: deviceInfo } = await supabaseAdmin
+        .from("user_devices")
+        .select("user_id, device_id")
+        .eq("id", body.device_record_id)
+        .single();
+
+      await supabaseAdmin.from("user_devices").delete().eq("id", body.device_record_id);
+
+      // Also deactivate any linked licenses
+      if (deviceInfo) {
+        await supabaseAdmin
+          .from("user_licenses")
+          .update({ is_active: false })
+          .eq("user_id", deviceInfo.user_id)
+          .eq("device_id", deviceInfo.device_id);
+        const cpSync = await syncToCpanel(deviceInfo.user_id, { activation: 0 });
+        return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === TOGGLE DEVICE STATUS ===
+    if (action === "toggle_device" && body.device_record_id) {
+      const { data: device } = await supabaseAdmin
+        .from("user_devices")
+        .select("*")
+        .eq("id", body.device_record_id)
+        .single();
+      if (!device) throw new Error("Device not found");
+
+      const newStatus = !device.is_active;
+      await supabaseAdmin
+        .from("user_devices")
+        .update({ is_active: newStatus })
+        .eq("id", body.device_record_id);
+
+      // Sync license status
+      if (device.device_id && device.user_id) {
+        await supabaseAdmin
+          .from("user_licenses")
+          .update({ is_active: newStatus })
+          .eq("user_id", device.user_id)
+          .eq("device_id", device.device_id);
+      }
+      const cpSync = await syncToCpanel(device.user_id, { activation: newStatus ? 1 : 0 });
+      return new Response(JSON.stringify({ success: true, is_active: newStatus, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   FileStack,
+  Laptop,
   CreditCard,
   Key,
   MessageSquare,
@@ -29,12 +30,13 @@ import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
 import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
+import { AdminDeviceManagement } from "@/components/admin/AdminDeviceManagement";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -87,6 +89,7 @@ const AdminPanel = () => {
     { id: "stats", label: "Dashboard", icon: Settings },
     { id: "users", label: "Users", icon: UserCog },
     { id: "device_requests", label: "Device Requests", icon: Monitor },
+    { id: "pc_management", label: "PC Management", icon: Laptop },
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
@@ -147,6 +150,7 @@ const AdminPanel = () => {
           {activeTab === "stats" && <AdminStats onNavigateToUsers={handleNavigateToUsers} />}
           {activeTab === "users" && <AdminUsers initialFilter={userFilter} />}
           {activeTab === "device_requests" && <AdminDeviceRequests />}
+          {activeTab === "pc_management" && <AdminDeviceManagement />}
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}

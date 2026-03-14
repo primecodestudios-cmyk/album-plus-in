@@ -98,7 +98,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
         body: { action: "expired_users" },
       }),
       supabase.functions.invoke("admin-users", {
-        body: { action: "list_users" },
+        body: { action: "list_users", include_cpanel_pull: true },
       }),
     ]);
 

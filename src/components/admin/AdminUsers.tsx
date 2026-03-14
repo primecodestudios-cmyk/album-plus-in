@@ -166,7 +166,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "list_users" },
+        body: { action: "list_users", include_cpanel_pull: true },
       });
       if (error) throw error;
       if (data?.users) setUsers(data.users);

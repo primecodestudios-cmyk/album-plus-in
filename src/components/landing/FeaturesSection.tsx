@@ -85,15 +85,15 @@ export function FeaturesSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"
         >
           {features.map((feature) => (
             <motion.div
               key={feature.title}
               variants={item}
-              className="group relative bg-card rounded-2xl p-5 md:p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300 text-center"
+              className="group relative bg-card rounded-2xl p-4 md:p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300 text-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-gold group-hover:scale-110 transition-all duration-300">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:bg-gradient-gold group-hover:scale-110 transition-all duration-300">
                 <feature.icon
                   size={26}
                   className="text-accent group-hover:text-accent-foreground transition-colors"

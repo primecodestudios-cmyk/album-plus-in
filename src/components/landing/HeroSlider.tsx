@@ -98,7 +98,7 @@ export function HeroSlider() {
   };
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 touch-pan-y">
       {/* Background image with overlay */}
       <AnimatePresence mode="popLayout" custom={direction}>
         <motion.div
@@ -112,9 +112,11 @@ export function HeroSlider() {
         >
           <img
             src={slide.image}
-            alt=""
+            alt={slide.title}
             className="w-full h-full object-cover"
             loading={current === 0 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={current === 0 ? "high" : "low"}
           />
           <div className="absolute inset-0 bg-background/75" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
@@ -140,7 +142,7 @@ export function HeroSlider() {
             </div>
 
             {/* Title */}
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4">
               {slide.title}
             </h1>
 
@@ -203,7 +205,7 @@ export function HeroSlider() {
                   key={btn.label}
                   size="lg"
                   variant={btn.variant === "gold" ? "default" : "outline"}
-                  className={`gap-2 text-base h-14 rounded-xl font-semibold ${
+                  className={`gap-2 text-sm md:text-base h-12 md:h-14 rounded-xl font-semibold ${
                     btn.variant === "gold"
                       ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
                       : "border-border hover:border-accent/40 hover:text-accent"
@@ -221,17 +223,17 @@ export function HeroSlider() {
       {/* Navigation arrows */}
       <button
         onClick={prev}
-        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
+        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={20} />
       </button>
       <button
         onClick={next}
-        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
+        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
         aria-label="Next slide"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={20} />
       </button>
 
       {/* Dots + progress */}

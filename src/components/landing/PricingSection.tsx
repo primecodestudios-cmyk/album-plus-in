@@ -83,7 +83,7 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 max-w-6xl mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -91,7 +91,7 @@ export function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className={`relative rounded-2xl p-6 border flex flex-col ${
+              className={`relative rounded-2xl p-4 md:p-6 border flex flex-col ${
                 plan.popular
                   ? "border-accent/40 bg-card shadow-gold lg:scale-105"
                   : plan.bonus
@@ -120,15 +120,15 @@ export function PricingSection() {
               </div>
 
               <div className="mb-5">
-                <span className="font-display text-3xl md:text-4xl font-extrabold text-foreground">
+                <span className="font-display text-2xl md:text-4xl font-extrabold text-foreground">
                   {plan.price}
                 </span>
               </div>
 
-              <ul className="space-y-2.5 mb-6 flex-1">
+              <ul className="space-y-2 mb-5 flex-1">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
-                    <Check size={15} className="text-accent mt-0.5 shrink-0" />
+                  <li key={feature} className="flex items-start gap-2 text-xs md:text-sm">
+                    <Check size={14} className="text-accent mt-0.5 shrink-0" />
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}
@@ -150,7 +150,7 @@ export function PricingSection() {
               )}
 
               <Button
-                className={`w-full h-12 rounded-xl font-semibold text-sm ${
+                className={`w-full h-11 md:h-12 rounded-xl font-semibold text-xs md:text-sm ${
                   plan.popular || plan.bonus
                     ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
                     : "border-border hover:border-accent/30 hover:text-accent"

@@ -15,6 +15,7 @@ import {
   CreditCard,
   Key,
   MessageSquare,
+  Monitor,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";

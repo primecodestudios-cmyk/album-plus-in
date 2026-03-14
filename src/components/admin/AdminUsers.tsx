@@ -1010,6 +1010,9 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                         <TableCell className="text-xs text-muted-foreground">{d.system_info || "—"}</TableCell>
                         <TableCell className="text-xs">{d.running_version || "—"}</TableCell>
                         <TableCell className="text-xs">{d.plan_name || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {d.last_seen_at ? new Date(d.last_seen_at).toLocaleDateString("en-IN") : "—"}
+                        </TableCell>
                         <TableCell>
                           <Badge className={d.is_active ? "bg-green-600/20 text-green-400 border-green-600/30" : "bg-destructive/20 text-destructive border-destructive/30"}>
                             {d.is_active ? "Active" : "Inactive"}
@@ -1035,7 +1038,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-4">No devices found</TableCell>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-4">No devices found</TableCell>
                     </TableRow>
                   )}
                 </TableBody>

@@ -16,6 +16,8 @@ import {
   Key,
   MessageSquare,
   Monitor,
+  UserCog,
+  RefreshCw,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Templates", href: "#templates" },
+  { label: "PSD Store", href: "/store" },
   { label: "Support", href: "#support" },
 ];
 

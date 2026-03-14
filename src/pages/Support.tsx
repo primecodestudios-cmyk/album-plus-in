@@ -73,7 +73,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 const Support = () => {
-  const whatsappNumber = "91994342555";
+  const whatsappNumber = "918883081855";
+  const salesNumber = "+91 88709 97799";
+  const supportNumber = "+91 88830 81855";
 
   return (
     <div className="min-h-screen bg-background">

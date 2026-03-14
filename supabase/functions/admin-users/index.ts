@@ -199,8 +199,8 @@ serve(async (req) => {
           active_license: activeLicense || null,
           all_licenses: userLicenses,
           licenses_count: userLicenses.length,
-          devices: Array.from(deviceMap.values()),
-          devices_count: deviceMap.size,
+          devices: devicesArray,
+          devices_count: devicesArray.length,
           is_blocked: !!(cpanel?.block_user === 1) || !!isBanned,
           days_left: daysLeft,
           // cPanel specific fields

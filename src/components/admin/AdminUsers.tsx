@@ -21,6 +21,7 @@ import {
   X,
   Monitor,
   MapPin,
+  Calendar,
 } from "lucide-react";
 import {
   Table,
@@ -55,6 +56,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 
+type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
+
+interface DeviceInfo {
+  device_id: string;
+  plan_name?: string;
+  is_active?: boolean;
+  expires_at?: string;
+  starts_at?: string;
+  license_id?: string;
+  system_info?: string;
+  running_version?: string;
+}
+
 interface UserRow {
   id: string;
   email: string;
@@ -63,7 +77,10 @@ interface UserRow {
   created_at: string;
   has_active_license: boolean;
   active_license: any;
+  all_licenses: any[];
   licenses_count: number;
+  devices: DeviceInfo[];
+  devices_count: number;
   is_blocked: boolean;
   days_left: number | null;
   cpanel_id: number | null;
@@ -90,13 +107,17 @@ interface PricingPlan {
   price: number;
 }
 
-export function AdminUsers() {
+interface AdminUsersProps {
+  initialFilter?: UserFilter;
+}
+
+export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive" | "blocked" | "expiring">("all");
+  const [filterStatus, setFilterStatus] = useState<UserFilter>(initialFilter);
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
@@ -118,6 +139,22 @@ export function AdminUsers() {
   const [selectedPlan, setSelectedPlan] = useState("");
   const [activateDeviceId, setActivateDeviceId] = useState("");
   const [activating, setActivating] = useState(false);
+
+  // Subscription edit dialog
+  const [subEditUser, setSubEditUser] = useState<UserRow | null>(null);
+  const [subStart, setSubStart] = useState("");
+  const [subEnd, setSubEnd] = useState("");
+  const [subPlan, setSubPlan] = useState("");
+  const [subEnabled, setSubEnabled] = useState(true);
+  const [subSaving, setSubSaving] = useState(false);
+
+  // Devices dialog
+  const [devicesUser, setDevicesUser] = useState<UserRow | null>(null);
+
+  // Sync filter from parent
+  useEffect(() => {
+    setFilterStatus(initialFilter);
+  }, [initialFilter]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -168,6 +205,12 @@ export function AdminUsers() {
     if (filterStatus === "expiring") {
       result = result.filter((u) => u.days_left !== null && u.days_left > 0 && u.days_left <= 15);
     }
+    if (filterStatus === "expiring7") {
+      result = result.filter((u) => u.days_left !== null && u.days_left > 0 && u.days_left <= 7);
+    }
+    if (filterStatus === "expired") {
+      result = result.filter((u) => u.days_left !== null && u.days_left <= 0);
+    }
     return result;
   }, [users, searchQuery, filterStatus]);
 
@@ -175,6 +218,21 @@ export function AdminUsers() {
     try {
       const { data, error } = await supabase.functions.invoke("admin-users", {
         body: { action: actionName, user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: label });
+        fetchUsers();
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const invokeDeviceAction = async (actionName: string, licenseId: string, label: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: actionName, license_id: licenseId },
       });
       if (error) throw error;
       if (data?.success) {
@@ -229,6 +287,55 @@ export function AdminUsers() {
     }
   };
 
+  const handleOpenSubEdit = (user: UserRow) => {
+    setSubEditUser(user);
+    const start = user.sub_start || user.active_license?.starts_at || "";
+    const end = user.sub_end || user.active_license?.expires_at || "";
+    setSubStart(start ? new Date(start).toISOString().split("T")[0] : "");
+    setSubEnd(end ? new Date(end).toISOString().split("T")[0] : "");
+    setSubPlan(user.active_license?.plan_name || "28 Days");
+    setSubEnabled(user.activation === 1);
+  };
+
+  const handleSaveSubscription = async () => {
+    if (!subEditUser) return;
+    setSubSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "update_subscription",
+          user_id: subEditUser.id,
+          sub_start: subStart ? new Date(subStart).toISOString() : undefined,
+          sub_end: subEnd ? new Date(subEnd).toISOString() : undefined,
+          plan_name: subPlan,
+          is_enabled: subEnabled,
+          license_id: subEditUser.active_license?.id || undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "Subscription updated" });
+        setSubEditUser(null);
+        fetchUsers();
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSubSaving(false);
+    }
+  };
+
+  const subDaysRemaining = useMemo(() => {
+    if (!subEnd) return null;
+    const diff = Math.ceil((new Date(subEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return diff;
+  }, [subEnd]);
+
+  const subTotalDays = useMemo(() => {
+    if (!subStart || !subEnd) return null;
+    return Math.ceil((new Date(subEnd).getTime() - new Date(subStart).getTime()) / (1000 * 60 * 60 * 24));
+  }, [subStart, subEnd]);
+
   const handleActivate = async () => {
     if (!activateUser || !selectedPlan) return;
     const plan = plans.find((p) => p.id === selectedPlan);
@@ -250,7 +357,6 @@ export function AdminUsers() {
       });
       if (error) throw error;
 
-      // Also set activation=1 in cpanel_user_data
       await supabase.functions.invoke("admin-users", {
         body: { action: "activate_user", user_id: activateUser.id },
       });
@@ -268,7 +374,7 @@ export function AdminUsers() {
   };
 
   const exportCSV = () => {
-    const headers = ["ID", "Name", "Studio", "Email", "Phone", "PCID", "City", "Plan", "Expiry", "Days Left", "Status"];
+    const headers = ["ID", "Name", "Studio", "Email", "Phone", "PCID", "City", "PCs", "Plan", "Expiry", "Days Left", "Status"];
     const rows = filteredUsers.map((u) => [
       u.cpanel_id || "",
       u.full_name,
@@ -277,6 +383,7 @@ export function AdminUsers() {
       u.phone,
       u.pc_id,
       u.city,
+      u.devices_count || 0,
       u.active_license?.plan_name || "—",
       u.sub_end ? new Date(u.sub_end).toLocaleDateString("en-IN") : "—",
       u.days_left ?? "—",
@@ -295,8 +402,14 @@ export function AdminUsers() {
     if (user.is_blocked || user.block_user === 1) {
       return <Badge variant="destructive" className="text-xs">🚫 Blocked</Badge>;
     }
+    if (user.days_left !== null && user.days_left <= 0) {
+      return <Badge className="bg-destructive/20 text-destructive border-destructive/30 text-xs">❌ Expired</Badge>;
+    }
+    if (user.days_left !== null && user.days_left > 0 && user.days_left <= 7) {
+      return <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">🔴 Expiring</Badge>;
+    }
     if (user.days_left !== null && user.days_left > 0 && user.days_left <= 15) {
-      return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">🔴 Expiring</Badge>;
+      return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">🟡 Expiring</Badge>;
     }
     if (user.activation === 1) {
       return <Badge className="bg-green-600/20 text-green-400 border-green-600/30 text-xs">✅ Active</Badge>;
@@ -312,22 +425,36 @@ export function AdminUsers() {
   const activeUsers = users.filter((u) => u.activation === 1 && !u.is_blocked).length;
   const blockedUsers = users.filter((u) => u.is_blocked || u.block_user === 1).length;
   const expiringUsers = users.filter((u) => u.days_left !== null && u.days_left > 0 && u.days_left <= 15).length;
+  const expiredUsers = users.filter((u) => u.days_left !== null && u.days_left <= 0).length;
+
+  const filterButtons: { id: UserFilter; label: string; count?: number; color?: string }[] = [
+    { id: "all", label: "All", count: totalUsers },
+    { id: "active", label: "Active", count: activeUsers, color: "text-green-400" },
+    { id: "expiring", label: "Expiring ≤15d", count: expiringUsers, color: "text-amber-400" },
+    { id: "expiring7", label: "Expiring ≤7d", color: "text-orange-400" },
+    { id: "expired", label: "Expired", count: expiredUsers, color: "text-destructive" },
+    { id: "blocked", label: "Blocked", count: blockedUsers, color: "text-destructive" },
+  ];
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <button onClick={() => setFilterStatus("all")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "all" ? "border-primary shadow-gold" : "border-border"}`}>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><Users size={14} /> Total Users</div>
           <div className="font-display text-2xl font-bold text-foreground">{totalUsers}</div>
         </button>
         <button onClick={() => setFilterStatus("active")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "active" ? "border-green-500" : "border-border"}`}>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><ShieldCheck size={14} /> Active Users</div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><ShieldCheck size={14} /> Active</div>
           <div className="font-display text-2xl font-bold text-green-400">{activeUsers}</div>
         </button>
         <button onClick={() => setFilterStatus("expiring")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "expiring" ? "border-amber-500" : "border-border"}`}>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><AlertTriangle size={14} /> Expiring ≤15d</div>
           <div className="font-display text-2xl font-bold text-amber-400">{expiringUsers}</div>
+        </button>
+        <button onClick={() => setFilterStatus("expired")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "expired" ? "border-destructive" : "border-border"}`}>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><X size={14} /> Expired</div>
+          <div className="font-display text-2xl font-bold text-destructive">{expiredUsers}</div>
         </button>
         <button onClick={() => setFilterStatus("blocked")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "blocked" ? "border-destructive" : "border-border"}`}>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1"><Ban size={14} /> Blocked</div>
@@ -361,6 +488,23 @@ export function AdminUsers() {
         />
       </div>
 
+      {/* Filter chips */}
+      <div className="flex flex-wrap gap-2">
+        {filterButtons.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFilterStatus(f.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              filterStatus === f.id
+                ? "bg-accent/15 text-accent border border-accent/30"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {f.label} {f.count !== undefined && `(${f.count})`}
+          </button>
+        ))}
+      </div>
+
       {/* Users Table */}
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
         <div className="overflow-x-auto">
@@ -372,6 +516,7 @@ export function AdminUsers() {
                 <TableHead>Studio</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>PCID</TableHead>
+                <TableHead>PCs</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Expiry</TableHead>
                 <TableHead>Days Left</TableHead>
@@ -382,17 +527,18 @@ export function AdminUsers() {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
                     No users found
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredUsers.map((user) => {
                   const isExpiring = user.days_left !== null && user.days_left > 0 && user.days_left <= 15;
+                  const isExpired = user.days_left !== null && user.days_left <= 0;
                   return (
                     <TableRow
                       key={user.id}
-                      className={isExpiring ? "bg-amber-500/5" : user.is_blocked ? "bg-destructive/5" : ""}
+                      className={isExpired ? "bg-destructive/5" : isExpiring ? "bg-amber-500/5" : user.is_blocked ? "bg-destructive/5" : ""}
                     >
                       <TableCell className="text-xs text-muted-foreground">{user.cpanel_id || "—"}</TableCell>
                       <TableCell>
@@ -403,6 +549,18 @@ export function AdminUsers() {
                       <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
                       <TableCell className="text-xs font-mono text-muted-foreground max-w-[120px] truncate" title={user.pc_id}>
                         {user.pc_id ? user.pc_id.substring(0, 12) + "..." : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {user.devices_count > 0 ? (
+                          <button
+                            onClick={() => setDevicesUser(user)}
+                            className="text-xs font-bold text-primary hover:underline cursor-pointer"
+                          >
+                            {user.devices_count} PC{user.devices_count > 1 ? "s" : ""}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm">{user.active_license?.plan_name || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
@@ -415,7 +573,7 @@ export function AdminUsers() {
                       <TableCell>
                         {user.days_left !== null ? (
                           <span className={`text-sm font-semibold ${
-                            user.days_left <= 0 ? "text-destructive" : isExpiring ? "text-amber-400" : "text-foreground"
+                            user.days_left <= 0 ? "text-destructive" : user.days_left <= 7 ? "text-orange-400" : isExpiring ? "text-amber-400" : "text-foreground"
                           }`}>
                             {user.days_left <= 0 ? "Expired" : `${user.days_left}d`}
                             {isExpiring && <AlertTriangle size={12} className="inline ml-1" />}
@@ -430,10 +588,15 @@ export function AdminUsers() {
                               Actions ▾
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuContent align="end" className="w-52">
                             <DropdownMenuItem onClick={() => setViewUser(user)}>
                               <Eye size={14} className="mr-2" /> View Details
                             </DropdownMenuItem>
+                            {user.devices_count > 0 && (
+                              <DropdownMenuItem onClick={() => setDevicesUser(user)}>
+                                <Monitor size={14} className="mr-2" /> View Devices ({user.devices_count})
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             {user.activation !== 1 && (
                               <DropdownMenuItem onClick={() => invokeAction("activate_user", user.id, "User activated")}>
@@ -452,8 +615,11 @@ export function AdminUsers() {
                             }}>
                               <ShieldCheck size={14} className="mr-2 text-primary" /> New License
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenSubEdit(user)}>
+                              <Calendar size={14} className="mr-2 text-accent" /> Edit Subscription
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(user)}>
-                              <Edit size={14} className="mr-2" /> Edit
+                              <Edit size={14} className="mr-2" /> Edit Profile
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {user.is_blocked || user.block_user === 1 ? (
@@ -531,21 +697,64 @@ export function AdminUsers() {
               </div>
 
               <div className="border-t border-border pt-3 mt-3">
-                <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Monitor size={14} /> System Info</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground">PC ID</div>
-                    <div className="font-mono text-xs break-all">{viewUser.pc_id || "—"}</div>
+                <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Monitor size={14} /> Devices ({viewUser.devices_count})</h4>
+                {viewUser.devices && viewUser.devices.length > 0 ? (
+                  <div className="space-y-2">
+                    {viewUser.devices.map((d: DeviceInfo, i: number) => (
+                      <div key={i} className="bg-muted/30 rounded-lg p-3 grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-muted-foreground">PCID</span>
+                          <p className="font-mono break-all">{d.device_id}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Status</span>
+                          <p className={d.is_active ? "text-green-400 font-bold" : "text-destructive font-bold"}>
+                            {d.is_active ? "Active" : "Inactive"}
+                          </p>
+                        </div>
+                        {d.running_version && (
+                          <div>
+                            <span className="text-muted-foreground">Version</span>
+                            <p>{d.running_version}</p>
+                          </div>
+                        )}
+                        {d.system_info && (
+                          <div>
+                            <span className="text-muted-foreground">System</span>
+                            <p>{d.system_info}</p>
+                          </div>
+                        )}
+                        {d.plan_name && (
+                          <div>
+                            <span className="text-muted-foreground">Plan</span>
+                            <p>{d.plan_name}</p>
+                          </div>
+                        )}
+                        {d.expires_at && (
+                          <div>
+                            <span className="text-muted-foreground">Expires</span>
+                            <p>{new Date(d.expires_at).toLocaleDateString("en-IN")}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground">Running Version</div>
-                    <div className="font-medium">{viewUser.running_version || "—"}</div>
+                ) : (
+                  <div className="bg-muted/30 rounded-lg p-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground">PC ID</div>
+                      <div className="font-mono text-xs break-all">{viewUser.pc_id || "—"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Running Version</div>
+                      <div className="font-medium">{viewUser.running_version || "—"}</div>
+                    </div>
+                    <div className="col-span-2">
+                      <div className="text-xs text-muted-foreground">System Info</div>
+                      <div className="font-medium">{viewUser.system_info || "—"}</div>
+                    </div>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-3 col-span-2">
-                    <div className="text-xs text-muted-foreground">System Info</div>
-                    <div className="font-medium">{viewUser.system_info || "—"}</div>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="border-t border-border pt-3 mt-3">
@@ -553,21 +762,17 @@ export function AdminUsers() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Start Date</div>
-                    <div className="font-medium">
-                      {viewUser.sub_start ? new Date(viewUser.sub_start).toLocaleDateString("en-IN") : "—"}
-                    </div>
+                    <div className="font-medium">{viewUser.sub_start ? new Date(viewUser.sub_start).toLocaleDateString("en-IN") : "—"}</div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">End Date</div>
-                    <div className="font-medium">
-                      {viewUser.sub_end ? new Date(viewUser.sub_end).toLocaleDateString("en-IN") : "—"}
-                    </div>
+                    <div className="font-medium">{viewUser.sub_end ? new Date(viewUser.sub_end).toLocaleDateString("en-IN") : "—"}</div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Days Left</div>
                     <div className={`font-bold ${
-                      viewUser.days_left !== null && viewUser.days_left <= 15 ? "text-amber-400" :
-                      viewUser.days_left !== null && viewUser.days_left <= 0 ? "text-destructive" : "text-foreground"
+                      viewUser.days_left !== null && viewUser.days_left <= 0 ? "text-destructive" :
+                      viewUser.days_left !== null && viewUser.days_left <= 15 ? "text-amber-400" : "text-foreground"
                     }`}>
                       {viewUser.days_left !== null ? (viewUser.days_left <= 0 ? "Expired" : `${viewUser.days_left} days`) : "—"}
                     </div>
@@ -657,6 +862,176 @@ export function AdminUsers() {
               Save
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subscription Edit Dialog */}
+      <Dialog open={!!subEditUser} onOpenChange={(open) => !open && setSubEditUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar size={18} /> Edit Subscription
+            </DialogTitle>
+          </DialogHeader>
+          {subEditUser && (
+            <div className="space-y-4 py-2">
+              <div className="bg-muted/30 rounded-xl p-3 text-sm">
+                <span className="text-muted-foreground">User: </span>
+                <strong>{subEditUser.full_name || subEditUser.email}</strong>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" value={subStart} onChange={(e) => setSubStart(e.target.value)} />
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input type="date" value={subEnd} onChange={(e) => setSubEnd(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Total Days</Label>
+                  <div className="h-10 flex items-center px-3 rounded-md border border-border bg-muted/30 text-sm font-medium">
+                    {subTotalDays !== null ? `${subTotalDays} days` : "—"}
+                  </div>
+                </div>
+                <div>
+                  <Label>Days Remaining</Label>
+                  <div className={`h-10 flex items-center px-3 rounded-md border border-border bg-muted/30 text-sm font-bold ${
+                    subDaysRemaining !== null && subDaysRemaining <= 0 ? "text-destructive" :
+                    subDaysRemaining !== null && subDaysRemaining <= 15 ? "text-amber-400" : "text-foreground"
+                  }`}>
+                    {subDaysRemaining !== null ? (subDaysRemaining <= 0 ? "Expired" : `${subDaysRemaining} days`) : "—"}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Plan Name</Label>
+                <select
+                  value={subPlan}
+                  onChange={(e) => {
+                    setSubPlan(e.target.value);
+                    // Auto-set end date based on plan
+                    const planDays: Record<string, number> = { "28 Days": 28, "3 Months": 90, "6 Months": 180, "1 Year": 365 };
+                    if (planDays[e.target.value] && subStart) {
+                      const end = new Date(subStart);
+                      end.setDate(end.getDate() + planDays[e.target.value]);
+                      setSubEnd(end.toISOString().split("T")[0]);
+                    }
+                  }}
+                  className="w-full h-10 px-3 rounded-md bg-secondary border border-border text-foreground text-sm"
+                >
+                  <option>28 Days</option>
+                  <option>3 Months</option>
+                  <option>6 Months</option>
+                  <option>1 Year</option>
+                  <option>Custom</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Label>Subscription Status</Label>
+                <button
+                  onClick={() => setSubEnabled(!subEnabled)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    subEnabled
+                      ? "bg-green-600/20 text-green-400 border border-green-600/30"
+                      : "bg-destructive/20 text-destructive border border-destructive/30"
+                  }`}
+                >
+                  {subEnabled ? "✅ Enabled" : "❌ Disabled"}
+                </button>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleSaveSubscription} disabled={subSaving} className="gap-2">
+              {subSaving ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+              Save Subscription
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Devices Dialog */}
+      <Dialog open={!!devicesUser} onOpenChange={(open) => !open && setDevicesUser(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Monitor size={18} /> Device Activations
+            </DialogTitle>
+          </DialogHeader>
+          {devicesUser && (
+            <div className="space-y-4">
+              <div className="bg-muted/30 rounded-xl p-3 text-sm flex items-center justify-between">
+                <div>
+                  <span className="text-muted-foreground">User: </span>
+                  <strong>{devicesUser.full_name || devicesUser.email}</strong>
+                  {devicesUser.phone && <span className="text-muted-foreground ml-2">• {devicesUser.phone}</span>}
+                </div>
+                <Badge variant="secondary">{devicesUser.devices_count} PC{devicesUser.devices_count > 1 ? "s" : ""}</Badge>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>PCID</TableHead>
+                    <TableHead>System Info</TableHead>
+                    <TableHead>Version</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {devicesUser.devices && devicesUser.devices.length > 0 ? (
+                    devicesUser.devices.map((d: DeviceInfo, i: number) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-xs max-w-[150px] truncate" title={d.device_id}>
+                          {d.device_id.length > 16 ? d.device_id.slice(0, 16) + "..." : d.device_id}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{d.system_info || "—"}</TableCell>
+                        <TableCell className="text-xs">{d.running_version || "—"}</TableCell>
+                        <TableCell className="text-xs">{d.plan_name || "—"}</TableCell>
+                        <TableCell>
+                          <Badge className={d.is_active ? "bg-green-600/20 text-green-400 border-green-600/30" : "bg-destructive/20 text-destructive border-destructive/30"}>
+                            {d.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            {d.license_id && d.is_active && (
+                              <Button size="sm" variant="ghost" className="text-xs text-amber-400 h-7"
+                                onClick={() => { invokeDeviceAction("deactivate_device", d.license_id!, "Device deactivated"); setDevicesUser(null); }}>
+                                <ShieldOff size={12} className="mr-1" /> Deactivate
+                              </Button>
+                            )}
+                            {d.license_id && !d.is_active && (
+                              <Button size="sm" variant="ghost" className="text-xs text-green-400 h-7"
+                                onClick={() => { invokeDeviceAction("activate_device", d.license_id!, "Device activated"); setDevicesUser(null); }}>
+                                <ShieldCheck size={12} className="mr-1" /> Activate
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-4">No devices found</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

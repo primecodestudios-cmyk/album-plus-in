@@ -4,6 +4,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
+import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
         <CTASection />
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 };

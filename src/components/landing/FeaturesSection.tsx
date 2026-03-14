@@ -46,13 +46,14 @@ const item = {
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 relative">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+    <section id="features" className="py-20 md:py-28 relative">
+      <div className="absolute inset-0 bg-hero" />
+      <div className="container mx-auto px-4 relative">
+        <div className="text-center mb-14">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Everything You Need to Create
+            Everything You Need to <span className="text-gradient-gold">Create</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Professional-grade tools designed for photographers who demand speed,
             quality, and creative freedom.
           </p>
@@ -63,15 +64,15 @@ export function FeaturesSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
         >
           {features.map((feature) => (
             <motion.div
               key={feature.title}
               variants={item}
-              className="group relative bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-elevated transition-shadow duration-300"
+              className="group relative bg-card rounded-2xl p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-gradient-accent group-hover:text-accent-foreground transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-gradient-gold transition-all duration-300">
                 <feature.icon size={24} className="text-accent group-hover:text-accent-foreground transition-colors" />
               </div>
               <h3 className="font-display text-lg font-semibold text-foreground mb-2">

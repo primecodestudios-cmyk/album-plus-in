@@ -53,20 +53,19 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-24 relative">
-      <div className="absolute inset-0 bg-hero opacity-[0.02]" />
+    <section id="pricing" className="py-20 md:py-28 relative">
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-16">
+        <div className="text-center mb-14">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Simple, Transparent Pricing
+            Simple, <span className="text-gradient-gold">Transparent</span> Pricing
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Choose the plan that fits your workflow. All plans include free updates
             and a 14-day money-back guarantee.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -76,12 +75,12 @@ export function PricingSection() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className={`relative rounded-2xl p-6 border ${
                 plan.popular
-                  ? "border-accent bg-card shadow-elevated scale-[1.02]"
+                  ? "border-accent/40 bg-card shadow-gold md:scale-105"
                   : "border-border bg-card shadow-card"
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-accent text-accent-foreground text-xs font-semibold">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-gold text-accent-foreground text-xs font-bold">
                   Most Popular
                 </div>
               )}
@@ -106,7 +105,7 @@ export function PricingSection() {
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
+                  <li key={feature} className="flex items-start gap-2.5 text-sm">
                     <Check size={16} className="text-accent mt-0.5 shrink-0" />
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
@@ -114,10 +113,10 @@ export function PricingSection() {
               </ul>
 
               <Button
-                className={`w-full ${
+                className={`w-full h-12 rounded-xl font-semibold text-base ${
                   plan.popular
-                    ? "bg-gradient-accent text-accent-foreground hover:opacity-90"
-                    : ""
+                    ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
+                    : "border-border hover:border-accent/30 hover:text-accent"
                 }`}
                 variant={plan.popular ? "default" : "outline"}
               >

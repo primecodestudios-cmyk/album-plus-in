@@ -70,6 +70,7 @@ const AdminPanel = () => {
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
+    { id: "enquiries", label: "Enquiries", icon: Users },
   ];
 
   return (

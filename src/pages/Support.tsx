@@ -119,8 +119,11 @@ const Support = () => {
                   <div>
                     {section.questions.map((faq) => (
                       <FaqItem key={faq.q} q={faq.q} a={faq.a} />
-                    ))}
-                  </div>
+              ))}
+
+              {/* Contact Form */}
+              <ContactForm />
+            </div>
                 </motion.div>
               ))}
             </div>

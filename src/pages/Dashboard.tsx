@@ -107,6 +107,11 @@ const Dashboard = () => {
             Album<span className="text-gradient-gold">Plus</span>
           </Link>
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-2 text-destructive font-semibold">
+                <Settings size={16} /> Admin Panel
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">
               <Home size={16} /> Home
             </Button>

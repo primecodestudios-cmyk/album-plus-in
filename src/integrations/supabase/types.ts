@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      pricing_plans: {
+        Row: {
+          created_at: string
+          duration_days: number
+          id: string
+          is_active: boolean
+          plan_name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_days: number
+          id?: string
+          is_active?: boolean
+          plan_name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          plan_name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,6 +71,60 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      psd_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          downloads_count: number
+          file_size: string | null
+          file_url: string | null
+          id: string
+          is_active: boolean
+          is_free: boolean
+          name: string
+          pages: number
+          photoshop_version: string | null
+          preview_url: string | null
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          downloads_count?: number
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          name: string
+          pages?: number
+          photoshop_version?: string | null
+          preview_url?: string | null
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          downloads_count?: number
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          name?: string
+          pages?: number
+          photoshop_version?: string | null
+          preview_url?: string | null
+          price?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -125,15 +209,40 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_admin_stats: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -260,6 +369,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

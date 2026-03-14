@@ -1,7 +1,23 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, IndianRupee, AlertTriangle, Clock, Ban, Monitor, XCircle, RefreshCw, Eye, Edit, ShieldOff, Laptop } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
 interface Stats {
   total_users: number;
@@ -19,20 +35,37 @@ interface ExpiringUser {
   days_left: number;
 }
 
+interface UserInfo {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  devices_count: number;
+  devices: any[];
+  activation: number;
+  is_blocked: boolean;
+  active_license: any;
+  sub_end: string | null;
+  days_left: number | null;
+  studio_name: string;
+}
+
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 interface AdminStatsProps {
   onNavigateToUsers: (filter: UserFilter) => void;
 }
 
-const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+const AUTO_REFRESH_INTERVAL = 30000;
 
 export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
+  const { toast } = useToast();
   const [stats, setStats] = useState<Stats | null>(null);
   const [expiringUsers15, setExpiringUsers15] = useState<ExpiringUser[]>([]);
   const [expiringUsers7, setExpiringUsers7] = useState<ExpiringUser[]>([]);
   const [expiredUsers, setExpiredUsers] = useState<ExpiringUser[]>([]);
   const [pcStats, setPcStats] = useState<Record<number, number>>({});
+  const [allUsers, setAllUsers] = useState<UserInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -40,6 +73,9 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   const [refreshing, setRefreshing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // PC activation dialog
+  const [selectedPcCount, setSelectedPcCount] = useState<number | null>(null);
 
   const fetchAll = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -65,16 +101,15 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     if (expiring7Res.data?.users) setExpiringUsers7(expiring7Res.data.users);
     if (expiredRes.data?.users) setExpiredUsers(expiredRes.data.users);
     if (usersRes.data?.pc_activation_stats) setPcStats(usersRes.data.pc_activation_stats);
+    if (usersRes.data?.users) setAllUsers(usersRes.data.users);
     setLoading(false);
     setRefreshing(false);
     setLastRefresh(new Date());
     setCountdown(30);
   }, []);
 
-  // Initial fetch
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Auto refresh interval
   useEffect(() => {
     if (autoRefresh) {
       intervalRef.current = setInterval(() => fetchAll(true), AUTO_REFRESH_INTERVAL);
@@ -87,6 +122,22 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [autoRefresh, fetchAll]);
+
+  const invokeAction = async (actionName: string, userId: string, label: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: actionName, user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        const syncMsg = data.cpanel_sync ? " (cPanel synced ✅)" : "";
+        toast({ title: label + syncMsg });
+        fetchAll(true);
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
 
   if (loading) return <div className="text-muted-foreground py-8 text-center">Loading stats...</div>;
 
@@ -103,10 +154,30 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
     { label: "Expired Users", count: expiredUsers.length, color: "text-destructive", bgColor: "bg-destructive/10 border-destructive/30", filter: "expired" as UserFilter },
   ];
 
-  // PC activation count entries
-  const pcEntries = Object.entries(pcStats)
-    .map(([count, users]) => ({ pcCount: Number(count), userCount: users }))
-    .sort((a, b) => a.pcCount - b.pcCount);
+  // Build PC activation cards for 1-10
+  const pcCards = Array.from({ length: 10 }, (_, i) => {
+    const pcCount = i + 1;
+    return { pcCount, userCount: pcStats[pcCount] || 0 };
+  });
+
+  // Users for selected PC count
+  const pcFilteredUsers = selectedPcCount !== null
+    ? allUsers.filter((u) => u.devices_count === selectedPcCount)
+    : [];
+
+  const getStatusText = (user: UserInfo) => {
+    if (user.is_blocked) return "🚫 Blocked";
+    if (user.days_left !== null && user.days_left <= 0) return "❌ Expired";
+    if (user.activation === 1) return "✅ Active";
+    return "Inactive";
+  };
+
+  const getStatusClass = (user: UserInfo) => {
+    if (user.is_blocked) return "text-destructive";
+    if (user.days_left !== null && user.days_left <= 0) return "text-destructive";
+    if (user.activation === 1) return "text-green-400";
+    return "text-muted-foreground";
+  };
 
   const renderUserList = (users: ExpiringUser[], color: string) => {
     if (users.length === 0) {
@@ -153,7 +224,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
 
   return (
     <div className="space-y-8">
-      {/* Overview Cards - Clickable */}
+      {/* Overview Cards */}
       <div>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-xl font-bold text-foreground">Overview</h2>
@@ -203,33 +274,118 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
         </div>
       </div>
 
-      {/* PC Activation Counts */}
-      {pcEntries.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Monitor size={18} className="text-primary" />
-            <h2 className="font-display text-lg font-bold text-foreground">PC Activation Count</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {pcEntries.map(({ pcCount, userCount }) => (
-              <div
-                key={pcCount}
-                className="bg-card rounded-2xl border border-border p-4 shadow-card text-center"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 mx-auto">
-                  <Monitor size={18} className="text-primary" />
-                </div>
-                <div className="font-display text-2xl font-bold text-foreground">{userCount}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {pcCount} PC{pcCount > 1 ? "s" : ""} Activation
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* PC Activation Count — 1 to 10 PCs, clickable */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Monitor size={18} className="text-primary" />
+          <h2 className="font-display text-lg font-bold text-foreground">PC Activation Count</h2>
         </div>
-      )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-3">
+          {pcCards.map(({ pcCount, userCount }) => (
+            <button
+              key={pcCount}
+              onClick={() => setSelectedPcCount(pcCount)}
+              className="bg-card rounded-2xl border border-border p-4 shadow-card text-center transition-all hover:border-primary/40 hover:shadow-gold cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center mb-2 mx-auto transition-colors">
+                <Laptop size={18} className="text-primary" />
+              </div>
+              <div className="font-display text-2xl font-bold text-foreground">{userCount}</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {pcCount} PC Activation
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Expiry Alert Cards - Clickable */}
+      {/* PC Users Dialog */}
+      <Dialog open={selectedPcCount !== null} onOpenChange={(open) => !open && setSelectedPcCount(null)}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Monitor size={18} className="text-primary" />
+              {selectedPcCount} PC Activation — Users ({pcFilteredUsers.length})
+            </DialogTitle>
+          </DialogHeader>
+          {pcFilteredUsers.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">No users with {selectedPcCount} PC activation</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Mobile</TableHead>
+                    <TableHead>PC Count</TableHead>
+                    <TableHead>Subscription</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pcFilteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="font-medium text-sm">{user.full_name || "—"}</div>
+                        {user.studio_name && <div className="text-xs text-muted-foreground">{user.studio_name}</div>}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="text-sm">{user.phone || "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs font-bold">
+                          {user.devices_count} PC{user.devices_count > 1 ? "s" : ""}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <div>{user.active_license?.plan_name || "—"}</div>
+                        {user.days_left !== null && (
+                          <div className={`font-semibold ${user.days_left <= 0 ? "text-destructive" : user.days_left <= 15 ? "text-amber-400" : "text-foreground"}`}>
+                            {user.days_left <= 0 ? "Expired" : `${user.days_left}d left`}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-bold ${getStatusClass(user)}`}>
+                          {getStatusText(user)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end flex-wrap">
+                          <Button size="sm" variant="ghost" className="text-xs h-7 gap-1"
+                            onClick={() => { setSelectedPcCount(null); onNavigateToUsers("all"); }}>
+                            <Eye size={12} /> View
+                          </Button>
+                          {!user.is_blocked && user.activation === 1 && (
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-amber-400"
+                              onClick={() => invokeAction("deactivate_user", user.id, "User deactivated")}>
+                              <ShieldOff size={12} /> Deactivate
+                            </Button>
+                          )}
+                          {!user.is_blocked ? (
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-destructive"
+                              onClick={() => invokeAction("block_user", user.id, "User blocked")}>
+                              <Ban size={12} /> Block
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="ghost" className="text-xs h-7 gap-1 text-green-400"
+                              onClick={() => invokeAction("unblock_user", user.id, "User unblocked")}>
+                              <ShieldCheck size={12} /> Unblock
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Expiry Alert Cards */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle size={18} className="text-amber-400" />

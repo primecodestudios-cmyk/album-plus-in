@@ -91,7 +91,7 @@ export function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className={`relative rounded-2xl p-6 border flex flex-col ${
+              className={`relative rounded-2xl p-4 md:p-6 border flex flex-col ${
                 plan.popular
                   ? "border-accent/40 bg-card shadow-gold lg:scale-105"
                   : plan.bonus

@@ -81,6 +81,9 @@ const AdminPanel = () => {
             <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-bold">ADMIN</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="gap-2 text-muted-foreground">
+              <Users size={16} /> User Panel
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">
               <Home size={16} /> Home
             </Button>

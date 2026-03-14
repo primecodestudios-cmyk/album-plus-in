@@ -108,6 +108,9 @@ serve(async (req) => {
         .order("expires_at", { ascending: false });
 
       // Group all cpanel entries by email/phone for multi-PC tracking
+      // Also fetch user_devices
+      const { data: userDevices } = await supabaseAdmin.from("user_devices").select("*");
+
       const userMap = (authUsers?.users || []).map((au: any) => {
         const profile = profiles?.find((p: any) => p.user_id === au.id);
         const cpanel = cpanelData?.find((c: any) => c.user_id === au.id);
@@ -129,8 +132,25 @@ serve(async (req) => {
           );
         }
 
-        // Collect all devices (from licenses with different device_ids)
+        // Collect devices from user_devices table first
+        const uDevices = (userDevices || []).filter((ud: any) => ud.user_id === au.id);
         const deviceMap = new Map<string, any>();
+        for (const ud of uDevices) {
+          deviceMap.set(ud.device_id, {
+            device_id: ud.device_id,
+            device_name: ud.device_name || "",
+            system_info: ud.system_info || "",
+            running_version: ud.running_version || "",
+            windows_version: ud.windows_version || "",
+            ip_address: ud.ip_address || "",
+            is_active: ud.is_active,
+            activated_at: ud.activated_at,
+            last_seen_at: ud.last_seen_at,
+            record_id: ud.id,
+            license_id: ud.license_id,
+          });
+        }
+        // Also add from licenses
         for (const lic of userLicenses) {
           if (lic.device_id && !deviceMap.has(lic.device_id)) {
             deviceMap.set(lic.device_id, {
@@ -143,7 +163,7 @@ serve(async (req) => {
             });
           }
         }
-        // Also add cpanel pc_id if not already there
+        // Also add cpanel pc_id
         if (cpanel?.pc_id && !deviceMap.has(cpanel.pc_id)) {
           deviceMap.set(cpanel.pc_id, {
             device_id: cpanel.pc_id,
@@ -155,6 +175,19 @@ serve(async (req) => {
             starts_at: cpanel.sub_start || activeLicense?.starts_at || null,
           });
         }
+
+        // Enrich devices with license plan info
+        const devicesArray = Array.from(deviceMap.values()).map((d: any) => {
+          if (!d.plan_name && d.license_id) {
+            const lic = userLicenses.find((l: any) => l.id === d.license_id);
+            if (lic) {
+              d.plan_name = lic.plan_name;
+              d.expires_at = lic.expires_at;
+              d.starts_at = lic.starts_at;
+            }
+          }
+          return d;
+        });
 
         return {
           id: au.id,

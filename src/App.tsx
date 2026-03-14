@@ -12,6 +12,9 @@ import Dashboard from "./pages/Dashboard.tsx";
 import DownloadCenter from "./pages/DownloadCenter.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
 import ActivateLicense from "./pages/ActivateLicense.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import RefundPolicy from "./pages/RefundPolicy.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();

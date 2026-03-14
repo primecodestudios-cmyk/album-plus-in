@@ -112,9 +112,11 @@ export function HeroSlider() {
         >
           <img
             src={slide.image}
-            alt=""
+            alt={slide.title}
             className="w-full h-full object-cover"
             loading={current === 0 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={current === 0 ? "high" : "low"}
           />
           <div className="absolute inset-0 bg-background/75" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />

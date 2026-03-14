@@ -18,6 +18,7 @@ import {
   Monitor,
   UserCog,
   RefreshCw,
+  Video,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";
@@ -30,9 +31,10 @@ import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
 import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
+import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens";
+type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -92,6 +94,7 @@ const AdminPanel = () => {
     { id: "sync", label: "Sync Users", icon: Users },
     { id: "activate", label: "Activate", icon: ShieldCheck },
     { id: "api_tokens", label: "API Tokens", icon: Key },
+    { id: "demo_videos", label: "Demo Videos", icon: Video },
   ];
 
   return (
@@ -151,6 +154,7 @@ const AdminPanel = () => {
           {activeTab === "sync" && <AdminSyncUsers />}
           {activeTab === "activate" && <AdminActivateLicense />}
           {activeTab === "api_tokens" && <AdminApiTokens />}
+          {activeTab === "demo_videos" && <AdminDemoVideos />}
         </motion.div>
       </div>
     </div>

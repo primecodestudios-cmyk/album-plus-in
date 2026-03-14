@@ -31,6 +31,7 @@ import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
 import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
+import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { useToast } from "@/hooks/use-toast";
 
 type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens";

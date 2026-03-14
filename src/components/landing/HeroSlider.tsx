@@ -41,8 +41,8 @@ const slides = [
     image: heroSlide3,
     badge: "🔧 Full Compatibility",
     title: "Compatible With All Photoshop Versions",
-    subtitle: "CS3 to CC 2024 — 32 Bit & 64 Bit Supported",
-    tags: ["CS3", "CS4", "CS5", "CS6", "CC 2014", "CC 2020", "CC 2024"],
+    subtitle: "CS3 32-Bit to CC 2026 64-Bit — Full Support",
+    tags: ["CS3", "CS4", "CS5", "CS6", "CC 2014", "CC 2020", "CC 2024", "CC 2026"],
     buttons: [
       { label: "Check Compatibility", icon: ArrowRight, variant: "gold" as const },
     ],

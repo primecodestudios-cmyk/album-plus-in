@@ -37,7 +37,7 @@ const PsdStore = () => {
             price: Number(t.price),
             isFree: t.is_free,
             fileSize: t.file_size || "—",
-            photoshopVersion: t.photoshop_version || "CS6 — CC 2024",
+            photoshopVersion: t.photoshop_version || "CS6 — CC 2026",
             pages: t.pages,
             downloads: t.downloads_count,
             description: t.description || "",

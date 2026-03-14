@@ -230,10 +230,10 @@ export function HeroSlider() {
       </button>
       <button
         onClick={next}
-        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
+        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-card/60 backdrop-blur border border-border flex items-center justify-center text-foreground hover:bg-card hover:border-accent/30 transition-all active:scale-95"
         aria-label="Next slide"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={20} />
       </button>
 
       {/* Dots + progress */}

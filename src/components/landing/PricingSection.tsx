@@ -150,7 +150,7 @@ export function PricingSection() {
               )}
 
               <Button
-                className={`w-full h-12 rounded-xl font-semibold text-sm ${
+                className={`w-full h-11 md:h-12 rounded-xl font-semibold text-xs md:text-sm ${
                   plan.popular || plan.bonus
                     ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
                     : "border-border hover:border-accent/30 hover:text-accent"

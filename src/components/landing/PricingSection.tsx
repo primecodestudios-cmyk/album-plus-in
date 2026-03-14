@@ -125,10 +125,10 @@ export function PricingSection() {
                 </span>
               </div>
 
-              <ul className="space-y-2.5 mb-6 flex-1">
+              <ul className="space-y-2 mb-5 flex-1">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
-                    <Check size={15} className="text-accent mt-0.5 shrink-0" />
+                  <li key={feature} className="flex items-start gap-2 text-xs md:text-sm">
+                    <Check size={14} className="text-accent mt-0.5 shrink-0" />
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}

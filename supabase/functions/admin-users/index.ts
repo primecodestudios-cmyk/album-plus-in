@@ -302,7 +302,12 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify({ success: true, users: userMap, pc_activation_stats: pcCountMap }), {
+      return new Response(JSON.stringify({
+        success: true,
+        users: userMap,
+        pc_activation_stats: pcCountMap,
+        cpanel_pull_triggered: pullTriggered,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

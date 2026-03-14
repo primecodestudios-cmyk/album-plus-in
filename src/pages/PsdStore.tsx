@@ -1,17 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import { PsdProductCard } from "@/components/store/PsdProductCard";
 import { PsdDetailModal } from "@/components/store/PsdDetailModal";
-import { categories, templates, PsdCategory, PsdTemplate } from "@/data/psdTemplates";
-import { Search } from "lucide-react";
+import { categories, templates as fallbackTemplates, categoryFallbackImages, defaultFallbackImage, PsdCategory, PsdTemplate } from "@/data/psdTemplates";
+import { supabase } from "@/integrations/supabase/client";
+import { Search, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const PsdStore = () => {
   const [activeCategory, setActiveCategory] = useState<PsdCategory>("All");
   const [search, setSearch] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<PsdTemplate | null>(null);
+  const [templates, setTemplates] = useState<PsdTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const { data, error } = await supabase
+        .from("psd_templates")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        // Fallback to hardcoded data
+        setTemplates(fallbackTemplates);
+      } else {
+        setTemplates(
+          data.map((t) => ({
+            id: t.id,
+            name: t.name,
+            category: t.category,
+            image: t.preview_url || categoryFallbackImages[t.category] || defaultFallbackImage,
+            price: Number(t.price),
+            isFree: t.is_free,
+            fileSize: t.file_size || "—",
+            photoshopVersion: t.photoshop_version || "CS6 — CC 2024",
+            pages: t.pages,
+            downloads: t.downloads_count,
+            description: t.description || "",
+          }))
+        );
+      }
+      setLoading(false);
+    };
+
+    fetchTemplates();
+  }, []);
 
   const filtered = templates.filter((t) => {
     const matchCategory = activeCategory === "All" || t.category === activeCategory;
@@ -44,7 +81,6 @@ const PsdStore = () => {
 
           {/* Search + Filters */}
           <div className="flex flex-col gap-4 mb-8">
-            {/* Search bar */}
             <div className="relative max-w-md mx-auto w-full">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -56,7 +92,6 @@ const PsdStore = () => {
               />
             </div>
 
-            {/* Category tabs */}
             <div className="flex flex-wrap justify-center gap-2">
               {categories.map((cat) => (
                 <button
@@ -74,35 +109,43 @@ const PsdStore = () => {
             </div>
           </div>
 
-          {/* Results count */}
-          <div className="text-sm text-muted-foreground mb-6">
-            Showing <strong className="text-foreground">{filtered.length}</strong> templates
-            {activeCategory !== "All" && (
-              <> in <strong className="text-accent">{activeCategory}</strong></>
-            )}
-          </div>
-
-          {/* Grid */}
-          {filtered.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-              {filtered.map((template) => (
-                <PsdProductCard
-                  key={template.id}
-                  template={template}
-                  onSelect={setSelectedTemplate}
-                />
-              ))}
+          {/* Results */}
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={24} className="animate-spin text-accent" />
+              <span className="ml-3 text-muted-foreground">Loading templates...</span>
             </div>
           ) : (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">No templates found.</p>
-              <button
-                onClick={() => { setActiveCategory("All"); setSearch(""); }}
-                className="mt-3 text-accent text-sm font-medium hover:underline"
-              >
-                Clear filters
-              </button>
-            </div>
+            <>
+              <div className="text-sm text-muted-foreground mb-6">
+                Showing <strong className="text-foreground">{filtered.length}</strong> templates
+                {activeCategory !== "All" && (
+                  <> in <strong className="text-accent">{activeCategory}</strong></>
+                )}
+              </div>
+
+              {filtered.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+                  {filtered.map((template) => (
+                    <PsdProductCard
+                      key={template.id}
+                      template={template}
+                      onSelect={setSelectedTemplate}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">No templates found.</p>
+                  <button
+                    onClick={() => { setActiveCategory("All"); setSearch(""); }}
+                    className="mt-3 text-accent text-sm font-medium hover:underline"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
@@ -110,7 +153,6 @@ const PsdStore = () => {
       <Footer />
       <WhatsAppButton />
 
-      {/* Detail Modal */}
       <PsdDetailModal
         template={selectedTemplate}
         onClose={() => setSelectedTemplate(null)}

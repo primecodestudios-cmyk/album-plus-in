@@ -10,7 +10,7 @@ const navLinks = [
   { label: "Pricing", href: "/#pricing" },
   { label: "PSD Store", href: "/store" },
   { label: "Downloads", href: "/downloads" },
-  { label: "Support", href: "/#support" },
+  { label: "Support", href: "/support" },
 ];
 
 export function Navbar() {

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check, Star, Crown, HardDrive, Monitor } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -20,24 +20,27 @@ export function PricingSection() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchPlans() {
-      const { data, error } = await supabase
-        .from("pricing_plans")
-        .select("*")
-        .eq("is_active", true)
-        .order("price", { ascending: true });
+  const fetchPlans = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("pricing_plans")
+      .select("*")
+      .eq("is_active", true)
+      .order("price", { ascending: true });
 
-      if (error) {
-        console.error("Error fetching plans:", error);
-      } else {
-        setPlans(data || []);
-      }
-      setLoading(false);
+    if (error) {
+      console.error("Error fetching plans:", error);
+    } else {
+      setPlans(data || []);
     }
-
-    fetchPlans();
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchPlans();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchPlans, 30000);
+    return () => clearInterval(interval);
+  }, [fetchPlans]);
 
   const formatDuration = (days: number, type: string) => {
     if (type === "days") return `${days} Days`;

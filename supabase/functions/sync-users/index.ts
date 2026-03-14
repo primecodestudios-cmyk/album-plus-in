@@ -48,15 +48,46 @@ serve(async (req) => {
       }
     }
 
+    const pick = (...values: any[]) => values.find((v) => v !== undefined && v !== null && v !== "");
+    const toInt = (value: any, fallback = 0) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    function normalizeCpanelUser(raw: any) {
+      return {
+        id: pick(raw.id, raw.cpanel_id, raw.cpanelId),
+        email: (pick(raw.email, raw.mail) || "").toString().trim(),
+        pcId: pick(raw.pcId, raw.pcid, raw.pc_id, raw.pcID, ""),
+        subStart: pick(raw.subStart, raw.sub_start, null),
+        subEnd: pick(raw.subEnd, raw.sub_end, null),
+        userName: pick(raw.userName, raw.user_name, raw.username, ""),
+        shortName: pick(raw.shortName, raw.short_name, ""),
+        studioName: pick(raw.studioName, raw.studio_name, ""),
+        mobile: pick(raw.mobile, raw.phone, ""),
+        city: pick(raw.city, ""),
+        address: pick(raw.address, ""),
+        activation: toInt(pick(raw.activation, raw.activated), 0),
+        blockUser: toInt(pick(raw.block_user, raw.blockedUser), 0),
+        runningVersion: pick(raw.running_version, raw.runningVersion, ""),
+        systemInfo: pick(raw.system_info, raw.systemInfo, ""),
+        created: pick(raw.created, raw.cpanel_created, ""),
+        note1: pick(raw.note1, ""),
+        note2: pick(raw.note2, ""),
+      };
+    }
+
     // === BULK SYNC from cPanel ===
     if (action === "sync_users" && Array.isArray(body.users)) {
       const results = { created: 0, updated: 0, errors: [] as string[] };
 
-      for (const u of body.users) {
+      for (const rawUser of body.users) {
         try {
-          const email = u.email?.trim();
+          const u = normalizeCpanelUser(rawUser);
+          const email = u.email;
+
           if (!email) {
-            results.errors.push(`Skipped: no email for cpanel id=${u.id}`);
+            results.errors.push(`Skipped: no email for cpanel id=${u.id ?? "unknown"}`);
             continue;
           }
 
@@ -96,7 +127,7 @@ serve(async (req) => {
           // Upsert cpanel_user_data with ALL fields
           await supabase.from("cpanel_user_data").upsert({
             user_id: userId,
-            cpanel_id: parseInt(u.id) || null,
+            cpanel_id: toInt(u.id, 0) || null,
             pc_id: u.pcId || "",
             sub_start: u.subStart || null,
             sub_end: u.subEnd || null,
@@ -104,10 +135,10 @@ serve(async (req) => {
             studio_name: u.studioName || "",
             city: u.city || "",
             address: u.address || "",
-            activation: parseInt(u.activation) || 0,
-            block_user: parseInt(u.block_user) || 0,
-            running_version: u.running_version || "",
-            system_info: u.system_info || "",
+            activation: u.activation,
+            block_user: u.blockUser,
+            running_version: u.runningVersion || "",
+            system_info: u.systemInfo || "",
             cpanel_created: u.created || "",
             note1: u.note1 || "",
             note2: u.note2 || "",
@@ -138,13 +169,14 @@ serve(async (req) => {
                   plan_name: planName,
                   starts_at: subStart.toISOString(),
                   expires_at: subEnd.toISOString(),
-                  is_active: parseInt(u.activation) === 1,
+                  is_active: u.activation === 1,
                 });
               }
             }
           }
         } catch (err: any) {
-          results.errors.push(`Error processing ${u.email}: ${err.message}`);
+          const rawEmail = rawUser?.email || rawUser?.mail || "unknown";
+          results.errors.push(`Error processing ${rawEmail}: ${err.message}`);
         }
       }
 
@@ -158,8 +190,8 @@ serve(async (req) => {
 
     // === SINGLE USER SYNC ===
     if (action === "sync_single" && body.user) {
-      const u = body.user;
-      const email = u.email?.trim();
+      const u = normalizeCpanelUser(body.user);
+      const email = u.email;
       if (!email) {
         return new Response(
           JSON.stringify({ success: false, error: "Email is required" }),
@@ -200,7 +232,7 @@ serve(async (req) => {
 
       await supabase.from("cpanel_user_data").upsert({
         user_id: userId,
-        cpanel_id: parseInt(u.id) || null,
+        cpanel_id: toInt(u.id, 0) || null,
         pc_id: u.pcId || "",
         sub_start: u.subStart || null,
         sub_end: u.subEnd || null,
@@ -208,10 +240,10 @@ serve(async (req) => {
         studio_name: u.studioName || "",
         city: u.city || "",
         address: u.address || "",
-        activation: parseInt(u.activation) || 0,
-        block_user: parseInt(u.block_user) || 0,
-        running_version: u.running_version || "",
-        system_info: u.system_info || "",
+        activation: u.activation,
+        block_user: u.blockUser,
+        running_version: u.runningVersion || "",
+        system_info: u.systemInfo || "",
         cpanel_created: u.created || "",
         note1: u.note1 || "",
         note2: u.note2 || "",

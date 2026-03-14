@@ -56,45 +56,116 @@ serve(async (req) => {
     const { action } = body;
 
     // Helper: reverse sync status changes to cPanel MySQL
+    function withLegacyCpanelAliases(updates: Record<string, any>) {
+      const mapped: Record<string, any> = { ...updates };
+
+      if (updates.sub_start !== undefined) mapped.subStart = updates.sub_start;
+      if (updates.sub_end !== undefined) mapped.subEnd = updates.sub_end;
+      if (updates.activation !== undefined) mapped.activated = updates.activation;
+      if (updates.block_user !== undefined) mapped.blockedUser = updates.block_user;
+      if (updates.full_name !== undefined) mapped.userName = updates.full_name;
+      if (updates.studio_name !== undefined) mapped.studioName = updates.studio_name;
+      if (updates.pc_id !== undefined) mapped.pcId = updates.pc_id;
+      if (updates.running_version !== undefined) mapped.runningVersion = updates.running_version;
+      if (updates.system_info !== undefined) mapped.systemInfo = updates.system_info;
+
+      return mapped;
+    }
+
     async function syncToCpanel(userId: string, updates: Record<string, any>) {
       const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
       if (!cpanelSyncUrl) {
         console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
-        return null;
+        return false;
       }
+
       try {
         const { data: cpanelRow } = await supabaseAdmin
           .from("cpanel_user_data")
           .select("cpanel_id, pc_id")
           .eq("user_id", userId)
           .maybeSingle();
+
         const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
-        if (!cpanelRow?.cpanel_id && !authUser?.email) return null;
+        if (!cpanelRow?.cpanel_id && !authUser?.email) return false;
+
         const syncPayload = {
           action: "update_subscription",
           cpanel_id: cpanelRow?.cpanel_id || null,
+          id: cpanelRow?.cpanel_id || null,
           email: authUser?.email || "",
           pc_id: cpanelRow?.pc_id || "",
+          pcId: cpanelRow?.pc_id || "",
           sync_secret: Deno.env.get("SYNC_API_SECRET") || "",
-          ...updates,
+          ...withLegacyCpanelAliases(updates),
         };
+
         console.log("Reverse sync to cPanel:", JSON.stringify({ cpanel_id: syncPayload.cpanel_id, updates }));
+
         const resp = await fetch(cpanelSyncUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(syncPayload),
         });
+
         const result = await resp.text();
-        console.log("cPanel sync response:", result);
-        return result;
+        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result);
+
+        if (!resp.ok || isLoginPage) {
+          console.error("cPanel reverse sync failed", {
+            status: resp.status,
+            isLoginPage,
+            bodyPreview: result.slice(0, 180),
+          });
+          return false;
+        }
+
+        console.log("cPanel sync response:", result.slice(0, 180));
+        return true;
       } catch (err: any) {
         console.error("cPanel reverse sync error:", err.message);
-        return `Error: ${err.message}`;
+        return false;
       }
     }
 
-    // === LIST USERS with all cPanel data ===
+    // Helper: trigger inbound sync from cPanel (best effort)
+    async function triggerInboundSyncFromCpanel() {
+      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      if (!cpanelSyncUrl) return false;
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+
+        const resp = await fetch(cpanelSyncUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json,text/plain,*/*" },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+        const result = await resp.text();
+        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result);
+
+        if (!resp.ok || isLoginPage) {
+          console.warn("Inbound cPanel sync trigger skipped", {
+            status: resp.status,
+            isLoginPage,
+          });
+          return false;
+        }
+
+        console.log("Inbound cPanel sync trigger success");
+        return true;
+      } catch (err: any) {
+        console.warn("Inbound cPanel sync trigger failed:", err.message);
+        return false;
+      }
+    }
+
     if (action === "list_users") {
+      const pullTriggered = body.include_cpanel_pull ? await triggerInboundSyncFromCpanel() : false;
+
       const { data: authUsers, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,
       });
@@ -231,7 +302,12 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify({ success: true, users: userMap, pc_activation_stats: pcCountMap }), {
+      return new Response(JSON.stringify({
+        success: true,
+        users: userMap,
+        pc_activation_stats: pcCountMap,
+        cpanel_pull_triggered: pullTriggered,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

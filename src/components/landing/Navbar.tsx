@@ -9,6 +9,7 @@ const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
   { label: "PSD Store", href: "/store" },
+  { label: "Downloads", href: "/downloads" },
   { label: "Support", href: "/#support" },
 ];
 

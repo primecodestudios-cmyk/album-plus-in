@@ -220,6 +220,14 @@ export function AdminPricing() {
           </Button>
           <Button
             size="sm"
+            variant="outline"
+            onClick={() => { setShowBulk(true); setBulkValue(0); }}
+            className="gap-2"
+          >
+            <Percent size={14} /> Bulk Update
+          </Button>
+          <Button
+            size="sm"
             onClick={() => setShowAdd(true)}
             className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl"
           >

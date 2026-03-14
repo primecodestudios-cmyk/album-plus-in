@@ -151,7 +151,7 @@ export function AdminEnquiries() {
         </div>
       )}
 
-      {enquiries.map((enquiry, i) => (
+      {filtered.map((enquiry, i) => (
         <motion.div
           key={enquiry.id}
           initial={{ opacity: 0, y: 12 }}

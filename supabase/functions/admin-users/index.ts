@@ -74,9 +74,10 @@ serve(async (req) => {
 
     async function syncToCpanel(userId: string, updates: Record<string, any>) {
       const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      const syncSecret = Deno.env.get("SYNC_API_SECRET") || "";
       if (!cpanelSyncUrl) {
         console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
-        return false;
+        return { success: false, reason: "no_url" };
       }
 
       try {
@@ -87,7 +88,7 @@ serve(async (req) => {
           .maybeSingle();
 
         const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
-        if (!cpanelRow?.cpanel_id && !authUser?.email) return false;
+        if (!cpanelRow?.cpanel_id && !authUser?.email) return { success: false, reason: "no_identifier" };
 
         const syncPayload = {
           action: "update_subscription",
@@ -96,35 +97,44 @@ serve(async (req) => {
           email: authUser?.email || "",
           pc_id: cpanelRow?.pc_id || "",
           pcId: cpanelRow?.pc_id || "",
-          sync_secret: Deno.env.get("SYNC_API_SECRET") || "",
+          sync_secret: syncSecret,
           ...withLegacyCpanelAliases(updates),
         };
 
-        console.log("Reverse sync to cPanel:", JSON.stringify({ cpanel_id: syncPayload.cpanel_id, updates }));
+        console.log("Reverse sync to cPanel:", JSON.stringify({ url: cpanelSyncUrl, cpanel_id: syncPayload.cpanel_id, email: syncPayload.email, updates }));
 
         const resp = await fetch(cpanelSyncUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-sync-secret": syncSecret,
+            "User-Agent": "AlbumPlus-Admin/1.0",
+          },
           body: JSON.stringify(syncPayload),
         });
 
         const result = await resp.text();
-        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result);
+        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result) || /cpsrvd/i.test(result);
 
-        if (!resp.ok || isLoginPage) {
-          console.error("cPanel reverse sync failed", {
-            status: resp.status,
-            isLoginPage,
-            bodyPreview: result.slice(0, 180),
-          });
-          return false;
+        if (isLoginPage) {
+          console.error("cPanel reverse sync BLOCKED by login gate. Fix: Disable Directory Privacy for apiV1 folder in cPanel → Directory Privacy. Current URL:", cpanelSyncUrl);
+          return { success: false, reason: "login_redirect", message: "cPanel Directory Privacy is blocking access. Disable it for the apiV1 folder." };
         }
 
-        console.log("cPanel sync response:", result.slice(0, 180));
-        return true;
+        if (!resp.ok) {
+          console.error("cPanel reverse sync HTTP error", { status: resp.status, bodyPreview: result.slice(0, 300) });
+          return { success: false, reason: "http_error", status: resp.status };
+        }
+
+        // Try to parse response as JSON
+        let parsed: any = null;
+        try { parsed = JSON.parse(result); } catch {}
+
+        console.log("cPanel sync SUCCESS:", result.slice(0, 300));
+        return { success: true, response: parsed || result.slice(0, 200) };
       } catch (err: any) {
-        console.error("cPanel reverse sync error:", err.message);
-        return false;
+        console.error("cPanel reverse sync network error:", err.message);
+        return { success: false, reason: "network_error", message: err.message };
       }
     }
 

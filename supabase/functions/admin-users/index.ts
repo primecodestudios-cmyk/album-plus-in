@@ -368,12 +368,13 @@ serve(async (req) => {
     // === UPDATE SUBSCRIPTION ===
     if (action === "update_subscription" && body.user_id) {
       const { sub_start, sub_end, plan_name, is_enabled } = body;
+      const activationVal = body.activation !== undefined ? body.activation : (is_enabled !== undefined ? (is_enabled ? 1 : 0) : undefined);
 
       // Update cpanel_user_data subscription dates
       const cpanelUpdate: any = {};
       if (sub_start !== undefined) cpanelUpdate.sub_start = sub_start;
       if (sub_end !== undefined) cpanelUpdate.sub_end = sub_end;
-      if (is_enabled !== undefined) cpanelUpdate.activation = is_enabled ? 1 : 0;
+      if (activationVal !== undefined) cpanelUpdate.activation = activationVal;
 
       if (Object.keys(cpanelUpdate).length > 0) {
         await supabaseAdmin
@@ -383,12 +384,13 @@ serve(async (req) => {
       }
 
       // Update active license if exists
+      const isActive = activationVal !== undefined ? activationVal === 1 : undefined;
       if (body.license_id) {
         const licUpdate: any = {};
         if (sub_start !== undefined) licUpdate.starts_at = sub_start;
         if (sub_end !== undefined) licUpdate.expires_at = sub_end;
         if (plan_name !== undefined) licUpdate.plan_name = plan_name;
-        if (is_enabled !== undefined) licUpdate.is_active = is_enabled;
+        if (isActive !== undefined) licUpdate.is_active = isActive;
 
         if (Object.keys(licUpdate).length > 0) {
           await supabaseAdmin
@@ -397,12 +399,12 @@ serve(async (req) => {
             .eq("id", body.license_id);
         }
       } else {
-        // Update all active licenses for this user
+        // Update all licenses for this user
         const licUpdate: any = {};
         if (sub_start !== undefined) licUpdate.starts_at = sub_start;
         if (sub_end !== undefined) licUpdate.expires_at = sub_end;
         if (plan_name !== undefined) licUpdate.plan_name = plan_name;
-        if (is_enabled !== undefined) licUpdate.is_active = is_enabled;
+        if (isActive !== undefined) licUpdate.is_active = isActive;
 
         if (Object.keys(licUpdate).length > 0) {
           await supabaseAdmin
@@ -416,7 +418,7 @@ serve(async (req) => {
       const syncUpdates: Record<string, any> = {};
       if (sub_start) syncUpdates.sub_start = sub_start;
       if (sub_end) syncUpdates.sub_end = sub_end;
-      if (is_enabled !== undefined) syncUpdates.activation = is_enabled ? 1 : 0;
+      if (activationVal !== undefined) syncUpdates.activation = activationVal;
       const cpSync = await syncToCpanel(body.user_id, syncUpdates);
 
       return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {

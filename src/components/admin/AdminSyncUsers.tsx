@@ -63,27 +63,40 @@ export function AdminSyncUsers() {
     setSyncResult(null);
 
     try {
-      const response = await fetch(syncUrl.trim(), {
-        method: "GET",
-        mode: "no-cors",
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "trigger_inbound_sync",
+          sync_pull_url: syncUrl.trim(),
+        },
       });
+      if (error) throw error;
 
-      // With no-cors we can't read the response, but the request was sent
+      if (!data?.success) {
+        setSyncStatus("error");
+        setSyncResult(data?.cpanel_pull || null);
+        toast({
+          title: "Sync trigger failed",
+          description: data?.cpanel_pull?.message || data?.cpanel_pull?.reason || "Could not trigger inbound sync.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSyncStatus("success");
+      setSyncResult(data?.cpanel_pull || null);
       toast({
         title: "Sync triggered!",
-        description: "The PHP script has been called. It may take 1-2 minutes for all users to sync. Refresh stats to check progress.",
+        description: "Inbound sync request sent successfully. Refresh Users tab in 10-30 seconds.",
       });
-      setSyncStatus("success");
 
-      // Refresh stats after a delay
       setTimeout(() => fetchStats(), 5000);
       setTimeout(() => fetchStats(), 15000);
       setTimeout(() => fetchStats(), 30000);
     } catch (err: any) {
       setSyncStatus("error");
       toast({
-        title: "Could not reach sync URL",
-        description: "Make sure the URL is correct and your cPanel server is accessible. Error: " + err.message,
+        title: "Could not reach sync endpoint",
+        description: err.message,
         variant: "destructive",
       });
     } finally {

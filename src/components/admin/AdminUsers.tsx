@@ -633,11 +633,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
                       </TableCell>
                       <TableCell className="text-sm">{user.active_license?.plan_name || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {user.sub_end
-                          ? new Date(user.sub_end).toLocaleDateString("en-IN")
-                          : user.active_license?.expires_at
-                          ? new Date(user.active_license.expires_at).toLocaleDateString("en-IN")
-                          : "—"}
+                        {formatDateTime(user.sub_end || user.active_license?.expires_at)}
                       </TableCell>
                       <TableCell>
                         {user.days_left !== null ? (

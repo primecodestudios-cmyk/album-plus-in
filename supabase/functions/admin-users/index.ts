@@ -126,6 +126,7 @@ serve(async (req) => {
         console.error("cPanel reverse sync error:", err.message);
         return false;
       }
+    }
 
     // Helper: trigger inbound sync from cPanel (best effort)
     async function triggerInboundSyncFromCpanel() {

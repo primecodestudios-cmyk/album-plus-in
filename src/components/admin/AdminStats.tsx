@@ -81,6 +81,7 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   const [showNewUsers, setShowNewUsers] = useState(false);
   const [subForm, setSubForm] = useState<{ userId: string; userName: string; startDate: string; endDate: string } | null>(null);
   const [newUserSearch, setNewUserSearch] = useState("");
+  const [pcUserSearch, setPcUserSearch] = useState("");
 
   const fetchAll = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);

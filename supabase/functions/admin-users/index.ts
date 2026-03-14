@@ -1014,6 +1014,15 @@ serve(async (req) => {
       });
     }
 
+    if (action === "trigger_inbound_sync") {
+      const pullResult = await triggerInboundSyncFromCpanel(body.sync_pull_url);
+      const status = pullResult?.success ? 200 : 502;
+      return new Response(
+        JSON.stringify({ success: !!pullResult?.success, cpanel_pull: pullResult }),
+        { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

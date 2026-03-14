@@ -98,7 +98,7 @@ export function HeroSlider() {
   };
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 touch-pan-y">
       {/* Background image with overlay */}
       <AnimatePresence mode="popLayout" custom={direction}>
         <motion.div

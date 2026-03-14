@@ -70,6 +70,7 @@ const AdminPanel = () => {
 
   const tabs: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "stats", label: "Dashboard", icon: Settings },
+    { id: "device_requests", label: "Device Requests", icon: Monitor },
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },

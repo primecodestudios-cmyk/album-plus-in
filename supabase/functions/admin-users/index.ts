@@ -55,6 +55,44 @@ serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    // Helper: reverse sync status changes to cPanel MySQL
+    async function syncToCpanel(userId: string, updates: Record<string, any>) {
+      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      if (!cpanelSyncUrl) {
+        console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
+        return null;
+      }
+      try {
+        const { data: cpanelRow } = await supabaseAdmin
+          .from("cpanel_user_data")
+          .select("cpanel_id, pc_id")
+          .eq("user_id", userId)
+          .maybeSingle();
+        const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (!cpanelRow?.cpanel_id && !authUser?.email) return null;
+        const syncPayload = {
+          action: "update_subscription",
+          cpanel_id: cpanelRow?.cpanel_id || null,
+          email: authUser?.email || "",
+          pc_id: cpanelRow?.pc_id || "",
+          sync_secret: Deno.env.get("SYNC_API_SECRET") || "",
+          ...updates,
+        };
+        console.log("Reverse sync to cPanel:", JSON.stringify({ cpanel_id: syncPayload.cpanel_id, updates }));
+        const resp = await fetch(cpanelSyncUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(syncPayload),
+        });
+        const result = await resp.text();
+        console.log("cPanel sync response:", result);
+        return result;
+      } catch (err: any) {
+        console.error("cPanel reverse sync error:", err.message);
+        return `Error: ${err.message}`;
+      }
+    }
+
     // === LIST USERS with all cPanel data ===
     if (action === "list_users") {
       const { data: authUsers, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
@@ -184,12 +222,12 @@ serve(async (req) => {
         .from("cpanel_user_data")
         .update({ activation: 1 })
         .eq("user_id", body.user_id);
-      // Also activate any licenses
       await supabaseAdmin
         .from("user_licenses")
         .update({ is_active: true })
         .eq("user_id", body.user_id);
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 1 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -205,7 +243,8 @@ serve(async (req) => {
         .update({ is_active: false })
         .eq("user_id", body.user_id)
         .eq("is_active", true);
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 0 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -223,7 +262,8 @@ serve(async (req) => {
       await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
         ban_duration: "876000h",
       });
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { activation: 0, block_user: 1 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -237,7 +277,8 @@ serve(async (req) => {
       await supabaseAdmin.auth.admin.updateUserById(body.user_id, {
         ban_duration: "none",
       });
-      return new Response(JSON.stringify({ success: true }), {
+      const cpSync = await syncToCpanel(body.user_id, { block_user: 0 });
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -326,52 +367,14 @@ serve(async (req) => {
         }
       }
 
-      // === REVERSE SYNC: Push changes back to cPanel MySQL ===
-      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
-      let cpanelSyncResult = null;
-      if (cpanelSyncUrl) {
-        try {
-          // Get user's cpanel_id and email for MySQL lookup
-          const { data: cpanelRow } = await supabaseAdmin
-            .from("cpanel_user_data")
-            .select("cpanel_id, pc_id")
-            .eq("user_id", body.user_id)
-            .maybeSingle();
+      // Reverse sync to cPanel MySQL
+      const syncUpdates: Record<string, any> = {};
+      if (sub_start) syncUpdates.sub_start = sub_start;
+      if (sub_end) syncUpdates.sub_end = sub_end;
+      if (is_enabled !== undefined) syncUpdates.activation = is_enabled ? 1 : 0;
+      const cpSync = await syncToCpanel(body.user_id, syncUpdates);
 
-          const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(body.user_id);
-
-          if (cpanelRow?.cpanel_id || authUser?.email) {
-            const syncPayload = {
-              action: "update_subscription",
-              cpanel_id: cpanelRow?.cpanel_id || null,
-              email: authUser?.email || "",
-              pc_id: cpanelRow?.pc_id || "",
-              sub_start: sub_start || null,
-              sub_end: sub_end || null,
-              activation: is_enabled !== undefined ? (is_enabled ? 1 : 0) : undefined,
-              sync_secret: Deno.env.get("SYNC_API_SECRET") || "",
-            };
-
-            console.log("Reverse sync to cPanel:", JSON.stringify({ cpanel_id: syncPayload.cpanel_id, email: syncPayload.email }));
-
-            const syncResp = await fetch(cpanelSyncUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(syncPayload),
-            });
-
-            cpanelSyncResult = await syncResp.text();
-            console.log("cPanel sync response:", cpanelSyncResult);
-          }
-        } catch (syncErr: any) {
-          console.error("cPanel reverse sync error:", syncErr.message);
-          cpanelSyncResult = `Error: ${syncErr.message}`;
-        }
-      } else {
-        console.log("CPANEL_SYNC_URL not configured, skipping reverse sync");
-      }
-
-      return new Response(JSON.stringify({ success: true, cpanel_sync: cpanelSyncResult }), {
+      return new Response(JSON.stringify({ success: true, cpanel_sync: cpSync }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

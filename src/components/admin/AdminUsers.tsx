@@ -221,7 +221,8 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: label });
+        const syncInfo = data.cpanel_sync ? " (cPanel synced ✅)" : "";
+        toast({ title: label + syncInfo });
         fetchUsers();
       }
     } catch (err: any) {

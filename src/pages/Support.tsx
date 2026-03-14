@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/landing/Footer";
+import { ContactForm } from "@/components/support/ContactForm";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import { Navbar } from "@/components/landing/Navbar";
 

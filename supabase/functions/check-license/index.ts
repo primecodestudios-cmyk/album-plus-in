@@ -97,6 +97,18 @@ serve(async (req) => {
 
     const remainingDays = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
+    // Auto-register/update device in user_devices table
+    await supabase
+      .from("user_devices")
+      .upsert({
+        user_id: user.id,
+        device_id: device_id,
+        system_info: software_version || "",
+        is_active: license.is_active,
+        last_seen_at: new Date().toISOString(),
+        license_id: license.id,
+      }, { onConflict: "user_id,device_id" });
+
     return new Response(
       JSON.stringify({
         success: true,

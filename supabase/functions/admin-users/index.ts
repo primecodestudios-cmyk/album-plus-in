@@ -81,6 +81,7 @@ serve(async (req) => {
         const activeLicense = userLicenses.find(
           (l: any) => l.is_active && new Date(l.expires_at) > new Date()
         );
+        const isBanned = au.banned_until && new Date(au.banned_until) > new Date();
 
         return {
           id: au.id,
@@ -91,6 +92,7 @@ serve(async (req) => {
           has_active_license: !!activeLicense,
           active_license: activeLicense || null,
           licenses_count: userLicenses.length,
+          is_blocked: !!isBanned,
         };
       });
 

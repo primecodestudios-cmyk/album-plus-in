@@ -85,7 +85,7 @@ export function FeaturesSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"
         >
           {features.map((feature) => (
             <motion.div

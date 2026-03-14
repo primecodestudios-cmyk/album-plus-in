@@ -126,9 +126,42 @@ serve(async (req) => {
         console.error("cPanel reverse sync error:", err.message);
         return false;
       }
+
+    // Helper: trigger inbound sync from cPanel (best effort)
+    async function triggerInboundSyncFromCpanel() {
+      const cpanelSyncUrl = Deno.env.get("CPANEL_SYNC_URL");
+      if (!cpanelSyncUrl) return false;
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+
+        const resp = await fetch(cpanelSyncUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json,text/plain,*/*" },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+        const result = await resp.text();
+        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result);
+
+        if (!resp.ok || isLoginPage) {
+          console.warn("Inbound cPanel sync trigger skipped", {
+            status: resp.status,
+            isLoginPage,
+          });
+          return false;
+        }
+
+        console.log("Inbound cPanel sync trigger success");
+        return true;
+      } catch (err: any) {
+        console.warn("Inbound cPanel sync trigger failed:", err.message);
+        return false;
+      }
     }
 
-    // === LIST USERS with all cPanel data ===
     if (action === "list_users") {
       const { data: authUsers, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,

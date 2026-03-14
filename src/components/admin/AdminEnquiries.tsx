@@ -180,9 +180,20 @@ export function AdminEnquiries() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-        <h2 className="font-display text-lg font-bold text-foreground">
-          Contact Enquiries ({filtered.length})
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-bold text-foreground">
+            Contact Enquiries ({filtered.length})
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={exportCSV}
+            disabled={filtered.length === 0}
+          >
+            <Download size={14} /> Export CSV
+          </Button>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

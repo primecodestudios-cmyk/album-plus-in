@@ -142,7 +142,7 @@ export function HeroSlider() {
             </div>
 
             {/* Title */}
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4">
               {slide.title}
             </h1>
 

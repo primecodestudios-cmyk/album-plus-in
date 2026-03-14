@@ -1,46 +1,65 @@
 import { motion } from "framer-motion";
-import { Layers, Palette, Download, ShieldCheck, Zap, Monitor } from "lucide-react";
+import {
+  PenTool,
+  Wand2,
+  Paintbrush,
+  SunMedium,
+  Camera,
+  LayoutGrid,
+  FileStack,
+  Scissors,
+} from "lucide-react";
 
 const features = [
   {
-    icon: Layers,
-    title: "Drag & Drop Designer",
-    description: "Intuitive album layout editor with smart alignment, grids, and auto-arrange tools.",
+    icon: PenTool,
+    title: "Manual Album Designing",
+    description: "Create albums manually with full creative control.",
   },
   {
-    icon: Palette,
-    title: "500+ PSD Templates",
-    description: "Premium, fully customizable PSD templates for weddings, portraits, and events.",
+    icon: Wand2,
+    title: "Semi Auto Designing",
+    description: "Automatically generate layouts quickly.",
   },
   {
-    icon: Zap,
-    title: "Batch Processing",
-    description: "Apply layouts to hundreds of photos at once. Save hours on every project.",
+    icon: Paintbrush,
+    title: "Oil Painting Effect",
+    description: "Convert photos to oil painting style instantly.",
   },
   {
-    icon: Download,
-    title: "Export Anywhere",
-    description: "Export as high-res PDF, JPEG, or PSD — ready for print labs or digital delivery.",
+    icon: SunMedium,
+    title: "Auto Color Correction",
+    description: "Fix lighting and skin tones automatically.",
   },
   {
-    icon: Monitor,
-    title: "Live Preview",
-    description: "See real-time album previews with spread view, 3D flip, and client sharing.",
+    icon: Camera,
+    title: "Multi Camera Editing",
+    description: "Edit photos captured from multiple cameras.",
   },
   {
-    icon: ShieldCheck,
-    title: "License Management",
-    description: "Activate on multiple devices, manage team seats, and track usage effortlessly.",
+    icon: LayoutGrid,
+    title: "Multi Window Editing",
+    description: "Work with multiple images simultaneously.",
+  },
+  {
+    icon: FileStack,
+    title: "PSD Automation",
+    description: "Convert PSD templates into auto layouts.",
+  },
+  {
+    icon: Scissors,
+    title: "Background Removal",
+    description: "AI powered photo cutting.",
   },
 ];
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.08 } },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 28 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
@@ -50,12 +69,14 @@ export function FeaturesSection() {
       <div className="absolute inset-0 bg-hero" />
       <div className="container mx-auto px-4 relative">
         <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/30 bg-accent/5 text-accent text-xs font-semibold mb-4">
+            ⭐ Powerful Features
+          </div>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Everything You Need to <span className="text-gradient-gold">Create</span>
+            Everything You Need to <span className="text-gradient-gold">Design</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Professional-grade tools designed for photographers who demand speed,
-            quality, and creative freedom.
+            Professional-grade tools built for speed, precision, and creativity.
           </p>
         </div>
 
@@ -63,22 +84,25 @@ export function FeaturesSection() {
           variants={container}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          viewport={{ once: true, margin: "-60px" }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5"
         >
           {features.map((feature) => (
             <motion.div
               key={feature.title}
               variants={item}
-              className="group relative bg-card rounded-2xl p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300"
+              className="group relative bg-card rounded-2xl p-5 md:p-6 border border-border hover:border-accent/30 shadow-card hover:shadow-gold transition-all duration-300 text-center"
             >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-gradient-gold transition-all duration-300">
-                <feature.icon size={24} className="text-accent group-hover:text-accent-foreground transition-colors" />
+              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-gold group-hover:scale-110 transition-all duration-300">
+                <feature.icon
+                  size={26}
+                  className="text-accent group-hover:text-accent-foreground transition-colors"
+                />
               </div>
-              <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+              <h3 className="font-display text-sm md:text-base font-semibold text-foreground mb-1.5">
                 {feature.title}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>

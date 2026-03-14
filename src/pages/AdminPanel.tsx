@@ -88,6 +88,7 @@ const AdminPanel = () => {
     { id: "stats", label: "Dashboard", icon: Settings },
     { id: "users", label: "Users", icon: UserCog },
     { id: "device_requests", label: "Device Requests", icon: Monitor },
+    { id: "pc_management", label: "PC Management", icon: Laptop },
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },

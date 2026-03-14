@@ -205,7 +205,7 @@ export function HeroSlider() {
                   key={btn.label}
                   size="lg"
                   variant={btn.variant === "gold" ? "default" : "outline"}
-                  className={`gap-2 text-base h-14 rounded-xl font-semibold ${
+                  className={`gap-2 text-sm md:text-base h-12 md:h-14 rounded-xl font-semibold ${
                     btn.variant === "gold"
                       ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
                       : "border-border hover:border-accent/40 hover:text-accent"

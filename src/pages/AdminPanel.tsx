@@ -14,15 +14,17 @@ import {
   FileStack,
   CreditCard,
   Key,
+  MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminLicenses } from "@/components/admin/AdminLicenses";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
+import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "licenses" | "pricing" | "templates";
+type Tab = "stats" | "licenses" | "pricing" | "templates" | "enquiries";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -69,6 +71,7 @@ const AdminPanel = () => {
     { id: "licenses", label: "Licenses", icon: Key },
     { id: "pricing", label: "Pricing", icon: CreditCard },
     { id: "templates", label: "PSD Templates", icon: FileStack },
+    { id: "enquiries", label: "Enquiries", icon: MessageSquare },
   ];
 
   return (
@@ -119,6 +122,7 @@ const AdminPanel = () => {
           {activeTab === "licenses" && <AdminLicenses />}
           {activeTab === "pricing" && <AdminPricing />}
           {activeTab === "templates" && <AdminPsdTemplates />}
+          {activeTab === "enquiries" && <AdminEnquiries />}
         </motion.div>
       </div>
     </div>

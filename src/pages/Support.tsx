@@ -73,7 +73,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 const Support = () => {
-  const whatsappNumber = "91994342555";
+  const whatsappNumber = "918883081855";
+  const salesNumber = "+91 88709 97799";
+  const supportNumber = "+91 88830 81855";
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,7 +150,7 @@ const Support = () => {
                   </Button>
                 </a>
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  +91 99434 2555 • Mon–Sat, 9 AM – 9 PM
+                  {supportNumber} • Mon–Sat, 10 AM – 6 PM
                 </p>
               </motion.div>
 
@@ -183,11 +185,25 @@ const Support = () => {
                 </div>
                 <h3 className="font-display font-bold text-foreground mb-1">Call Us</h3>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Speak directly with our support team.
+                  Sales & general enquiries, or speak with support directly.
                 </p>
-                <a href="tel:+91994342555" className="text-sm text-accent font-medium hover:underline">
-                  +91 99434 2555
-                </a>
+                <div className="space-y-1.5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Sales</span>
+                    <a href="tel:+918870997799" className="block text-sm text-accent font-medium hover:underline">
+                      {salesNumber}
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Support</span>
+                    <a href="tel:+918883081855" className="block text-sm text-accent font-medium hover:underline">
+                      {supportNumber}
+                    </a>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-3">
+                  Mon–Sat: 10 AM – 6 PM • Sunday: Closed
+                </p>
               </motion.div>
 
               {/* Quick Links */}

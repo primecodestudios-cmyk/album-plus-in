@@ -44,6 +44,72 @@ export type Database = {
         }
         Relationships: []
       }
+      cpanel_user_data: {
+        Row: {
+          activation: number | null
+          address: string | null
+          block_user: number | null
+          city: string | null
+          cpanel_created: string | null
+          cpanel_id: number | null
+          created_at: string | null
+          id: string
+          note1: string | null
+          note2: string | null
+          pc_id: string | null
+          running_version: string | null
+          short_name: string | null
+          studio_name: string | null
+          sub_end: string | null
+          sub_start: string | null
+          system_info: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activation?: number | null
+          address?: string | null
+          block_user?: number | null
+          city?: string | null
+          cpanel_created?: string | null
+          cpanel_id?: number | null
+          created_at?: string | null
+          id?: string
+          note1?: string | null
+          note2?: string | null
+          pc_id?: string | null
+          running_version?: string | null
+          short_name?: string | null
+          studio_name?: string | null
+          sub_end?: string | null
+          sub_start?: string | null
+          system_info?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activation?: number | null
+          address?: string | null
+          block_user?: number | null
+          city?: string | null
+          cpanel_created?: string | null
+          cpanel_id?: number | null
+          created_at?: string | null
+          id?: string
+          note1?: string | null
+          note2?: string | null
+          pc_id?: string | null
+          running_version?: string | null
+          short_name?: string | null
+          studio_name?: string | null
+          sub_end?: string | null
+          sub_start?: string | null
+          system_info?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       device_requests: {
         Row: {
           admin_notes: string | null

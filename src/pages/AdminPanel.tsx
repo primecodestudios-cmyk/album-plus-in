@@ -14,6 +14,7 @@ import {
   FileStack,
   CreditCard,
   Key,
+  MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";

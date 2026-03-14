@@ -130,14 +130,44 @@ export function AdminEnquiries() {
               </p>
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDelete(enquiry.id)}
-              className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 size={16} />
-            </Button>
+            <div className="flex flex-col gap-1.5 shrink-0">
+              {enquiry.phone && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  className="text-muted-foreground hover:text-green-500 hover:bg-green-500/10"
+                >
+                  <a
+                    href={`https://wa.me/${enquiry.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle size={16} />
+                  </a>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="text-muted-foreground hover:text-accent hover:bg-accent/10"
+              >
+                <a
+                  href={`mailto:${enquiry.email}?subject=Re: ${encodeURIComponent(enquiry.subject)}&body=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                >
+                  <Mail size={16} />
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDelete(enquiry.id)}
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
           </div>
         </motion.div>
       ))}

@@ -77,6 +77,10 @@ export function AdminStats({ onNavigateToUsers }: AdminStatsProps) {
   // PC activation dialog
   const [selectedPcCount, setSelectedPcCount] = useState<number | null>(null);
 
+  // New users dialog
+  const [showNewUsers, setShowNewUsers] = useState(false);
+  const [subForm, setSubForm] = useState<{ userId: string; userName: string; startDate: string; endDate: string } | null>(null);
+
   const fetchAll = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setRefreshing(true);

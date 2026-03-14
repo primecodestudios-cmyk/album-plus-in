@@ -31,6 +31,13 @@ export function AdminPricing() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
 
+  // Bulk update state
+  const [showBulk, setShowBulk] = useState(false);
+  const [bulkMode, setBulkMode] = useState<"fixed" | "percent">("percent");
+  const [bulkValue, setBulkValue] = useState(0);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkPreviews, setBulkPreviews] = useState<Record<string, number>>({});
+
   // Add new plan dialog
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState("");

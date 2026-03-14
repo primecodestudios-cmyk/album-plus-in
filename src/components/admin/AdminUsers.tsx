@@ -332,6 +332,19 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
     return `${year}-${month}-${day}`;
   };
 
+  // Helper: format date+time as YYYY-MM-DD HH:mm (matches cPanel phpMyAdmin format)
+  const formatDateTime = (dateStr: string | null | undefined): string => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const mins = String(d.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${mins}`;
+  };
+
   // Helper: parse YYYY-MM-DD to local date ISO string (avoid UTC shift)
   const parseLocalDateToISO = (dateStr: string): string => {
     if (!dateStr) return "";

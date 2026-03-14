@@ -166,7 +166,49 @@ export function AdminPricing() {
     return `${plan.duration_days} Days`;
   };
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Loading...</div>;
+  // Bulk price update
+  const computeBulkPreviews = () => {
+    const previews: Record<string, number> = {};
+    plans.forEach((p) => {
+      if (bulkMode === "percent") {
+        previews[p.id] = Math.round(p.price * (1 + bulkValue / 100));
+      } else {
+        previews[p.id] = p.price + bulkValue;
+      }
+      if (previews[p.id] < 0) previews[p.id] = 0;
+    });
+    setBulkPreviews(previews);
+  };
+
+  useEffect(() => {
+    if (showBulk) computeBulkPreviews();
+  }, [bulkValue, bulkMode, showBulk, plans]);
+
+  const handleBulkUpdate = async () => {
+    setBulkSaving(true);
+    let hasError = false;
+    for (const plan of plans) {
+      const newPrice = bulkPreviews[plan.id];
+      if (newPrice !== undefined && newPrice !== plan.price) {
+        const { error } = await supabase
+          .from("pricing_plans")
+          .update({ price: newPrice } as any)
+          .eq("id", plan.id);
+        if (error) hasError = true;
+      }
+    }
+    if (hasError) {
+      toast({ title: "Some plans failed to update", variant: "destructive" });
+    } else {
+      toast({ title: "All plan prices updated!" });
+    }
+    setShowBulk(false);
+    setBulkValue(0);
+    fetchPlans();
+    setBulkSaving(false);
+  };
+
+
 
   return (
     <div>

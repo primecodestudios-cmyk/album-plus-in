@@ -81,11 +81,13 @@ serve(async (req) => {
     if (action === "sync_users" && Array.isArray(body.users)) {
       const results = { created: 0, updated: 0, errors: [] as string[] };
 
-      for (const u of body.users) {
+      for (const rawUser of body.users) {
         try {
-          const email = u.email?.trim();
+          const u = normalizeCpanelUser(rawUser);
+          const email = u.email;
+
           if (!email) {
-            results.errors.push(`Skipped: no email for cpanel id=${u.id}`);
+            results.errors.push(`Skipped: no email for cpanel id=${u.id ?? "unknown"}`);
             continue;
           }
 
@@ -125,7 +127,7 @@ serve(async (req) => {
           // Upsert cpanel_user_data with ALL fields
           await supabase.from("cpanel_user_data").upsert({
             user_id: userId,
-            cpanel_id: parseInt(u.id) || null,
+            cpanel_id: toInt(u.id, 0) || null,
             pc_id: u.pcId || "",
             sub_start: u.subStart || null,
             sub_end: u.subEnd || null,
@@ -133,10 +135,10 @@ serve(async (req) => {
             studio_name: u.studioName || "",
             city: u.city || "",
             address: u.address || "",
-            activation: parseInt(u.activation) || 0,
-            block_user: parseInt(u.block_user) || 0,
-            running_version: u.running_version || "",
-            system_info: u.system_info || "",
+            activation: u.activation,
+            block_user: u.blockUser,
+            running_version: u.runningVersion || "",
+            system_info: u.systemInfo || "",
             cpanel_created: u.created || "",
             note1: u.note1 || "",
             note2: u.note2 || "",
@@ -167,13 +169,14 @@ serve(async (req) => {
                   plan_name: planName,
                   starts_at: subStart.toISOString(),
                   expires_at: subEnd.toISOString(),
-                  is_active: parseInt(u.activation) === 1,
+                  is_active: u.activation === 1,
                 });
               }
             }
           }
         } catch (err: any) {
-          results.errors.push(`Error processing ${u.email}: ${err.message}`);
+          const rawEmail = rawUser?.email || rawUser?.mail || "unknown";
+          results.errors.push(`Error processing ${rawEmail}: ${err.message}`);
         }
       }
 

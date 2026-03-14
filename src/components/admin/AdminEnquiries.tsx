@@ -19,6 +19,8 @@ interface Enquiry {
 export function AdminEnquiries() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const { toast } = useToast();
 
   const fetchEnquiries = async () => {

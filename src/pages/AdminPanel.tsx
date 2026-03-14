@@ -26,7 +26,7 @@ import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "licenses" | "pricing" | "templates" | "enquiries";
+type Tab = "stats" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();

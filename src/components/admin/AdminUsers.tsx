@@ -13,6 +13,9 @@ import {
   X,
   Check,
   ShieldCheck,
+  ShieldOff,
+  Ban,
+  Unlock,
   AlertTriangle,
   Download,
 } from "lucide-react";
@@ -51,6 +54,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface UserRow {
   id: string;
@@ -61,6 +71,7 @@ interface UserRow {
   has_active_license: boolean;
   active_license: any;
   licenses_count: number;
+  is_blocked: boolean;
 }
 
 interface PricingPlan {
@@ -76,7 +87,7 @@ export function AdminUsers() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "expired">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "expired" | "blocked" | "expiring">("all");
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
@@ -120,6 +131,13 @@ export function AdminUsers() {
     fetchPlans();
   }, []);
 
+  const getRemainingDays = (license: any) => {
+    if (!license) return null;
+    return Math.ceil(
+      (new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+  };
+
   const filteredUsers = useMemo(() => {
     let result = users;
     if (searchQuery.trim()) {
@@ -131,8 +149,15 @@ export function AdminUsers() {
           u.phone?.toLowerCase().includes(q)
       );
     }
-    if (filterStatus === "active") result = result.filter((u) => u.has_active_license);
-    if (filterStatus === "expired") result = result.filter((u) => !u.has_active_license);
+    if (filterStatus === "active") result = result.filter((u) => u.has_active_license && !u.is_blocked);
+    if (filterStatus === "expired") result = result.filter((u) => !u.has_active_license && !u.is_blocked);
+    if (filterStatus === "blocked") result = result.filter((u) => u.is_blocked);
+    if (filterStatus === "expiring") {
+      result = result.filter((u) => {
+        const days = getRemainingDays(u.active_license);
+        return days !== null && days > 0 && days <= 15;
+      });
+    }
     return result;
   }, [users, searchQuery, filterStatus]);
 
@@ -145,6 +170,51 @@ export function AdminUsers() {
       if (data?.success) {
         toast({ title: "User deleted" });
         setUsers((prev) => prev.filter((u) => u.id !== userId));
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleDeactivate = async (userId: string, userName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "deactivate_user", user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "License deactivated", description: userName });
+        fetchUsers();
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleBlock = async (userId: string, userName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "block_user", user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "User blocked", description: userName });
+        fetchUsers();
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleUnblock = async (userId: string, userName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "unblock_user", user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "User unblocked", description: userName });
+        fetchUsers();
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -217,14 +287,6 @@ export function AdminUsers() {
     }
   };
 
-  const getRemainingDays = (license: any) => {
-    if (!license) return null;
-    const days = Math.ceil(
-      (new Date(license.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-    return days;
-  };
-
   const exportCSV = () => {
     const headers = ["Name", "Email", "Phone", "Status", "Plan", "Expires", "Days Left"];
     const rows = filteredUsers.map((u) => {
@@ -233,7 +295,7 @@ export function AdminUsers() {
         u.full_name,
         u.email,
         u.phone,
-        u.has_active_license ? "Active" : "Expired",
+        u.is_blocked ? "Blocked" : u.has_active_license ? "Active" : "Expired",
         u.active_license?.plan_name || "—",
         u.active_license?.expires_at ? new Date(u.active_license.expires_at).toLocaleDateString() : "—",
         days !== null ? days : "—",
@@ -248,18 +310,60 @@ export function AdminUsers() {
     a.click();
   };
 
+  const getStatusBadge = (user: UserRow) => {
+    if (user.is_blocked) {
+      return <Badge variant="destructive" className="text-xs">🚫 Blocked</Badge>;
+    }
+    const days = getRemainingDays(user.active_license);
+    if (user.has_active_license && days !== null && days <= 15 && days > 0) {
+      return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">🔴 Expiring</Badge>;
+    }
+    if (user.has_active_license) {
+      return <Badge className="bg-green-600/20 text-green-400 border-green-600/30 text-xs">✅ Active</Badge>;
+    }
+    return <Badge variant="secondary" className="text-xs">Expired</Badge>;
+  };
+
   if (loading) {
     return <div className="text-muted-foreground py-8 text-center">Loading users...</div>;
   }
 
+  // Summary counts
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.has_active_license && !u.is_blocked).length;
+  const blockedUsers = users.filter((u) => u.is_blocked).length;
+  const expiringUsers = users.filter((u) => {
+    const d = getRemainingDays(u.active_license);
+    return d !== null && d > 0 && d <= 15;
+  }).length;
+
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <button onClick={() => setFilterStatus("all")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "all" ? "border-primary shadow-gold" : "border-border"}`}>
+          <div className="text-xs text-muted-foreground mb-1">Total Users</div>
+          <div className="font-display text-2xl font-bold text-foreground">{totalUsers}</div>
+        </button>
+        <button onClick={() => setFilterStatus("active")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "active" ? "border-green-500 shadow-gold" : "border-border"}`}>
+          <div className="text-xs text-muted-foreground mb-1">Active</div>
+          <div className="font-display text-2xl font-bold text-green-400">{activeUsers}</div>
+        </button>
+        <button onClick={() => setFilterStatus("expiring")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "expiring" ? "border-amber-500 shadow-gold" : "border-border"}`}>
+          <div className="text-xs text-muted-foreground mb-1">🔴 Expiring ≤15d</div>
+          <div className="font-display text-2xl font-bold text-amber-400">{expiringUsers}</div>
+        </button>
+        <button onClick={() => setFilterStatus("blocked")} className={`bg-card rounded-2xl border p-4 text-left transition-all ${filterStatus === "blocked" ? "border-destructive shadow-gold" : "border-border"}`}>
+          <div className="text-xs text-muted-foreground mb-1">Blocked</div>
+          <div className="font-display text-2xl font-bold text-destructive">{blockedUsers}</div>
+        </button>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-display text-xl font-bold text-foreground">
-            Users <span className="text-muted-foreground font-normal text-base">({users.length})</span>
+            Users <span className="text-muted-foreground font-normal text-base">({filteredUsers.length})</span>
           </h2>
-          <p className="text-sm text-muted-foreground">Manage all users, licenses, and profiles.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
@@ -271,27 +375,15 @@ export function AdminUsers() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, email, or phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select value={filterStatus} onValueChange={(v: any) => setFilterStatus(v)}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Users</SelectItem>
-            <SelectItem value="active">Active License</SelectItem>
-            <SelectItem value="expired">No License</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Search */}
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search by name, email, or phone..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {/* Users Table */}
@@ -300,12 +392,12 @@ export function AdminUsers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Plan</TableHead>
+                <TableHead>Expiry</TableHead>
                 <TableHead>Days Left</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -321,93 +413,70 @@ export function AdminUsers() {
                   const days = getRemainingDays(user.active_license);
                   const isExpiring = days !== null && days <= 15 && days > 0;
                   return (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{user.email}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{user.phone || "—"}</TableCell>
+                    <TableRow key={user.id} className={isExpiring ? "bg-amber-500/5" : user.is_blocked ? "bg-destructive/5" : ""}>
                       <TableCell>
-                        {user.has_active_license ? (
-                          <Badge variant="default" className="bg-green-600/20 text-green-400 border-green-600/30 text-xs">
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Expired
-                          </Badge>
-                        )}
+                        <div className="font-medium text-sm">{user.full_name || "—"}</div>
+                        <div className="text-xs text-muted-foreground">{user.phone || ""}</div>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {user.active_license?.plan_name || "—"}
+                      <TableCell className="text-muted-foreground text-xs">{user.email}</TableCell>
+                      <TableCell className="text-sm">{user.active_license?.plan_name || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {user.active_license?.expires_at
+                          ? new Date(user.active_license.expires_at).toLocaleDateString("en-IN")
+                          : "—"}
                       </TableCell>
                       <TableCell>
                         {days !== null ? (
-                          <span
-                            className={`text-sm font-semibold ${
-                              isExpiring
-                                ? "text-amber-400"
-                                : days <= 0
-                                ? "text-destructive"
-                                : "text-foreground"
-                            }`}
-                          >
+                          <span className={`text-sm font-semibold ${
+                            days <= 0 ? "text-destructive" : isExpiring ? "text-amber-400" : "text-foreground"
+                          }`}>
                             {days <= 0 ? "Expired" : `${days}d`}
-                            {isExpiring && (
-                              <AlertTriangle size={12} className="inline ml-1 text-amber-400" />
-                            )}
+                            {isExpiring && <AlertTriangle size={12} className="inline ml-1 text-amber-400" />}
                           </span>
-                        ) : (
-                          "—"
-                        )}
+                        ) : "—"}
                       </TableCell>
+                      <TableCell>{getStatusBadge(user)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+                              Actions ▾
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
                               setActivateUser(user);
                               setSelectedPlan("");
                               setActivateDeviceId("");
-                            }}
-                            title="Activate License"
-                          >
-                            <ShieldCheck size={15} className="text-primary" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleEdit(user)}
-                            title="Edit"
-                          >
-                            <Edit size={15} className="text-muted-foreground" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" title="Delete">
-                                <Trash2 size={15} className="text-destructive" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete User?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete <strong>{user.full_name || user.email}</strong> and all their data including licenses, downloads, and purchases. This cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(user.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                            }}>
+                              <ShieldCheck size={14} className="mr-2 text-primary" /> Activate
+                            </DropdownMenuItem>
+                            {user.has_active_license && (
+                              <DropdownMenuItem onClick={() => handleDeactivate(user.id, user.full_name || user.email)}>
+                                <ShieldOff size={14} className="mr-2 text-amber-400" /> Deactivate
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleEdit(user)}>
+                              <Edit size={14} className="mr-2 text-muted-foreground" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {user.is_blocked ? (
+                              <DropdownMenuItem onClick={() => handleUnblock(user.id, user.full_name || user.email)}>
+                                <Unlock size={14} className="mr-2 text-green-400" /> Unblock
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleBlock(user.id, user.full_name || user.email)} className="text-amber-400">
+                                <Ban size={14} className="mr-2" /> Block
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(user.id)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 size={14} className="mr-2" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   );

@@ -23,7 +23,7 @@ import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminEnquiries } from "@/components/admin/AdminEnquiries";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "licenses" | "pricing" | "templates";
+type Tab = "stats" | "licenses" | "pricing" | "templates" | "enquiries";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();

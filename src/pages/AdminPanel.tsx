@@ -18,6 +18,7 @@ import {
   Monitor,
   UserCog,
   RefreshCw,
+  Video,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminStats } from "@/components/admin/AdminStats";

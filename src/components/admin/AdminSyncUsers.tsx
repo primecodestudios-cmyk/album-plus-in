@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Upload, UserPlus } from "lucide-react";
+import { RefreshCw, Upload, UserPlus, Zap, Globe, CheckCircle2, AlertCircle } from "lucide-react";
+
+const SYNC_URL_KEY = "albumplus_sync_url";
 
 export function AdminSyncUsers() {
   const { toast } = useToast();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<any>(null);
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle");
+
+  // PHP Sync URL
+  const [syncUrl, setSyncUrl] = useState(() => localStorage.getItem(SYNC_URL_KEY) || "");
+  const [editingUrl, setEditingUrl] = useState(false);
 
   // Single user sync form
   const [email, setEmail] = useState("");
@@ -18,6 +25,71 @@ export function AdminSyncUsers() {
   const [pcId, setPcId] = useState("");
   const [subEnd, setSubEnd] = useState("");
   const [singleSyncing, setSingleSyncing] = useState(false);
+
+  // DB stats
+  const [dbStats, setDbStats] = useState<{ cpanel: number; auth: number; profiles: number } | null>(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const [cpanel, profiles] = await Promise.all([
+      supabase.from("cpanel_user_data").select("id", { count: "exact", head: true }),
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+    ]);
+    setDbStats({
+      cpanel: cpanel.count || 0,
+      auth: profiles.count || 0, // approximate
+      profiles: profiles.count || 0,
+    });
+  };
+
+  const handleSaveSyncUrl = () => {
+    localStorage.setItem(SYNC_URL_KEY, syncUrl.trim());
+    setEditingUrl(false);
+    toast({ title: "Sync URL saved" });
+  };
+
+  const handleTriggerSync = async () => {
+    if (!syncUrl.trim()) {
+      toast({ title: "Set your PHP sync URL first", variant: "destructive" });
+      setEditingUrl(true);
+      return;
+    }
+
+    setSyncStatus("syncing");
+    setSyncing(true);
+    setSyncResult(null);
+
+    try {
+      const response = await fetch(syncUrl.trim(), {
+        method: "GET",
+        mode: "no-cors",
+      });
+
+      // With no-cors we can't read the response, but the request was sent
+      toast({
+        title: "Sync triggered!",
+        description: "The PHP script has been called. It may take 1-2 minutes for all users to sync. Refresh stats to check progress.",
+      });
+      setSyncStatus("success");
+
+      // Refresh stats after a delay
+      setTimeout(() => fetchStats(), 5000);
+      setTimeout(() => fetchStats(), 15000);
+      setTimeout(() => fetchStats(), 30000);
+    } catch (err: any) {
+      setSyncStatus("error");
+      toast({
+        title: "Could not reach sync URL",
+        description: "Make sure the URL is correct and your cPanel server is accessible. Error: " + err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleSyncSingle = async () => {
     if (!email.trim()) {
@@ -48,6 +120,7 @@ export function AdminSyncUsers() {
         setMobile("");
         setPcId("");
         setSubEnd("");
+        fetchStats();
       } else {
         toast({ title: "Sync failed", description: data?.error || "Unknown error", variant: "destructive" });
       }
@@ -63,8 +136,92 @@ export function AdminSyncUsers() {
       <div>
         <h2 className="font-display text-xl font-bold text-foreground mb-2">Sync Users</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Sync users from your legacy MySQL database or add individual users manually.
+          Sync users from your cPanel MySQL database or add individual users manually.
         </p>
+      </div>
+
+      {/* DB Stats */}
+      {dbStats && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-card rounded-2xl border border-border p-4 shadow-card text-center">
+            <div className="text-2xl font-bold text-primary">{dbStats.cpanel}</div>
+            <div className="text-xs text-muted-foreground">Synced Users (cPanel)</div>
+          </div>
+          <div className="bg-card rounded-2xl border border-border p-4 shadow-card text-center">
+            <div className="text-2xl font-bold text-accent">{dbStats.profiles}</div>
+            <div className="text-xs text-muted-foreground">Total Profiles</div>
+          </div>
+          <div className="bg-card rounded-2xl border border-border p-4 shadow-card text-center">
+            <Button variant="outline" size="sm" onClick={fetchStats} className="gap-2">
+              <RefreshCw size={14} /> Refresh Stats
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Bulk Sync Trigger */}
+      <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+        <div className="flex items-center gap-2 mb-4">
+          <Zap size={20} className="text-primary" />
+          <h3 className="font-display text-lg font-semibold text-foreground">Manual Bulk Sync</h3>
+          {syncStatus === "success" && <CheckCircle2 size={16} className="text-primary" />}
+          {syncStatus === "error" && <AlertCircle size={16} className="text-destructive" />}
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Trigger the PHP sync script on your cPanel server to pull all users into the admin panel.
+        </p>
+
+        {/* Sync URL Config */}
+        <div className="mb-4">
+          <Label htmlFor="sync-url" className="flex items-center gap-1.5 mb-1.5">
+            <Globe size={14} />
+            PHP Sync Script URL
+          </Label>
+          {editingUrl || !syncUrl ? (
+            <div className="flex gap-2">
+              <Input
+                id="sync-url"
+                value={syncUrl}
+                onChange={(e) => setSyncUrl(e.target.value)}
+                placeholder="https://yourdomain.com/albumplus/sync_users.php"
+                className="flex-1"
+              />
+              <Button size="sm" onClick={handleSaveSyncUrl} disabled={!syncUrl.trim()}>
+                Save
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <code className="bg-muted px-3 py-1.5 rounded-lg text-xs text-muted-foreground flex-1 truncate">
+                {syncUrl}
+              </code>
+              <Button size="sm" variant="ghost" onClick={() => setEditingUrl(true)}>
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Sync Button */}
+        <Button
+          onClick={handleTriggerSync}
+          disabled={syncing || !syncUrl.trim()}
+          className="gap-2 bg-gradient-gold text-accent-foreground shadow-gold hover:opacity-90"
+          size="lg"
+        >
+          {syncing ? (
+            <RefreshCw size={18} className="animate-spin" />
+          ) : (
+            <Zap size={18} />
+          )}
+          {syncing ? "Syncing from cPanel..." : "🔄 Trigger Bulk Sync Now"}
+        </Button>
+
+        {syncStatus === "success" && (
+          <p className="text-xs text-primary mt-2">
+            ✅ Sync triggered! Stats will auto-refresh. Check the Users tab in ~30 seconds.
+          </p>
+        )}
       </div>
 
       {/* Single User Sync */}
@@ -101,18 +258,17 @@ export function AdminSyncUsers() {
         </Button>
       </div>
 
-      {/* Bulk Sync Info */}
+      {/* API Reference */}
       <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
         <div className="flex items-center gap-2 mb-4">
           <Upload size={20} className="text-accent" />
-          <h3 className="font-display text-lg font-semibold text-foreground">Bulk Sync (via PHP Script)</h3>
+          <h3 className="font-display text-lg font-semibold text-foreground">API Reference</h3>
         </div>
         <p className="text-sm text-muted-foreground mb-3">
-          To bulk-sync all users from your MySQL database, run the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">sync_to_lovable.php</code> script on your cPanel server. 
-          It will send all users to the sync API in batches.
+          Your PHP script should POST to the sync API endpoint with the configured secret.
         </p>
         <div className="bg-muted/50 rounded-xl p-4 text-xs font-mono text-muted-foreground">
-          POST /functions/v1/sync-users<br />
+          POST https://nnlrtacjnbgjqmndllfs.supabase.co/functions/v1/sync-users<br />
           Header: x-sync-secret: YOUR_SECRET<br />
           Body: {"{"} "action": "sync_users", "users": [...] {"}"}
         </div>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, RefreshCw, Monitor, HardDrive, IndianRupee, Calendar } from "lucide-react";
+import { Save, Plus, Trash2, RefreshCw, Monitor, HardDrive, IndianRupee, Calendar, Percent, Edit3 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,13 @@ export function AdminPricing() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+
+  // Bulk update state
+  const [showBulk, setShowBulk] = useState(false);
+  const [bulkMode, setBulkMode] = useState<"fixed" | "percent">("percent");
+  const [bulkValue, setBulkValue] = useState(0);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkPreviews, setBulkPreviews] = useState<Record<string, number>>({});
 
   // Add new plan dialog
   const [showAdd, setShowAdd] = useState(false);
@@ -159,7 +166,49 @@ export function AdminPricing() {
     return `${plan.duration_days} Days`;
   };
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Loading...</div>;
+  // Bulk price update
+  const computeBulkPreviews = () => {
+    const previews: Record<string, number> = {};
+    plans.forEach((p) => {
+      if (bulkMode === "percent") {
+        previews[p.id] = Math.round(p.price * (1 + bulkValue / 100));
+      } else {
+        previews[p.id] = p.price + bulkValue;
+      }
+      if (previews[p.id] < 0) previews[p.id] = 0;
+    });
+    setBulkPreviews(previews);
+  };
+
+  useEffect(() => {
+    if (showBulk) computeBulkPreviews();
+  }, [bulkValue, bulkMode, showBulk, plans]);
+
+  const handleBulkUpdate = async () => {
+    setBulkSaving(true);
+    let hasError = false;
+    for (const plan of plans) {
+      const newPrice = bulkPreviews[plan.id];
+      if (newPrice !== undefined && newPrice !== plan.price) {
+        const { error } = await supabase
+          .from("pricing_plans")
+          .update({ price: newPrice } as any)
+          .eq("id", plan.id);
+        if (error) hasError = true;
+      }
+    }
+    if (hasError) {
+      toast({ title: "Some plans failed to update", variant: "destructive" });
+    } else {
+      toast({ title: "All plan prices updated!" });
+    }
+    setShowBulk(false);
+    setBulkValue(0);
+    fetchPlans();
+    setBulkSaving(false);
+  };
+
+
 
   return (
     <div>
@@ -168,6 +217,14 @@ export function AdminPricing() {
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={fetchPlans} className="gap-2">
             <RefreshCw size={14} /> Refresh
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setShowBulk(true); setBulkValue(0); }}
+            className="gap-2"
+          >
+            <Percent size={14} /> Bulk Update
           </Button>
           <Button
             size="sm"
@@ -370,6 +427,83 @@ export function AdminPricing() {
             <Button onClick={handleSaveEdit} disabled={editSaving} className="gap-2">
               {editSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Update Dialog */}
+      <Dialog open={showBulk} onOpenChange={setShowBulk}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent size={18} /> Bulk Price Update
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Update Mode</Label>
+                <select
+                  value={bulkMode}
+                  onChange={(e) => setBulkMode(e.target.value as "fixed" | "percent")}
+                  className="w-full h-10 px-3 rounded-md bg-secondary border border-border text-foreground text-sm"
+                >
+                  <option value="percent">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount (₹)</option>
+                </select>
+              </div>
+              <div>
+                <Label>{bulkMode === "percent" ? "Change %" : "Change ₹"}</Label>
+                <Input
+                  type="number"
+                  value={bulkValue}
+                  onChange={(e) => setBulkValue(Number(e.target.value))}
+                  placeholder={bulkMode === "percent" ? "e.g., 10 or -20" : "e.g., 50 or -100"}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Use negative values to decrease</p>
+              </div>
+            </div>
+
+            {/* Preview table */}
+            <div className="rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-secondary/50 text-xs text-muted-foreground">
+                    <th className="text-left p-2.5">Plan</th>
+                    <th className="text-right p-2.5">Current (₹)</th>
+                    <th className="text-right p-2.5">New (₹)</th>
+                    <th className="text-right p-2.5">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((plan) => {
+                    const newPrice = bulkPreviews[plan.id] ?? plan.price;
+                    const diff = newPrice - plan.price;
+                    return (
+                      <tr key={plan.id} className="border-t border-border">
+                        <td className="p-2.5 font-medium text-foreground">{plan.plan_name}</td>
+                        <td className="p-2.5 text-right text-muted-foreground">₹{plan.price}</td>
+                        <td className="p-2.5 text-right font-semibold text-foreground">₹{newPrice}</td>
+                        <td className={`p-2.5 text-right text-xs font-semibold ${
+                          diff > 0 ? "text-green-400" : diff < 0 ? "text-destructive" : "text-muted-foreground"
+                        }`}>
+                          {diff > 0 ? "+" : ""}{diff !== 0 ? `₹${diff}` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleBulkUpdate} disabled={bulkSaving || bulkValue === 0} className="gap-2">
+              {bulkSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+              Update All Prices
             </Button>
           </DialogFooter>
         </DialogContent>

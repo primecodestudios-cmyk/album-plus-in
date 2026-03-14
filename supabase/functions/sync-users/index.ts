@@ -37,7 +37,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const body = await req.json();
+    const body = bodyJson;
     const { action } = body;
 
     console.log("Action:", action, "Users count:", body.users?.length || 0);

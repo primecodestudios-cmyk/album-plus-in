@@ -29,9 +29,10 @@ import { AdminDeviceRequests } from "@/components/admin/AdminDeviceRequests";
 import { AdminSyncUsers } from "@/components/admin/AdminSyncUsers";
 import { AdminActivateLicense } from "@/components/admin/AdminActivateLicense";
 import { AdminUsers } from "@/components/admin/AdminUsers";
+import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate";
+type Tab = "stats" | "users" | "device_requests" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens";
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -83,6 +84,7 @@ const AdminPanel = () => {
     { id: "enquiries", label: "Enquiries", icon: MessageSquare },
     { id: "sync", label: "Sync Users", icon: Users },
     { id: "activate", label: "Activate", icon: ShieldCheck },
+    { id: "api_tokens", label: "API Tokens", icon: Key },
   ];
 
   return (
@@ -138,6 +140,7 @@ const AdminPanel = () => {
           {activeTab === "enquiries" && <AdminEnquiries />}
           {activeTab === "sync" && <AdminSyncUsers />}
           {activeTab === "activate" && <AdminActivateLicense />}
+          {activeTab === "api_tokens" && <AdminApiTokens />}
         </motion.div>
       </div>
     </div>

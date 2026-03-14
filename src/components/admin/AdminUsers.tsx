@@ -233,6 +233,7 @@ export function AdminUsers({ initialFilter = "all" }: AdminUsersProps) {
       case "no_identifier": return { text: "⚠️ No cPanel ID or email found for this user", isError: true };
       case "login_redirect": return { text: "❌ cPanel Directory Privacy blocking access. Disable it for apiV1 folder.", isError: true };
       case "http_error": return { text: `❌ cPanel HTTP error (status ${cpanelSync.status})`, isError: true };
+      case "cpanel_rejected": return { text: `❌ cPanel rejected update: ${cpanelSync.message || "Unknown reason"}`, isError: true };
       case "network_error": return { text: `❌ Network error: ${cpanelSync.message}`, isError: true };
       default: return { text: `⚠️ cPanel sync issue: ${cpanelSync.reason || "unknown"}`, isError: true };
     }

@@ -90,48 +90,98 @@ serve(async (req) => {
         const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
         if (!cpanelRow?.cpanel_id && !authUser?.email) return { success: false, reason: "no_identifier" };
 
-        const syncPayload = {
-          action: "update_subscription",
-          cpanel_id: cpanelRow?.cpanel_id || null,
-          id: cpanelRow?.cpanel_id || null,
-          email: authUser?.email || "",
-          pc_id: cpanelRow?.pc_id || "",
-          pcId: cpanelRow?.pc_id || "",
-          sync_secret: syncSecret,
-          ...withLegacyCpanelAliases(updates),
-        };
+        const hasSubscriptionFields = updates.sub_start !== undefined || updates.sub_end !== undefined || updates.plan_name !== undefined;
+        const actionCandidates = hasSubscriptionFields
+          ? ["update_subscription", "update_user", "update_user_status"]
+          : ["update_user_status", "update_subscription", "update_user"];
 
-        console.log("Reverse sync to cPanel:", JSON.stringify({ url: cpanelSyncUrl, cpanel_id: syncPayload.cpanel_id, email: syncPayload.email, updates }));
+        let lastFailure: Record<string, any> = { success: false, reason: "unknown" };
 
-        const resp = await fetch(cpanelSyncUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-sync-secret": syncSecret,
-            "User-Agent": "AlbumPlus-Admin/1.0",
-          },
-          body: JSON.stringify(syncPayload),
-        });
+        for (const syncAction of actionCandidates) {
+          const syncPayload = {
+            action: syncAction,
+            cpanel_id: cpanelRow?.cpanel_id || null,
+            id: cpanelRow?.cpanel_id || null,
+            email: authUser?.email || "",
+            pc_id: cpanelRow?.pc_id || "",
+            pcId: cpanelRow?.pc_id || "",
+            sync_secret: syncSecret,
+            ...withLegacyCpanelAliases(updates),
+          };
 
-        const result = await resp.text();
-        const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result) || /cpsrvd/i.test(result);
+          console.log("Reverse sync to cPanel:", JSON.stringify({
+            url: cpanelSyncUrl,
+            action: syncAction,
+            cpanel_id: syncPayload.cpanel_id,
+            email: syncPayload.email,
+            updates,
+          }));
 
-        if (isLoginPage) {
-          console.error("cPanel reverse sync BLOCKED by login gate. Fix: Disable Directory Privacy for apiV1 folder in cPanel → Directory Privacy. Current URL:", cpanelSyncUrl);
-          return { success: false, reason: "login_redirect", message: "cPanel Directory Privacy is blocking access. Disable it for the apiV1 folder." };
+          const resp = await fetch(cpanelSyncUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-sync-secret": syncSecret,
+              "User-Agent": "AlbumPlus-Admin/1.0",
+            },
+            body: JSON.stringify(syncPayload),
+          });
+
+          const result = await resp.text();
+          const isLoginPage = /<title>\s*cPanel Login\s*<\/title>/i.test(result) || /action="\/login\//i.test(result) || /cpsrvd/i.test(result);
+
+          if (isLoginPage) {
+            console.error("cPanel reverse sync BLOCKED by login gate. Fix: Disable Directory Privacy for apiV1 folder in cPanel → Directory Privacy. Current URL:", cpanelSyncUrl);
+            return { success: false, reason: "login_redirect", message: "cPanel Directory Privacy is blocking access. Disable it for the apiV1 folder." };
+          }
+
+          if (!resp.ok) {
+            lastFailure = {
+              success: false,
+              reason: "http_error",
+              status: resp.status,
+              action: syncAction,
+              message: result.slice(0, 200),
+            };
+            console.error("cPanel reverse sync HTTP error", lastFailure);
+            continue;
+          }
+
+          let parsed: any = null;
+          try {
+            parsed = JSON.parse(result);
+          } catch {
+            parsed = null;
+          }
+
+          if (parsed && typeof parsed === "object") {
+            const parsedSuccess = parsed.success === true || parsed.status === "success";
+            const parsedFailure = parsed.success === false || parsed.status === "error" || typeof parsed.error === "string";
+
+            if (parsedSuccess) {
+              console.log("cPanel sync SUCCESS via", syncAction);
+              return { success: true, action: syncAction, response: parsed };
+            }
+
+            if (parsedFailure) {
+              lastFailure = {
+                success: false,
+                reason: "cpanel_rejected",
+                action: syncAction,
+                message: parsed.error || parsed.message || "cPanel rejected update",
+                response: parsed,
+              };
+              console.error("cPanel rejected sync payload", lastFailure);
+              continue;
+            }
+          }
+
+          console.log("cPanel sync SUCCESS (non-JSON) via", syncAction, result.slice(0, 200));
+          return { success: true, action: syncAction, response: parsed || result.slice(0, 200) };
         }
 
-        if (!resp.ok) {
-          console.error("cPanel reverse sync HTTP error", { status: resp.status, bodyPreview: result.slice(0, 300) });
-          return { success: false, reason: "http_error", status: resp.status };
-        }
-
-        // Try to parse response as JSON
-        let parsed: any = null;
-        try { parsed = JSON.parse(result); } catch {}
-
-        console.log("cPanel sync SUCCESS:", result.slice(0, 300));
-        return { success: true, response: parsed || result.slice(0, 200) };
+        console.error("cPanel reverse sync failed after all actions", lastFailure);
+        return lastFailure;
       } catch (err: any) {
         console.error("cPanel reverse sync network error:", err.message);
         return { success: false, reason: "network_error", message: err.message };

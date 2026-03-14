@@ -1,30 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const videos = [
-  {
-    id: "dQw4w9WgXcQ",
-    title: "Album Plus Full Demo — How It Works",
-    description: "Complete walkthrough of all features",
-    duration: "12:45",
-  },
-  {
-    id: "dQw4w9WgXcQ",
-    title: "Auto Album Designing Tutorial",
-    description: "Design 200 sheets in minutes",
-    duration: "8:30",
-  },
-  {
-    id: "dQw4w9WgXcQ",
-    title: "PSD Automation & Template Import",
-    description: "Convert any PSD to auto layout",
-    duration: "6:15",
-  },
-];
+interface DemoVideo {
+  id: string;
+  title: string;
+  description: string;
+  youtube_id: string;
+  duration: string;
+}
 
 export function DemoVideoSection() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const [videos, setVideos] = useState<DemoVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchVideos() {
+      const { data } = await supabase
+        .from("demo_videos")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (data) setVideos(data as unknown as DemoVideo[]);
+      setLoading(false);
+    }
+    fetchVideos();
+  }, []);
+
+  if (!loading && videos.length === 0) return null;
 
   return (
     <section className="py-20 md:py-28 relative">
@@ -41,48 +47,52 @@ export function DemoVideoSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
-          {videos.map((video, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group bg-card rounded-2xl border border-border shadow-card hover:border-accent/30 hover:shadow-gold transition-all duration-300 overflow-hidden cursor-pointer"
-              onClick={() => setActiveVideo(video.id)}
-            >
-              {/* Thumbnail */}
-              <div className="relative aspect-video bg-muted/50">
-                <img
-                  src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
-                  alt={video.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-background/40 flex items-center justify-center group-hover:bg-background/20 transition-colors">
-                  <div className="w-14 h-14 rounded-full bg-accent/90 flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform">
-                    <Play size={24} className="text-accent-foreground ml-1" />
+        {loading ? (
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="aspect-video rounded-2xl" />)}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
+            {videos.map((video, i) => (
+              <motion.div
+                key={video.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group bg-card rounded-2xl border border-border shadow-card hover:border-accent/30 hover:shadow-gold transition-all duration-300 overflow-hidden cursor-pointer"
+                onClick={() => setActiveVideo(video.youtube_id)}
+              >
+                <div className="relative aspect-video bg-muted/50">
+                  <img
+                    src={`https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}
+                    alt={video.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-background/40 flex items-center justify-center group-hover:bg-background/20 transition-colors">
+                    <div className="w-14 h-14 rounded-full bg-accent/90 flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform">
+                      <Play size={24} className="text-accent-foreground ml-1" />
+                    </div>
                   </div>
+                  {video.duration && (
+                    <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-background/80 text-xs font-mono text-foreground">
+                      {video.duration}
+                    </div>
+                  )}
                 </div>
-                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-background/80 text-xs font-mono text-foreground">
-                  {video.duration}
+                <div className="p-4">
+                  <h3 className="font-display text-sm font-semibold text-foreground mb-1 line-clamp-1">
+                    {video.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{video.description}</p>
                 </div>
-              </div>
-
-              {/* Info */}
-              <div className="p-4">
-                <h3 className="font-display text-sm font-semibold text-foreground mb-1 line-clamp-1">
-                  {video.title}
-                </h3>
-                <p className="text-xs text-muted-foreground">{video.description}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Video Modal */}
       {activeVideo && (
         <div
           className="fixed inset-0 z-50 bg-background/90 backdrop-blur-xl flex items-center justify-center p-4"

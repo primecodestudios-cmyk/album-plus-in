@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, RotateCcw, BookOpen, IndianRupee, Headphones, HelpCircle, Download, Shield, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
@@ -67,11 +67,15 @@ async function streamChat({
   onDone();
 }
 
-const quickQuestions = [
-  "What is Album Plus?",
-  "How to activate license?",
-  "Pricing plans?",
-  "System requirements?",
+const quickTemplates = [
+  { icon: BookOpen, label: "Album Demo", prompt: "Show me a demo of Album Plus features and how to create a wedding album step by step" },
+  { icon: IndianRupee, label: "Pricing Plans", prompt: "What are the pricing plans available for Album Plus? Show all plans with prices" },
+  { icon: Headphones, label: "Support Help", prompt: "I need technical support. How can I contact your team and what are your support hours?" },
+  { icon: Download, label: "Download & Install", prompt: "How do I download and install Album Plus? What are the system requirements?" },
+  { icon: Shield, label: "License & Activation", prompt: "How do I activate my license key? Can I transfer it to another device?" },
+  { icon: HelpCircle, label: "Troubleshooting", prompt: "Album Plus is running slow or showing errors. How can I fix common issues?" },
+  { icon: Sparkles, label: "Smart Features", prompt: "What are the smart automation features in Album Plus? Tell me about PSD conversion and templates" },
+  { icon: MessageCircle, label: "Refund Policy", prompt: "What is the refund policy for Album Plus? Can I get a refund after purchase?" },
 ];
 
 export function ChatWidget() {
@@ -84,6 +88,12 @@ export function ChatWidget() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setInput("");
+    setLoading(false);
+  };
 
   const send = useCallback(
     async (text: string) => {
@@ -135,7 +145,7 @@ export function ChatWidget() {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+            className="fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
             aria-label="Open chat"
           >
             <Bot size={26} />
@@ -150,7 +160,7 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-4 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-2rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-4 right-4 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-2rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-accent/5">
@@ -159,35 +169,55 @@ export function ChatWidget() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">Album Plus AI</p>
-                <p className="text-[11px] text-muted-foreground">Customer Support</p>
+                <p className="text-[11px] text-muted-foreground">Customer Support • Online</p>
               </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-1">
+                {messages.length > 0 && (
+                  <button
+                    onClick={handleNewChat}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="New Chat"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                )}
+                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {messages.length === 0 && (
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  {/* Welcome */}
                   <div className="flex gap-2">
                     <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
                       <Bot size={14} className="text-accent" />
                     </div>
                     <div className="bg-muted rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-foreground">
-                      👋 Hi! I'm Album Plus AI Assistant. Ask me anything about our software, licensing, pricing, or technical support!
+                      👋 Hi! I'm <strong>Album Plus AI Assistant</strong>. How can I help you today? Pick a topic below or type your question!
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 pl-9">
-                    {quickQuestions.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => send(q)}
-                        className="text-xs px-3 py-1.5 rounded-full border border-accent/30 text-accent hover:bg-accent/10 transition-colors"
-                      >
-                        {q}
-                      </button>
-                    ))}
+
+                  {/* Quick Templates Grid */}
+                  <div className="grid grid-cols-2 gap-2 pl-0">
+                    {quickTemplates.map((t) => {
+                      const Icon = t.icon;
+                      return (
+                        <button
+                          key={t.label}
+                          onClick={() => send(t.prompt)}
+                          className="flex items-center gap-2 text-left text-xs px-3 py-2.5 rounded-xl border border-border bg-card hover:border-accent/50 hover:bg-accent/5 transition-all group"
+                        >
+                          <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                            <Icon size={14} className="text-accent" />
+                          </div>
+                          <span className="text-foreground font-medium leading-tight">{t.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

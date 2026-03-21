@@ -12,6 +12,7 @@ import { PlatformSection } from "@/components/landing/PlatformSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { ExitPopup } from "@/components/landing/ExitPopup";
 
 const Index = () => {
@@ -33,6 +34,7 @@ const Index = () => {
       </main>
       <Footer />
       <WhatsAppButton />
+      <ChatWidget />
       <ExitPopup />
     </div>
   );

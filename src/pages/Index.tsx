@@ -33,7 +33,7 @@ const Index = () => {
         <CTASection />
       </main>
       <Footer />
-      <WhatsAppButton />
+      
       <ChatWidget />
       <ExitPopup />
     </div>

@@ -99,6 +99,7 @@ const AdminPanel = () => {
     { id: "activate", label: "Activate", icon: ShieldCheck },
     { id: "api_tokens", label: "API Tokens", icon: Key },
     { id: "demo_videos", label: "Demo Videos", icon: Video },
+    { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
   ];
 
   return (

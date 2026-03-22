@@ -236,7 +236,7 @@ const Support = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
+      <ChatWidget />
     </div>
   );
 };

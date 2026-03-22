@@ -267,6 +267,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
       </main>
+      <ChatWidget />
     </div>
   );
 };

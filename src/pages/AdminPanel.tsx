@@ -34,9 +34,10 @@ import { AdminDeviceManagement } from "@/components/admin/AdminDeviceManagement"
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
+import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -98,6 +99,7 @@ const AdminPanel = () => {
     { id: "activate", label: "Activate", icon: ShieldCheck },
     { id: "api_tokens", label: "API Tokens", icon: Key },
     { id: "demo_videos", label: "Demo Videos", icon: Video },
+    { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
   ];
 
   return (
@@ -159,6 +161,7 @@ const AdminPanel = () => {
           {activeTab === "activate" && <AdminActivateLicense />}
           {activeTab === "api_tokens" && <AdminApiTokens />}
           {activeTab === "demo_videos" && <AdminDemoVideos />}
+          {activeTab === "chat_logs" && <AdminChatLogs />}
         </motion.div>
       </div>
     </div>

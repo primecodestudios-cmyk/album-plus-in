@@ -3,10 +3,15 @@ import { MessageCircle, X, Send, Bot, User, RotateCcw, BookOpen, IndianRupee, He
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
+function generateSessionId() {
+  return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
 
 async function streamChat({
   messages,
@@ -83,16 +88,45 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [sessionId] = useState(() => generateSessionId());
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  const ensureConversation = useCallback(async () => {
+    if (conversationId) return conversationId;
+    const { data } = await supabase
+      .from("chat_conversations")
+      .insert({ session_id: sessionId })
+      .select("id")
+      .single();
+    if (data) {
+      setConversationId(data.id);
+      return data.id;
+    }
+    return null;
+  }, [conversationId, sessionId]);
+
+  const saveMessage = useCallback(async (convId: string, role: string, content: string) => {
+    await supabase.from("chat_messages").insert({
+      conversation_id: convId,
+      role,
+      content,
+    });
+    await supabase
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString(), message_count: messages.length + 1 })
+      .eq("id", convId);
+  }, [messages.length]);
+
   const handleNewChat = () => {
     setMessages([]);
     setInput("");
     setLoading(false);
+    setConversationId(null);
   };
 
   const send = useCallback(
@@ -102,6 +136,11 @@ export function ChatWidget() {
       setMessages((p) => [...p, userMsg]);
       setInput("");
       setLoading(true);
+
+      const convId = await ensureConversation();
+      if (convId) {
+        saveMessage(convId, "user", text.trim());
+      }
 
       let assistantSoFar = "";
       const upsert = (chunk: string) => {
@@ -121,7 +160,12 @@ export function ChatWidget() {
         await streamChat({
           messages: [...messages, userMsg],
           onDelta: upsert,
-          onDone: () => setLoading(false),
+          onDone: () => {
+            setLoading(false);
+            if (convId && assistantSoFar) {
+              saveMessage(convId, "assistant", assistantSoFar);
+            }
+          },
           onError: (e) => {
             upsert(`⚠️ ${e}`);
             setLoading(false);
@@ -132,7 +176,7 @@ export function ChatWidget() {
         setLoading(false);
       }
     },
-    [messages, loading]
+    [messages, loading, ensureConversation, saveMessage]
   );
 
   return (
@@ -191,7 +235,6 @@ export function ChatWidget() {
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {messages.length === 0 && (
                 <div className="space-y-4">
-                  {/* Welcome */}
                   <div className="flex gap-2">
                     <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
                       <Bot size={14} className="text-accent" />
@@ -200,8 +243,6 @@ export function ChatWidget() {
                       👋 Hi! I'm <strong>Album Plus AI Assistant</strong>. How can I help you today? Pick a topic below or type your question!
                     </div>
                   </div>
-
-                  {/* Quick Templates Grid */}
                   <div className="grid grid-cols-2 gap-2 pl-0">
                     {quickTemplates.map((t) => {
                       const Icon = t.icon;

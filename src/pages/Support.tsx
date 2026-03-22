@@ -5,7 +5,7 @@ import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle, ArrowLeft } from "
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/landing/Footer";
 import { ContactForm } from "@/components/support/ContactForm";
-import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { Navbar } from "@/components/landing/Navbar";
 
 const faqs = [
@@ -236,7 +236,7 @@ const Support = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
+      <ChatWidget />
     </div>
   );
 };

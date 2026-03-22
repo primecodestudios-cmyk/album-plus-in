@@ -14,6 +14,7 @@ import {
   Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 interface Profile {
   full_name: string;
@@ -266,6 +267,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
       </main>
+      <ChatWidget />
     </div>
   );
 };

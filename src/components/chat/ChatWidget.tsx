@@ -329,7 +329,7 @@ export function ChatWidget() {
             className="fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
             aria-label="Open chat"
           >
-            <Bot size={26} />
+            <MessageCircle size={26} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -346,11 +346,14 @@ export function ChatWidget() {
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-accent/5">
               <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
-                <Bot size={20} className="text-accent" />
+                <Headphones size={20} className="text-accent" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground">Album Plus AI</p>
-                <p className="text-[11px] text-muted-foreground">Customer Support • Online</p>
+                <p className="text-sm font-semibold text-foreground">Album Plus Support</p>
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
+                  24/7 Online Support
+                </p>
               </div>
               <div className="flex items-center gap-1">
                 {messages.length > 0 && (

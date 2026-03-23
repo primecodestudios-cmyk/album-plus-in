@@ -35,6 +35,7 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
+import { AdminSettings } from "@/components/admin/AdminSettings";
 import { useToast } from "@/hooks/use-toast";
 
 type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs";

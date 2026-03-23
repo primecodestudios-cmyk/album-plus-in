@@ -329,7 +329,7 @@ export function ChatWidget() {
             className="fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
             aria-label="Open chat"
           >
-            <Bot size={26} />
+            <MessageCircle size={26} />
           </motion.button>
         )}
       </AnimatePresence>

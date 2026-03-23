@@ -38,7 +38,7 @@ import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {

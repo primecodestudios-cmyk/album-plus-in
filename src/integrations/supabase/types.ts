@@ -52,6 +52,10 @@ export type Database = {
           id: string
           last_message_at: string
           message_count: number
+          otp_code: string | null
+          otp_expires_at: string | null
+          otp_verified: boolean
+          phone: string | null
           session_id: string
           started_at: string
           status: string
@@ -62,6 +66,10 @@ export type Database = {
           id?: string
           last_message_at?: string
           message_count?: number
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_verified?: boolean
+          phone?: string | null
           session_id: string
           started_at?: string
           status?: string
@@ -72,6 +80,10 @@ export type Database = {
           id?: string
           last_message_at?: string
           message_count?: number
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_verified?: boolean
+          phone?: string | null
           session_id?: string
           started_at?: string
           status?: string

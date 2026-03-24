@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function WhatsAppButton() {
+interface WhatsAppButtonProps {
+  phoneNumber?: string;
+}
+
+export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
@@ -10,9 +14,13 @@ export function WhatsAppButton() {
     return () => clearTimeout(timer);
   }, []);
 
+  const number = phoneNumber?.replace(/\D/g, "") || "";
+  if (!number) return null;
+
+  const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-      {/* Tooltip */}
       <AnimatePresence>
         {showTooltip && (
           <motion.div
@@ -32,9 +40,8 @@ export function WhatsAppButton() {
         )}
       </AnimatePresence>
 
-      {/* Button */}
       <a
-        href="https://wa.me/918883081855"
+        href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"

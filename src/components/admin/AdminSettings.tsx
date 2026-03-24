@@ -19,8 +19,6 @@ import {
   Palette,
 } from "lucide-react";
 
-const SETTINGS_KEY = "albumplus_admin_settings";
-
 interface AppSettings {
   whatsapp_instance_id: string;
   whatsapp_access_token: string;
@@ -41,13 +39,25 @@ const defaultSettings: AppSettings = {
   cpanel_sync_url: "",
   sync_api_secret: "",
   auto_refresh_interval: 30,
-  enable_chat_widget: true,
-  enable_whatsapp_button: true,
+  enable_chat_widget: false,
+  enable_whatsapp_button: false,
   maintenance_mode: false,
   site_title: "AlbumPlus",
   support_email: "",
   support_phone: "",
 };
+
+// Keys stored in DB (app_settings table)
+const DB_KEYS = [
+  "enable_chat_widget",
+  "enable_whatsapp_button",
+  "maintenance_mode",
+  "whatsapp_instance_id",
+  "whatsapp_access_token",
+  "support_phone",
+  "support_email",
+  "site_title",
+];
 
 export function AdminSettings() {
   const { toast } = useToast();
@@ -59,31 +69,68 @@ export function AdminSettings() {
   const [testNumber, setTestNumber] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem(SETTINGS_KEY);
-    if (saved) {
-      try {
-        setSettings({ ...defaultSettings, ...JSON.parse(saved) });
-      } catch {
-        // ignore
-      }
-    }
-    // Also load sync URL from legacy key
-    const legacySyncUrl = localStorage.getItem("albumplus_sync_url");
-    if (legacySyncUrl) {
-      setSettings((prev) => ({
-        ...prev,
-        cpanel_sync_url: prev.cpanel_sync_url || legacySyncUrl,
-      }));
-    }
+    loadSettings();
   }, []);
 
-  const handleSave = () => {
+  const loadSettings = async () => {
+    // Load DB settings
+    const { data: dbRows } = await supabase
+      .from("app_settings" as any)
+      .select("key, value");
+
+    const dbMap: Record<string, string> = {};
+    if (dbRows) {
+      (dbRows as any[]).forEach((r: any) => { dbMap[r.key] = r.value; });
+    }
+
+    // Load localStorage settings (for cpanel_sync_url, sync_api_secret, auto_refresh_interval)
+    const SETTINGS_KEY = "albumplus_admin_settings";
+    let localSettings: Record<string, any> = {};
+    try {
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      if (saved) localSettings = JSON.parse(saved);
+    } catch {}
+
+    const legacySyncUrl = localStorage.getItem("albumplus_sync_url");
+
+    setSettings({
+      enable_chat_widget: dbMap.enable_chat_widget === "true",
+      enable_whatsapp_button: dbMap.enable_whatsapp_button === "true",
+      maintenance_mode: dbMap.maintenance_mode === "true",
+      whatsapp_instance_id: dbMap.whatsapp_instance_id || "",
+      whatsapp_access_token: dbMap.whatsapp_access_token || "",
+      support_phone: dbMap.support_phone || "",
+      support_email: dbMap.support_email || "",
+      site_title: dbMap.site_title || "AlbumPlus",
+      cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
+      sync_api_secret: localSettings.sync_api_secret || "",
+      auto_refresh_interval: localSettings.auto_refresh_interval || 30,
+    });
+  };
+
+  const handleSave = async () => {
     setSaving(true);
     try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-      // Also save sync URL to legacy key for backward compatibility
+      // Save DB settings
+      for (const key of DB_KEYS) {
+        const val = String((settings as any)[key] ?? "");
+        await supabase
+          .from("app_settings" as any)
+          .update({ value: val, updated_at: new Date().toISOString() } as any)
+          .eq("key", key);
+      }
+
+      // Save local-only settings
+      const SETTINGS_KEY = "albumplus_admin_settings";
+      const localData = {
+        cpanel_sync_url: settings.cpanel_sync_url,
+        sync_api_secret: settings.sync_api_secret,
+        auto_refresh_interval: settings.auto_refresh_interval,
+      };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(localData));
       localStorage.setItem("albumplus_sync_url", settings.cpanel_sync_url);
-      toast({ title: "Settings saved", description: "All settings have been saved successfully." });
+
+      toast({ title: "Settings saved", description: "All settings saved to database." });
     } catch {
       toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" });
     }
@@ -173,7 +220,6 @@ export function AdminSettings() {
           </div>
         </div>
 
-        {/* Test WhatsApp */}
         <div className="flex items-end gap-3 pt-2 border-t border-border">
           <div className="flex-1 space-y-2">
             <Label htmlFor="test_number">Test Phone Number</Label>
@@ -269,10 +315,10 @@ export function AdminSettings() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="support_phone">Support Phone</Label>
+            <Label htmlFor="support_phone">Support Phone (with country code)</Label>
             <Input
               id="support_phone"
-              placeholder="+91 98765 43210"
+              placeholder="918883081855"
               value={settings.support_phone}
               onChange={(e) => update("support_phone", e.target.value)}
             />
@@ -285,6 +331,7 @@ export function AdminSettings() {
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Bell size={20} className="text-amber-500" /> Feature Toggles
         </h3>
+        <p className="text-xs text-muted-foreground">These toggles control frontend visibility. Changes are saved to the database and take effect immediately.</p>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between py-2">

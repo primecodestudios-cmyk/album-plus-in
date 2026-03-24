@@ -6,11 +6,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function getWhatsAppCredentials(supabase: any) {
+  let instanceId = Deno.env.get("WHATSAPP_INSTANCE_ID");
+  let accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+
+  if (!instanceId || !accessToken) {
+    const { data } = await supabase
+      .from("app_settings")
+      .select("key, value")
+      .in("key", ["whatsapp_instance_id", "whatsapp_access_token"]);
+
+    if (data) {
+      for (const row of data) {
+        if (row.key === "whatsapp_instance_id" && row.value) instanceId = row.value;
+        if (row.key === "whatsapp_access_token" && row.value) accessToken = row.value;
+      }
+    }
+  }
+
+  return { instanceId, accessToken };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Verify admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -36,7 +56,6 @@ serve(async (req) => {
 
     const userId = claims.claims.sub as string;
 
-    // Check admin role
     const adminSupabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -65,7 +84,7 @@ serve(async (req) => {
       });
     }
 
-    // Save admin reply to chat_messages
+    // Save admin reply
     const { error: insertErr } = await adminSupabase.from("chat_messages").insert({
       conversation_id,
       role: "admin",
@@ -79,13 +98,12 @@ serve(async (req) => {
       });
     }
 
-    // Update conversation
     await adminSupabase
       .from("chat_conversations")
       .update({ last_message_at: new Date().toISOString() })
       .eq("id", conversation_id);
 
-    // Also send via WhatsApp if phone is available
+    // Send via WhatsApp if phone is available
     const { data: conv } = await adminSupabase
       .from("chat_conversations")
       .select("phone, otp_verified")
@@ -94,8 +112,7 @@ serve(async (req) => {
 
     let whatsappSent = false;
     if (conv?.phone && conv?.otp_verified) {
-      const instanceId = Deno.env.get("WHATSAPP_INSTANCE_ID");
-      const accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+      const { instanceId, accessToken } = await getWhatsAppCredentials(adminSupabase);
 
       if (instanceId && accessToken) {
         try {

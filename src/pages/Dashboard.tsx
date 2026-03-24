@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 interface Profile {
   full_name: string;

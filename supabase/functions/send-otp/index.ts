@@ -6,24 +6,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function getWhatsAppCredentials(supabase: any) {
+  // Try env vars first, then fall back to app_settings table
+  let instanceId = Deno.env.get("WHATSAPP_INSTANCE_ID");
+  let accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+
+  if (!instanceId || !accessToken) {
+    const { data } = await supabase
+      .from("app_settings")
+      .select("key, value")
+      .in("key", ["whatsapp_instance_id", "whatsapp_access_token"]);
+
+    if (data) {
+      for (const row of data) {
+        if (row.key === "whatsapp_instance_id" && row.value) instanceId = row.value;
+        if (row.key === "whatsapp_access_token" && row.value) accessToken = row.value;
+      }
+    }
+  }
+
+  return { instanceId, accessToken };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { phone, conversation_id, action } = await req.json();
+    const { phone, conversation_id } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-
-    if (action === "verify") {
-      // Verify OTP
-      const { otp } = await req.json().catch(() => ({ otp: "" }));
-      // Re-parse since we already consumed the body
-      const body = { phone, conversation_id, action, otp: arguments[0] };
-      return await handleVerify(supabase, body, corsHeaders);
-    }
 
     // Generate OTP
     const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -47,11 +61,8 @@ serve(async (req) => {
       });
     }
 
-    // Send OTP via WhatsApp (chat2me.in)
-    // Get credentials from admin settings stored in DB or env
-    // For now, try to read from a simple approach - we'll use the settings table or direct env
-    const instanceId = Deno.env.get("WHATSAPP_INSTANCE_ID");
-    const accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+    // Send OTP via WhatsApp
+    const { instanceId, accessToken } = await getWhatsAppCredentials(supabase);
 
     if (instanceId && accessToken) {
       try {
@@ -70,7 +81,6 @@ serve(async (req) => {
         console.log("WhatsApp OTP send result:", waData);
       } catch (waErr) {
         console.error("WhatsApp send error:", waErr);
-        // Still return success - OTP is saved, just WhatsApp delivery may have failed
       }
     } else {
       console.warn("WhatsApp credentials not configured - OTP saved but not sent via WhatsApp");
@@ -88,11 +98,3 @@ serve(async (req) => {
     );
   }
 });
-
-async function handleVerify(supabase: any, body: any, corsHeaders: any) {
-  // This won't be called due to the body parsing issue - verify is handled separately
-  return new Response(JSON.stringify({ error: "Use verify-otp endpoint" }), {
-    status: 400,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}

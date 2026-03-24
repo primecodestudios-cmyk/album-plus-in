@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 interface Profile {
   full_name: string;
@@ -45,6 +46,7 @@ interface DownloadRecord {
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { settings: appSettings } = useAppSettings();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [licenses, setLicenses] = useState<License[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -267,7 +269,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
       </main>
-      <ChatWidget />
+      {appSettings.enable_chat_widget && <ChatWidget />}
     </div>
   );
 };

@@ -14,8 +14,11 @@ import { Footer } from "@/components/landing/Footer";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { ExitPopup } from "@/components/landing/ExitPopup";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 const Index = () => {
+  const { settings, loading } = useAppSettings();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -34,7 +37,10 @@ const Index = () => {
       </main>
       <Footer />
       
-      <ChatWidget />
+      {!loading && settings.enable_chat_widget && <ChatWidget />}
+      {!loading && settings.enable_whatsapp_button && (
+        <WhatsAppButton phoneNumber={settings.support_phone} />
+      )}
       <ExitPopup />
     </div>
   );

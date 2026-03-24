@@ -19,6 +19,7 @@ interface PricingPlan {
 export function PricingSection() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pcFilter, setPcFilter] = useState(1);
 
   const fetchPlans = useCallback(async () => {
     const { data, error } = await supabase
@@ -27,40 +28,33 @@ export function PricingSection() {
       .eq("is_active", true)
       .order("price", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching plans:", error);
-    } else {
-      setPlans(data || []);
-    }
+    if (!error) setPlans(data || []);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     fetchPlans();
-    // Auto-refresh every 30 seconds
     const interval = setInterval(fetchPlans, 30000);
     return () => clearInterval(interval);
   }, [fetchPlans]);
 
+  // Get unique PC counts for filter buttons
+  const pcOptions = [...new Set(plans.map((p) => p.max_pcs))].sort((a, b) => a - b);
+
+  const filteredPlans = plans.filter((p) => p.max_pcs === pcFilter);
+
   const formatDuration = (days: number, type: string) => {
-    if (type === "days") return `${days} Days`;
     if (type === "months") return `${Math.floor(days / 30)} Months`;
     if (type === "years") return `${Math.floor(days / 365)} Year`;
     return `${days} Days`;
   };
 
-  const formatPrice = (price: number) => {
-    return `₹${price.toLocaleString("en-IN")}`;
-  };
+  const formatPrice = (price: number) => `₹${price.toLocaleString("en-IN")}`;
 
-  const isPopular = (plan: PricingPlan, index: number, total: number) => {
-    // Middle plan is popular for 3+ plans
-    return total >= 3 && index === Math.floor(total / 2);
-  };
+  const isPopular = (_plan: PricingPlan, index: number, total: number) =>
+    total >= 3 && index === Math.floor(total / 2);
 
-  const isBestValue = (plan: PricingPlan) => {
-    return plan.duration_days >= 365;
-  };
+  const isBestValue = (plan: PricingPlan) => plan.duration_days >= 365;
 
   if (loading) {
     return (
@@ -79,7 +73,7 @@ export function PricingSection() {
   return (
     <section id="pricing" className="py-20 md:py-28 relative">
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-14">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/30 bg-accent/5 text-accent text-xs font-semibold mb-4">
             💰 Simple Pricing
           </div>
@@ -87,12 +81,32 @@ export function PricingSection() {
             Choose Your <span className="text-gradient-gold">Plan</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Flexible subscription plans starting at just ₹200. All plans include the full software and free data pack.
+            Flexible subscription plans starting at just ₹199. All plans include the full software and free data pack.
           </p>
         </div>
 
+        {/* PC Filter Buttons */}
+        {pcOptions.length > 1 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            {pcOptions.map((pc) => (
+              <button
+                key={pc}
+                onClick={() => setPcFilter(pc)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                  pcFilter === pc
+                    ? "bg-accent text-accent-foreground border-accent shadow-gold"
+                    : "bg-card text-muted-foreground border-border hover:border-accent/40 hover:text-foreground"
+                }`}
+              >
+                <Monitor size={14} className="inline mr-1.5 -mt-0.5" />
+                {pc} PC{pc > 1 ? "s" : ""}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 max-w-6xl mx-auto">
-          {plans.map((plan, i) => (
+          {filteredPlans.map((plan, i) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 24 }}
@@ -100,14 +114,14 @@ export function PricingSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
               className={`relative rounded-2xl p-4 md:p-6 border flex flex-col ${
-                isPopular(plan, i, plans.length)
+                isPopular(plan, i, filteredPlans.length)
                   ? "border-accent/40 bg-card shadow-gold lg:scale-105"
                   : isBestValue(plan)
                   ? "border-accent/30 bg-card shadow-gold"
                   : "border-border bg-card shadow-card"
               }`}
             >
-              {isPopular(plan, i, plans.length) && (
+              {isPopular(plan, i, filteredPlans.length) && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-gold text-accent-foreground text-xs font-bold flex items-center gap-1">
                   <Star size={12} /> Popular
                 </div>
@@ -123,7 +137,7 @@ export function PricingSection() {
                   {plan.plan_name}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formatDuration(plan.duration_days, plan.duration_type)} access
+                  {formatDuration(plan.duration_days, plan.duration_type)} • {plan.max_pcs} PC{plan.max_pcs > 1 ? "s" : ""}
                 </p>
               </div>
 
@@ -133,7 +147,6 @@ export function PricingSection() {
                 </span>
               </div>
 
-              {/* Data Pack & Max PCs Info */}
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 p-2.5 rounded-lg bg-accent/5 border border-accent/10">
                   <HardDrive size={16} className="text-accent shrink-0" />
@@ -178,7 +191,6 @@ export function PricingSection() {
                 </li>
               </ul>
 
-              {/* Bonus callout for year plan */}
               {isBestValue(plan) && (
                 <div className="mb-5 p-3 rounded-xl bg-accent/5 border border-accent/20 space-y-2">
                   <div className="text-xs font-bold text-accent uppercase tracking-wide">
@@ -197,17 +209,23 @@ export function PricingSection() {
 
               <Button
                 className={`w-full h-11 md:h-12 rounded-xl font-semibold text-xs md:text-sm ${
-                  isPopular(plan, i, plans.length) || isBestValue(plan)
+                  isPopular(plan, i, filteredPlans.length) || isBestValue(plan)
                     ? "bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold"
                     : "border-border hover:border-accent/30 hover:text-accent"
                 }`}
-                variant={isPopular(plan, i, plans.length) || isBestValue(plan) ? "default" : "outline"}
+                variant={isPopular(plan, i, filteredPlans.length) || isBestValue(plan) ? "default" : "outline"}
               >
                 Buy Now
               </Button>
             </motion.div>
           ))}
         </div>
+
+        {filteredPlans.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">
+            No plans available for {pcFilter} PC{pcFilter > 1 ? "s" : ""}. Try a different filter.
+          </p>
+        )}
 
         <p className="text-center text-xs text-muted-foreground mt-8">
           This is a digital software product. Due to the nature of digital downloads, refunds are not available after purchase. Prices are managed by admin and may vary. All prices in INR (₹).

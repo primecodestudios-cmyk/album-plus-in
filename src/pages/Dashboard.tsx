@@ -268,7 +268,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
       </main>
-      <ChatWidget />
+      {appSettings.enable_chat_widget && <ChatWidget />}
     </div>
   );
 };

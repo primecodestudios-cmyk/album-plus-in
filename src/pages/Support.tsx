@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle, ArrowLeft } from "lucide-react";
+import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/landing/Footer";
 import { ContactForm } from "@/components/support/ContactForm";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { Navbar } from "@/components/landing/Navbar";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 const faqs = [
   {
@@ -74,9 +75,11 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 const Support = () => {
-  const whatsappNumber = "918883081855";
-  const salesNumber = "+91 88709 97799";
-  const supportNumber = "+91 88830 81855";
+  const { settings } = useAppSettings();
+  const supportPhone = settings.support_phone || "918883081855";
+  const formattedPhone = supportPhone.replace(/(\d{2})(\d{5})(\d{5})/, "+$1 $2 $3");
+
+  const waUrl = `https://api.whatsapp.com/send?phone=${supportPhone.replace(/\D/g, "")}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,7 +87,6 @@ const Support = () => {
 
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -102,7 +104,6 @@ const Support = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* FAQ Section */}
             <div className="lg:col-span-2 space-y-6">
               {faqs.map((section) => (
                 <motion.div
@@ -119,16 +120,14 @@ const Support = () => {
                   <div>
                     {section.questions.map((faq) => (
                       <FaqItem key={faq.q} q={faq.q} a={faq.a} />
-              ))}
-
-              {/* Contact Form */}
-              <ContactForm />
-            </div>
+                    ))}
+                  </div>
                 </motion.div>
               ))}
+
+              <ContactForm />
             </div>
 
-            {/* Contact Sidebar */}
             <div className="space-y-5">
               {/* WhatsApp Card */}
               <motion.div
@@ -144,17 +143,13 @@ const Support = () => {
                 <p className="text-xs text-muted-foreground mb-4">
                   Get instant help from our team. We typically respond within 5 minutes.
                 </p>
-                <a
-                  href={`https://wa.me/${whatsappNumber}?text=Hi%20AlbumPlus%20Team%2C%20I%20need%20help%20with%20...`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={waUrl} target="_blank" rel="noopener noreferrer">
                   <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-[hsl(0,0%,100%)] font-semibold rounded-xl gap-2">
                     <MessageCircle size={16} /> Start Chat
                   </Button>
                 </a>
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  {supportNumber} • Mon–Sat, 10 AM – 6 PM
+                  {formattedPhone} • Mon–Sat, 10 AM – 6 PM
                 </p>
               </motion.div>
 
@@ -172,8 +167,8 @@ const Support = () => {
                 <p className="text-xs text-muted-foreground mb-3">
                   For detailed queries, license issues, or business inquiries.
                 </p>
-                <a href="mailto:support@albumplus.in" className="text-sm text-accent font-medium hover:underline">
-                  support@albumplus.in
+                <a href={`mailto:${settings.support_email || "support@albumplus.in"}`} className="text-sm text-accent font-medium hover:underline">
+                  {settings.support_email || "support@albumplus.in"}
                 </a>
               </motion.div>
 
@@ -193,15 +188,9 @@ const Support = () => {
                 </p>
                 <div className="space-y-1.5">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Sales</span>
-                    <a href="tel:+918870997799" className="block text-sm text-accent font-medium hover:underline">
-                      {salesNumber}
-                    </a>
-                  </div>
-                  <div>
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Support</span>
-                    <a href="tel:+918883081855" className="block text-sm text-accent font-medium hover:underline">
-                      {supportNumber}
+                    <a href={`tel:+${supportPhone.replace(/\D/g, "")}`} className="block text-sm text-accent font-medium hover:underline">
+                      {formattedPhone}
                     </a>
                   </div>
                 </div>
@@ -236,7 +225,7 @@ const Support = () => {
       </main>
 
       <Footer />
-      <ChatWidget />
+      {settings.enable_chat_widget && <ChatWidget />}
     </div>
   );
 };

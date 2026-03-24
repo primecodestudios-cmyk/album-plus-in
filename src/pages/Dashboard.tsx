@@ -46,6 +46,7 @@ interface DownloadRecord {
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { settings: appSettings } = useAppSettings();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [licenses, setLicenses] = useState<License[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);

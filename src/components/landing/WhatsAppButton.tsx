@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WhatsAppButtonProps {
   phoneNumber?: string;
@@ -8,6 +9,7 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(true), 5000);
@@ -17,7 +19,28 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   const number = phoneNumber?.replace(/\D/g, "") || "";
   if (!number) return null;
 
-  const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
+  const handleClick = async () => {
+    setSending(true);
+    try {
+      // Call backend to send initial message via API
+      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+        body: {
+          number,
+          message: "Hi AlbumPlus Team, I need help with ...",
+          category: "manual",
+        },
+      });
+
+      // Regardless of API result, open WhatsApp chat as fallback
+      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      // Fallback: open WhatsApp directly
+      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    }
+    setSending(false);
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
@@ -40,15 +63,14 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
         )}
       </AnimatePresence>
 
-      <a
-        href={waUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={handleClick}
+        disabled={sending}
         aria-label="Chat on WhatsApp"
-        className="w-14 h-14 rounded-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-[hsl(0,0%,100%)] flex items-center justify-center shadow-elevated transition-all duration-200 hover:scale-110 active:scale-95"
+        className="w-14 h-14 rounded-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-[hsl(0,0%,100%)] flex items-center justify-center shadow-elevated transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-70"
       >
         <MessageCircle size={26} fill="currentColor" />
-      </a>
+      </button>
     </div>
   );
 }

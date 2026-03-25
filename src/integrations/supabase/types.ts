@@ -612,6 +612,132 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_api_configs: {
+        Row: {
+          api_method: string
+          api_token: string
+          api_url: string
+          created_at: string
+          failure_count: number
+          health_status: string
+          id: string
+          instance_id: string
+          is_active: boolean
+          label: string
+          last_failure_at: string | null
+          sender_number: string
+          sort_order: number
+          total_sent: number
+          updated_at: string
+        }
+        Insert: {
+          api_method?: string
+          api_token?: string
+          api_url?: string
+          created_at?: string
+          failure_count?: number
+          health_status?: string
+          id?: string
+          instance_id?: string
+          is_active?: boolean
+          label?: string
+          last_failure_at?: string | null
+          sender_number?: string
+          sort_order?: number
+          total_sent?: number
+          updated_at?: string
+        }
+        Update: {
+          api_method?: string
+          api_token?: string
+          api_url?: string
+          created_at?: string
+          failure_count?: number
+          health_status?: string
+          id?: string
+          instance_id?: string
+          is_active?: boolean
+          label?: string
+          last_failure_at?: string | null
+          sender_number?: string
+          sort_order?: number
+          total_sent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_logs: {
+        Row: {
+          category: string
+          channel: string | null
+          created_at: string
+          delivery_status: string
+          error_message: string | null
+          id: string
+          message_content: string
+          user_id: string | null
+          user_name: string | null
+          whatsapp_number: string
+        }
+        Insert: {
+          category?: string
+          channel?: string | null
+          created_at?: string
+          delivery_status?: string
+          error_message?: string | null
+          id?: string
+          message_content: string
+          user_id?: string | null
+          user_name?: string | null
+          whatsapp_number: string
+        }
+        Update: {
+          category?: string
+          channel?: string | null
+          created_at?: string
+          delivery_status?: string
+          error_message?: string | null
+          id?: string
+          message_content?: string
+          user_id?: string | null
+          user_name?: string | null
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
+      whatsapp_templates: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          template_name: string
+          template_text: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          template_name?: string
+          template_text?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          template_name?: string
+          template_text?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

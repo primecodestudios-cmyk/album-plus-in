@@ -36,9 +36,10 @@ import { AdminApiTokens } from "@/components/admin/AdminApiTokens";
 import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
+import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "settings";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -101,6 +102,7 @@ const AdminPanel = () => {
     { id: "api_tokens", label: "API Tokens", icon: Key },
     { id: "demo_videos", label: "Demo Videos", icon: Video },
     { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
+    { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -164,6 +166,7 @@ const AdminPanel = () => {
           {activeTab === "api_tokens" && <AdminApiTokens />}
           {activeTab === "demo_videos" && <AdminDemoVideos />}
           {activeTab === "chat_logs" && <AdminChatLogs />}
+          {activeTab === "whatsapp" && <AdminWhatsApp />}
           {activeTab === "settings" && <AdminSettings />}
         </motion.div>
       </div>

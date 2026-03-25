@@ -6,28 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function getWhatsAppCredentials(supabase: any) {
-  // Try env vars first, then fall back to app_settings table
-  let instanceId = Deno.env.get("WHATSAPP_INSTANCE_ID");
-  let accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
-
-  if (!instanceId || !accessToken) {
-    const { data } = await supabase
-      .from("app_settings")
-      .select("key, value")
-      .in("key", ["whatsapp_instance_id", "whatsapp_access_token"]);
-
-    if (data) {
-      for (const row of data) {
-        if (row.key === "whatsapp_instance_id" && row.value) instanceId = row.value;
-        if (row.key === "whatsapp_access_token" && row.value) accessToken = row.value;
-      }
-    }
-  }
-
-  return { instanceId, accessToken };
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -46,45 +24,30 @@ serve(async (req) => {
     // Save OTP to conversation
     const { error: updateErr } = await supabase
       .from("chat_conversations")
-      .update({
-        phone: phone,
-        otp_code: otp,
-        otp_verified: false,
-        otp_expires_at: expiresAt,
-      })
+      .update({ phone, otp_code: otp, otp_verified: false, otp_expires_at: expiresAt })
       .eq("id", conversation_id);
 
     if (updateErr) {
       return new Response(JSON.stringify({ error: updateErr.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Send OTP via WhatsApp
-    const { instanceId, accessToken } = await getWhatsAppCredentials(supabase);
+    // Send OTP via centralized send-whatsapp function
+    const cleanNum = phone.replace(/\D/g, "");
+    const message = `🔐 Your AlbumPlus verification code is: *${otp}*\n\nThis code expires in 5 minutes. Do not share it with anyone.`;
 
-    if (instanceId && accessToken) {
-      try {
-        const waRes = await fetch("https://chat2me.in/api/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            number: phone.replace(/\D/g, ""),
-            type: "text",
-            message: `🔐 Your AlbumPlus verification code is: *${otp}*\n\nThis code expires in 5 minutes. Do not share it with anyone.`,
-            instance_id: instanceId,
-            access_token: accessToken,
-          }),
-        });
-        const waData = await waRes.json();
-        console.log("WhatsApp OTP send result:", waData);
-      } catch (waErr) {
-        console.error("WhatsApp send error:", waErr);
-      }
-    } else {
-      console.warn("WhatsApp credentials not configured - OTP saved but not sent via WhatsApp");
-    }
+    const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({ number: cleanNum, message, category: "otp" }),
+    });
+
+    const waData = await waRes.json();
+    console.log("OTP send result:", waData);
 
     return new Response(
       JSON.stringify({ success: true, message: "OTP sent" }),

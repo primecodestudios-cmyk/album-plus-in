@@ -102,6 +102,7 @@ const AdminPanel = () => {
     { id: "api_tokens", label: "API Tokens", icon: Key },
     { id: "demo_videos", label: "Demo Videos", icon: Video },
     { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
+    { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

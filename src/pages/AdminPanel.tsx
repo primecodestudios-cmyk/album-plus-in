@@ -39,7 +39,7 @@ import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "settings";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {

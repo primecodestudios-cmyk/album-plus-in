@@ -5,7 +5,7 @@ import { ArrowLeftRight } from "lucide-react";
 const comparisons = [
   {
     label: "Wedding Album — Traditional to Modern",
-    description: "Manual 6-hour layout vs Album Plus 20-minute auto-design",
+    description: "Manual 6-hour layout vs FX MinuteAlbum 20-minute auto-design",
     beforeColor: "hsl(var(--muted))",
     afterColor: "hsl(var(--accent))",
     beforeStats: { time: "6 Hours", quality: "Basic", pages: "24 Pages" },
@@ -46,7 +46,7 @@ export function BeforeAfterSection() {
             See the <span className="text-gradient-gold">Difference</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Compare manual album designing vs Album Plus automated workflow.
+            Compare manual album designing vs FX MinuteAlbum automated workflow.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export function BeforeAfterSection() {
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {/* Before */}
             <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
-              <div className="text-xs font-bold text-destructive uppercase tracking-wider mb-4">❌ Without Album Plus</div>
+              <div className="text-xs font-bold text-destructive uppercase tracking-wider mb-4">❌ Without FX MinuteAlbum</div>
               <div className="aspect-[4/3] rounded-xl bg-muted/50 border border-border flex items-center justify-center mb-5">
                 <div className="text-center p-4">
                   <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
@@ -105,7 +105,7 @@ export function BeforeAfterSection() {
 
             {/* After */}
             <div className="bg-card rounded-2xl border border-accent/30 p-6 shadow-gold">
-              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-4">✅ With Album Plus</div>
+              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-4">✅ With FX MinuteAlbum</div>
               <div className="aspect-[4/3] rounded-xl bg-accent/5 border border-accent/20 flex items-center justify-center mb-5">
                 <div className="text-center p-4">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center mx-auto mb-3">

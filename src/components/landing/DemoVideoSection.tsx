@@ -43,7 +43,7 @@ export function DemoVideoSection() {
             Demo <span className="text-gradient-gold">Videos</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            See Album Plus in action — real workflows, real speed.
+            See FX MinuteAlbum in action — real workflows, real speed.
           </p>
         </div>
 

@@ -13,16 +13,16 @@ const faqs = [
   {
     category: "General",
     questions: [
-      { q: "What is Album Plus?", a: "Album Plus is India's #1 wedding album designing software. It helps photographers create stunning photo albums using smart automation tools, PSD template conversion, and 500+ templates — all compatible with Adobe Photoshop CS3 to CC 2026." },
-      { q: "Is Album Plus compatible with my Photoshop version?", a: "Yes! Album Plus supports all Adobe Photoshop versions from CS3 to CC 2026, including both 32-bit and 64-bit systems." },
+      { q: "What is FX MinuteAlbum?", a: "FX MinuteAlbum is India's #1 wedding album designing software. It helps photographers create stunning photo albums using smart automation tools, PSD template conversion, and 500+ templates — all compatible with Adobe Photoshop CS3 to CC 2026." },
+      { q: "Is FX MinuteAlbum compatible with my Photoshop version?", a: "Yes! FX MinuteAlbum supports all Adobe Photoshop versions from CS3 to CC 2026, including both 32-bit and 64-bit systems." },
       { q: "Can I try before buying?", a: "Absolutely! We offer a free demo version with limited features so you can evaluate the software before purchasing a license." },
-      { q: "Does Album Plus work on Mac?", a: "Currently, Album Plus is designed for Windows operating systems. Mac support is planned for future releases." },
+      { q: "Does FX MinuteAlbum work on Mac?", a: "Currently, FX MinuteAlbum is designed for Windows operating systems. Mac support is planned for future releases." },
     ],
   },
   {
     category: "License & Activation",
     questions: [
-      { q: "How do I activate my license?", a: "After purchasing, you'll receive a license key (format: ALBM-XXXX-XXXX-XXXX). Go to the Activate License page, enter your key and device ID, and click Activate. Your license will be bound to that device." },
+      { q: "How do I activate my license?", a: "After purchasing, you'll receive a license key (format: FXMA-XXXX-XXXX-XXXX). Go to the Activate License page, enter your key and device ID, and click Activate. Your license will be bound to that device." },
       { q: "Can I use my license on multiple devices?", a: "Each license key is bound to one device upon activation. If you need to switch devices, contact our support team for assistance." },
       { q: "What happens when my license expires?", a: "When your license expires, the software will switch to demo mode with limited features. You can renew anytime by purchasing a new plan from our website." },
       { q: "I lost my license key. What should I do?", a: "Log in to your dashboard to view your active license key. If you still can't find it, contact our support team with your purchase details." },
@@ -32,14 +32,14 @@ const faqs = [
     category: "Pricing & Payments",
     questions: [
       { q: "What payment methods do you accept?", a: "We accept UPI, credit/debit cards, net banking, and popular wallets. All payments are processed securely through trusted Indian payment gateways." },
-      { q: "Is there a refund policy?", a: "Since Album Plus is a digital product, refunds are not available after purchase. We strongly recommend trying the free demo version before buying. See our Refund Policy page for details." },
+      { q: "Is there a refund policy?", a: "Since FX MinuteAlbum is a digital product, refunds are not available after purchase. We strongly recommend trying the free demo version before buying. See our Refund Policy page for details." },
       { q: "Can I upgrade my plan?", a: "Yes! You can upgrade to a higher plan at any time. Contact our support team and we'll help you with the upgrade." },
     ],
   },
   {
     category: "Technical Support",
     questions: [
-      { q: "Album Plus is running slow. What should I do?", a: "Ensure your system meets minimum requirements (4GB RAM, dual-core processor). Close other heavy applications, and make sure you're running the latest version of Album Plus." },
+      { q: "FX MinuteAlbum is running slow. What should I do?", a: "Ensure your system meets minimum requirements (4GB RAM, dual-core processor). Close other heavy applications, and make sure you're running the latest version of FX MinuteAlbum." },
       { q: "I'm getting an error during installation.", a: "Try running the installer as Administrator. If the issue persists, temporarily disable your antivirus and try again. Contact support if the problem continues." },
       { q: "How do I update to the latest version?", a: "Visit the Downloads page to get the latest update patch. Download and install it over your existing installation — your settings and templates will be preserved." },
     ],
@@ -79,7 +79,7 @@ const Support = () => {
   const supportPhone = settings.support_phone || "918883081855";
   const formattedPhone = supportPhone.replace(/(\d{2})(\d{5})(\d{5})/, "+$1 $2 $3");
 
-  const waUrl = `https://api.whatsapp.com/send?phone=${supportPhone.replace(/\D/g, "")}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
+  const waUrl = `https://api.whatsapp.com/send?phone=${supportPhone.replace(/\D/g, "")}&text=${encodeURIComponent("Hi FXMinuteAlbum Team, I need help with ...")}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -167,8 +167,8 @@ const Support = () => {
                 <p className="text-xs text-muted-foreground mb-3">
                   For detailed queries, license issues, or business inquiries.
                 </p>
-                <a href={`mailto:${settings.support_email || "support@albumplus.in"}`} className="text-sm text-accent font-medium hover:underline">
-                  {settings.support_email || "support@albumplus.in"}
+                <a href={`mailto:${settings.support_email || "support@fxminutealbum.in"}`} className="text-sm text-accent font-medium hover:underline">
+                  {settings.support_email || "support@fxminutealbum.in"}
                 </a>
               </motion.div>
 

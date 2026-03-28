@@ -64,7 +64,7 @@ export function SmartFeaturesSection() {
             Powered by <span className="text-gradient-gold">Smart Automation</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Advanced automation features that make Album Plus the smartest album designing software in India.
+            Advanced automation features that make FX MinuteAlbum the smartest album designing software in India.
           </p>
         </div>
 

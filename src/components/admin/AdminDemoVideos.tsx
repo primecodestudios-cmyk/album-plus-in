@@ -244,7 +244,7 @@ export function AdminDemoVideos() {
           <div className="space-y-4 py-2">
             <div>
               <Label>Title *</Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g., Album Plus Full Demo" />
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g., FX MinuteAlbum Full Demo" />
             </div>
             <div>
               <Label>Description</Label>

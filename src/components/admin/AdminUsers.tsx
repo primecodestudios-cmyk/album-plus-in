@@ -58,7 +58,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
-const SYNC_URL_KEY = "albumplus_sync_url";
+const SYNC_URL_KEY = "fxminutealbum_sync_url";
 const INBOUND_SYNC_THROTTLE_MS = 25000;
 
 interface DeviceInfo {

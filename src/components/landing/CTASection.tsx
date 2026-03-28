@@ -21,7 +21,7 @@ export function CTASection() {
               Ready to Create <span className="text-gradient-gold">Beautiful</span> Albums?
             </h2>
             <p className="text-primary-foreground/70 text-base md:text-lg max-w-xl mx-auto mb-8">
-              Join thousands of photographers who trust Album Plus. Start your free
+              Join thousands of photographers who trust FX MinuteAlbum. Start your free
               14-day trial — no credit card required.
             </p>
             <Button

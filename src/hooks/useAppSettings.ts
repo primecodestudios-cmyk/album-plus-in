@@ -20,7 +20,7 @@ const defaults: AppSettings = {
   whatsapp_access_token: "",
   support_phone: "",
   support_email: "",
-  site_title: "AlbumPlus",
+  site_title: "FXMinuteAlbum",
 };
 
 export function useAppSettings() {
@@ -43,7 +43,7 @@ export function useAppSettings() {
         whatsapp_access_token: map.whatsapp_access_token || "",
         support_phone: map.support_phone || "",
         support_email: map.support_email || "",
-        site_title: map.site_title || "AlbumPlus",
+        site_title: map.site_title || "FXMinuteAlbum",
       });
     }
     setLoading(false);

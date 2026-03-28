@@ -80,7 +80,7 @@ export function HeroSection() {
             <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-border">
               <img
                 src={heroMockup}
-                alt="Album Plus software interface showing professional photo album design"
+                alt="FX MinuteAlbum software interface showing professional photo album design"
                 className="w-full h-auto"
                 loading="eager"
               />

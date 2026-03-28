@@ -45,13 +45,13 @@ const Login = () => {
       >
         <div className="text-center mb-8">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            Album<span className="text-gradient-gold">Plus</span>
+            FX Minute<span className="text-gradient-gold">Album</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">
             Welcome Back
           </h1>
           <p className="text-sm text-muted-foreground">
-            Log in to your Album Plus account
+            Log in to your FX MinuteAlbum account
           </p>
         </div>
 

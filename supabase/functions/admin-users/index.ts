@@ -193,7 +193,7 @@ serve(async (req) => {
                 headers: {
                   "Content-Type": "application/json",
                   "x-sync-secret": syncSecret,
-                  "User-Agent": "AlbumPlus-Admin/1.0",
+                  "User-Agent": "FXMinuteAlbum-Admin/1.0",
                 },
                 body: JSON.stringify(syncPayload),
                 signal: AbortSignal.timeout(15000),
@@ -305,7 +305,7 @@ serve(async (req) => {
               method,
               headers: {
                 "x-sync-secret": syncSecret,
-                "User-Agent": "AlbumPlus-Admin/1.0",
+                "User-Agent": "FXMinuteAlbum-Admin/1.0",
               },
               signal: AbortSignal.timeout(15000),
             };

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck, Key, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldCheck, Mail, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
@@ -106,7 +106,7 @@ const ActivateLicense = () => {
             {/* License Key */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
-                <Key size={14} className="text-accent" /> License Key
+                <Mail size={14} className="text-accent" /> Mobile or Mail ID
               </label>
               <input
                 value={licenseKey}
@@ -152,7 +152,7 @@ const ActivateLicense = () => {
             {/* Info cards */}
             <div className="grid grid-cols-3 gap-3 pt-2">
               {[
-                { icon: Key, label: "License Key", desc: "Unique activation key" },
+                { icon: Mail, label: "Mobile / Mail ID", desc: "Unique activation key" },
                 { icon: Monitor, label: "Device ID", desc: "Hardware fingerprint" },
                 { icon: CalendarClock, label: "Expiry Date", desc: "Auto-checked" },
               ].map((item) => (

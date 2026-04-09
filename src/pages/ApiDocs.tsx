@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Send, Copy, Check, ChevronDown, ChevronRight, Code2, FileJson,
   Zap, Shield, Server, BookOpen, Monitor, Key, Activity, CreditCard,
-  Smartphone, AlertTriangle, Clock, Users, HardDrive, RefreshCw, Terminal
+  Smartphone, AlertTriangle, Clock, Users, HardDrive, RefreshCw, Terminal,
+  Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";

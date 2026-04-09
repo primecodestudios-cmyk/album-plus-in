@@ -36,6 +36,8 @@ interface AppSettings {
   chatbot_system_prompt: string;
   app_version: string;
   intro_video_id: string;
+  chatbot_voice_enabled: boolean;
+  chatbot_otp_required: boolean;
 }
 
 const defaultSettings: AppSettings = {
@@ -53,6 +55,8 @@ const defaultSettings: AppSettings = {
   chatbot_system_prompt: "",
   app_version: "1.0.0",
   intro_video_id: "",
+  chatbot_voice_enabled: true,
+  chatbot_otp_required: true,
 };
 
 // Keys stored in DB (app_settings table)
@@ -68,6 +72,8 @@ const DB_KEYS = [
   "chatbot_system_prompt",
   "app_version",
   "intro_video_id",
+  "chatbot_voice_enabled",
+  "chatbot_otp_required",
 ];
 
 export function AdminSettings() {

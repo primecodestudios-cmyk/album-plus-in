@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 const ForgotPassword = () => {
   const { toast } = useToast();

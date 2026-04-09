@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Lock } from "lucide-react";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 const PrivacyPolicy = () => (
   <div className="min-h-screen bg-background">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, RotateCcw, AlertTriangle } from "lucide-react";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 const RefundPolicy = () => (
   <div className="min-h-screen bg-background">

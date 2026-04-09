@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 const TermsAndConditions = () => (
   <div className="min-h-screen bg-background">

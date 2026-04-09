@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Key, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface ActivationResult {
   success: boolean;

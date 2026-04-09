@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 export function Footer() {
   return (
@@ -6,8 +7,9 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <div className="font-display text-lg font-bold text-foreground mb-3">
-              Alplum <span className="text-gradient-gold">Plus</span>
+            <div className="flex items-center gap-2 mb-3">
+              <img src={alplumLogo} alt="Alplum Plus" className="h-8 w-8" loading="lazy" width={512} height={512} />
+              <span className="font-display text-lg font-bold text-foreground">Alplum <span className="text-gradient-gold">Plus</span></span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Professional photo album design software for photographers worldwide.

@@ -29,6 +29,7 @@ export function Footer() {
               <li><a href="/#features" className="text-sm text-muted-foreground hover:text-accent transition-colors">Features</a></li>
               <li><a href="/#pricing" className="text-sm text-muted-foreground hover:text-accent transition-colors">Pricing</a></li>
               <li><Link to="/store" className="text-sm text-muted-foreground hover:text-accent transition-colors">PSD Store</Link></li>
+              <li><Link to="/videos" className="text-sm text-muted-foreground hover:text-accent transition-colors">Video Tutorials</Link></li>
               <li><Link to="/downloads" className="text-sm text-muted-foreground hover:text-accent transition-colors">Downloads</Link></li>
             </ul>
           </div>

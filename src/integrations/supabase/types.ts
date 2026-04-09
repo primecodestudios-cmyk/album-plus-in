@@ -243,6 +243,7 @@ export type Database = {
       }
       demo_videos: {
         Row: {
+          category: string
           created_at: string
           description: string | null
           duration: string | null
@@ -254,6 +255,7 @@ export type Database = {
           youtube_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string | null
           duration?: string | null
@@ -265,6 +267,7 @@ export type Database = {
           youtube_id: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string | null
           duration?: string | null

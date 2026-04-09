@@ -1,8 +1,10 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { LimitedTimeBanner } from "@/components/landing/LimitedTimeBanner";
 import { HeroSlider } from "@/components/landing/HeroSlider";
+import { IntroVideoSection } from "@/components/landing/IntroVideoSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SmartFeaturesSection } from "@/components/landing/SmartFeaturesSection";
+import { CustomerStatsSection } from "@/components/landing/CustomerStatsSection";
 import { BeforeAfterSection } from "@/components/landing/BeforeAfterSection";
 import { DemoVideoSection } from "@/components/landing/DemoVideoSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -25,8 +27,10 @@ const Index = () => {
       <LimitedTimeBanner />
       <main>
         <HeroSlider />
+        <IntroVideoSection />
         <FeaturesSection />
         <SmartFeaturesSection />
+        <CustomerStatsSection />
         <BeforeAfterSection />
         <DemoVideoSection />
         <TestimonialsSection />

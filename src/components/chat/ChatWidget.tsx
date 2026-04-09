@@ -488,8 +488,8 @@ export function ChatWidget() {
               <>
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                  {/* Welcome + Templates */}
-                  {messages.length === 0 && !pendingMessage && (!otpRequired || otpStep === "verified") && (
+                  {/* Welcome + Templates (show always when no messages, but templates trigger OTP if needed) */}
+                  {messages.length === 0 && !pendingMessage && (
                     <div className="space-y-4">
                       <div className="flex gap-2">
                         <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -497,6 +497,9 @@ export function ChatWidget() {
                         </div>
                         <div className="bg-muted rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-foreground">
                           👋 Hi! I'm <strong>Album Plus AI Assistant</strong>. How can I help you today? Pick a topic below or type your question!
+                          {otpRequired && otpStep !== "verified" && (
+                            <p className="text-xs text-muted-foreground mt-1">📱 WhatsApp verification required before chatting</p>
+                          )}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">

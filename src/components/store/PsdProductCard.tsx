@@ -13,8 +13,10 @@ export function PsdProductCard({ template, onSelect }: PsdProductCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.97 }}
       className="group bg-card rounded-2xl border border-border overflow-hidden shadow-card hover:shadow-gold hover:border-accent/30 transition-all duration-300 cursor-pointer"
       onClick={() => onSelect(template)}
     >

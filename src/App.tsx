@@ -20,6 +20,7 @@ import RefundPolicy from "./pages/RefundPolicy.tsx";
 import Support from "./pages/Support.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import ApiDocs from "./pages/ApiDocs.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,8 @@ const AnimatedRoutes = () => {
         <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
         <Route path="/refund-policy" element={<PageTransition><RefundPolicy /></PageTransition>} />
         <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
+        <Route path="/api/docs" element={<PageTransition><ApiDocs /></PageTransition>} />
+        <Route path="/api/test" element={<PageTransition><ApiDocs /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

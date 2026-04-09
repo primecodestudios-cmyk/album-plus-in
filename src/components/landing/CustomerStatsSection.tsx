@@ -38,7 +38,7 @@ function AnimatedCounter({ end, suffix = "", prefix = "", duration = 2000 }: Cou
   }, [end, duration]);
 
   return (
-    <div ref={ref} className="font-display text-2xl sm:text-3xl md:text-5xl font-bold text-accent tabular-nums leading-none">
+    <div ref={ref} className="font-display text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold text-accent tabular-nums leading-none">
       {prefix}{count.toLocaleString()}{suffix}
     </div>
   );

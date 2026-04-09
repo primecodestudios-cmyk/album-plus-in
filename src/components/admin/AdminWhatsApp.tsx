@@ -88,7 +88,7 @@ export function AdminWhatsApp() {
 
   // Test state
   const [testNumber, setTestNumber] = useState("");
-  const [testMessage, setTestMessage] = useState("✅ FXMinuteAlbum WhatsApp API test successful!");
+  const [testMessage, setTestMessage] = useState("✅ AlbumPlus WhatsApp API test successful!");
   const [testing, setTesting] = useState(false);
 
   // Messaging state
@@ -212,7 +212,7 @@ export function AdminWhatsApp() {
   const addTemplate = async () => {
     const { error } = await supabase.from("whatsapp_templates" as any).insert({
       category: "general", template_name: "New Template",
-      template_text: "Hello {{name}}, welcome to FXMinuteAlbum!",
+      template_text: "Hello {{name}}, welcome to AlbumPlus!",
     } as any);
     if (!error) { fetchTemplates(); toast({ title: "Template added" }); }
   };

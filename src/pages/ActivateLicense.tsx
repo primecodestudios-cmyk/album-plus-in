@@ -76,7 +76,7 @@ const ActivateLicense = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="font-display text-xl font-bold text-foreground">
-            FX Minute<span className="text-gradient-gold">Album</span>
+            Album <span className="text-gradient-gold">Plus</span>
           </Link>
           <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={16} /> Back to Home
@@ -95,7 +95,7 @@ const ActivateLicense = () => {
               License <span className="text-gradient-gold">Activation</span>
             </h1>
             <p className="text-sm text-muted-foreground mt-2">
-              Enter your license key and device ID to activate FXMinuteAlbum
+              Enter your license key and device ID to activate AlbumPlus
             </p>
           </div>
 
@@ -109,7 +109,7 @@ const ActivateLicense = () => {
               <input
                 value={licenseKey}
                 onChange={(e) => setLicenseKey(formatKey(e.target.value))}
-                placeholder="FXMA-XXXX-XXXX-XXXX"
+                placeholder="ALBM-XXXX-XXXX-XXXX"
                 maxLength={19}
                 className="w-full h-12 px-4 rounded-xl bg-secondary border border-border text-foreground font-mono text-lg tracking-wider text-center focus:outline-none focus:ring-2 focus:ring-accent/40 placeholder:text-muted-foreground/50"
               />

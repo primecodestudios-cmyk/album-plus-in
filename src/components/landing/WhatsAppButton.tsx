@@ -26,17 +26,17 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
         body: {
           number,
-          message: "Hi FXMinuteAlbum Team, I need help with ...",
+          message: "Hi AlbumPlus Team, I need help with ...",
           category: "manual",
         },
       });
 
       // Regardless of API result, open WhatsApp chat as fallback
-      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi FXMinuteAlbum Team, I need help with ...")}`;
+      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
       window.open(waUrl, "_blank", "noopener,noreferrer");
     } catch {
       // Fallback: open WhatsApp directly
-      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi FXMinuteAlbum Team, I need help with ...")}`;
+      const waUrl = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent("Hi AlbumPlus Team, I need help with ...")}`;
       window.open(waUrl, "_blank", "noopener,noreferrer");
     }
     setSending(false);

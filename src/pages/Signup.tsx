@@ -64,13 +64,13 @@ const Signup = () => {
       >
         <div className="text-center mb-8">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            FX Minute<span className="text-gradient-gold">Album</span>
+            Album <span className="text-gradient-gold">Plus</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">
             Create Your Account
           </h1>
           <p className="text-sm text-muted-foreground">
-            Get started with FX MinuteAlbum today
+            Get started with Album Plus today
           </p>
         </div>
 

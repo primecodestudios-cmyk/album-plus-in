@@ -39,7 +39,8 @@ const ForgotPassword = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="font-display text-2xl font-bold text-foreground">
+          <Link to="/" className="inline-flex items-center gap-2 font-display text-2xl font-bold text-foreground">
+            <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10" />
             Alplum <span className="text-gradient-gold">Plus</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">

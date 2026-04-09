@@ -64,7 +64,8 @@ const ResetPassword = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md text-center">
-          <Link to="/" className="font-display text-2xl font-bold text-foreground">
+          <Link to="/" className="inline-flex items-center gap-2 font-display text-2xl font-bold text-foreground">
+            <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10" />
             Alplum <span className="text-gradient-gold">Plus</span>
           </Link>
           <div className="bg-card rounded-2xl border border-border p-8 shadow-card mt-8">

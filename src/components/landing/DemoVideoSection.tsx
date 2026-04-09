@@ -58,8 +58,10 @@ export function DemoVideoSection() {
                 key={video.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.97 }}
                 className="group bg-card rounded-2xl border border-border shadow-card hover:border-accent/30 hover:shadow-gold transition-all duration-300 overflow-hidden cursor-pointer"
                 onClick={() => setActiveVideo(video.youtube_id)}
               >

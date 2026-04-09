@@ -51,9 +51,11 @@ export function PlatformSection() {
               key={p.title}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative bg-card rounded-2xl p-6 md:p-8 border border-border shadow-card hover:border-accent/30 hover:shadow-gold transition-all duration-300 text-center"
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.97 }}
+              className="relative bg-card rounded-2xl p-6 md:p-8 border border-border shadow-card hover:border-accent/30 hover:shadow-gold transition-all duration-300 text-center cursor-default"
             >
               <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5">
                 <p.icon size={30} className="text-accent" />

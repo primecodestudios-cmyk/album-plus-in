@@ -14,6 +14,7 @@ import {
   Settings,
   CalendarClock,
   CreditCard,
+  Code2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -59,6 +60,7 @@ const Dashboard = () => {
   const [downloads, setDownloads] = useState<DownloadRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -68,12 +70,13 @@ const Dashboard = () => {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-    const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes] = await Promise.all([
+    const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes, devRoleRes] = await Promise.all([
       supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
       supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
       supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),
       supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+      supabase.rpc("has_role", { _user_id: user.id, _role: "developer" as any }),
     ]);
 
     if (profileRes.data) setProfile(profileRes.data);
@@ -81,6 +84,7 @@ const Dashboard = () => {
     if (purchasesRes.data) setPurchases(purchasesRes.data);
     if (downloadsRes.data) setDownloads(downloadsRes.data);
     if (roleRes.data) setIsAdmin(true);
+    if (devRoleRes.data) setIsDeveloper(true);
     setLoading(false);
   }, [user]);
 
@@ -118,6 +122,11 @@ const Dashboard = () => {
             {isAdmin && (
               <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-2 text-destructive font-semibold">
                 <Settings size={16} /> Admin Panel
+              </Button>
+            )}
+            {(isAdmin || isDeveloper) && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/api/docs")} className="gap-2 text-accent font-semibold">
+                <Code2 size={16} /> API Docs
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">

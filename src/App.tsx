@@ -13,7 +13,7 @@ import Login from "./pages/Login.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import DownloadCenter from "./pages/DownloadCenter.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
-import ActivateLicense from "./pages/ActivateLicense.tsx";
+
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import RefundPolicy from "./pages/RefundPolicy.tsx";
@@ -39,7 +39,7 @@ const AnimatedRoutes = () => {
         <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
         <Route path="/downloads" element={<PageTransition><DownloadCenter /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
-        <Route path="/activate" element={<PageTransition><ActivateLicense /></PageTransition>} />
+        
         <Route path="/terms" element={<PageTransition><TermsAndConditions /></PageTransition>} />
         <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
         <Route path="/refund-policy" element={<PageTransition><RefundPolicy /></PageTransition>} />

@@ -7,6 +7,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  ta: "Tamil (தமிழ்)",
+  en: "English",
+  hi: "Hindi (हिन्दी)",
+  te: "Telugu (తెలుగు)",
+  kn: "Kannada (ಕನ್ನಡ)",
+  ml: "Malayalam (മലയാളം)",
+};
+
 const DEFAULT_PROMPT = `You are Album Plus AI Assistant — a friendly, knowledgeable customer support chatbot for Album Plus, India's #1 wedding album designing software.
 
 About Album Plus:
@@ -15,16 +24,29 @@ About Album Plus:
 - Features: smart automation tools, PSD template conversion, 500+ templates
 - Free demo version available with limited features
 
+License & Activation:
+- No serial key system — activation is done via login and admin approval
+- Users register with their mobile number or email
+- Registration is PENDING until manually activated by admin or upon payment
+- Each license is bound to specific devices via hardware-based Device ID
+
+Pricing & Payment:
+- Accepts UPI, credit/debit cards, net banking, wallets
+- Refund only if the software does NOT work on the user's system
+- Otherwise, no refund (recommend trying demo first)
+- Plan upgrades available via support
+
 Support Contacts:
 - WhatsApp: +91 88830 81855
-- Email: support@alplumplus.in
+- Sales: +91 88709 97799
+- Email: support@albumplus.in
+- Hours: Mon–Sat, 10 AM – 6 PM IST
 
-Guidelines:
-- Be concise, friendly, and helpful
-- Answer in the same language the user writes in
-- If you don't know something, direct them to WhatsApp or email support
-- Never make up pricing or feature details
-- Use markdown formatting for clarity`;
+If user asks for a demo, suggest visiting the Video Page.
+If user asks about pricing, explain the available plans.
+If user seems confused, suggest contacting support.
+Always respond politely, even if the user is rude.
+Use markdown formatting for clarity.`;
 
 async function getSystemPrompt(): Promise<string> {
   try {
@@ -49,11 +71,15 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = await getSystemPrompt();
+
+    // Add language instruction
+    const langName = LANGUAGE_NAMES[language] || "English";
+    const languageInstruction = `\n\nIMPORTANT: The user has selected "${langName}" as their preferred language. You MUST respond ONLY in ${langName}. Do not mix languages unless the user explicitly uses another language. Keep your entire response in ${langName}.`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -66,7 +92,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + languageInstruction },
             ...messages,
           ],
           stream: true,

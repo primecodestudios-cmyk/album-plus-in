@@ -214,15 +214,29 @@ const Dashboard = () => {
               ))}
             </div>
             {remainingDays <= 0 && (
-              <div className="mt-4 p-3 rounded-xl bg-destructive/5 border border-destructive/20 text-sm text-destructive flex items-center gap-2">
-                <Clock size={16} />
-                Your license has expired. Please renew to continue using the software.
+              <div className="mt-4 p-3 rounded-xl bg-destructive/5 border border-destructive/20 text-sm text-destructive flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} />
+                  Your license has expired. Please renew to continue using the software.
+                </div>
+                <a href="/#pricing">
+                  <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl">
+                    <CreditCard size={14} /> Renew Now
+                  </Button>
+                </a>
               </div>
             )}
-            {remainingDays > 0 && remainingDays <= 7 && (
-              <div className="mt-4 p-3 rounded-xl bg-[hsl(45,100%,51%)]/5 border-[hsl(45,100%,51%)]/20 border text-sm text-[hsl(45,100%,51%)] flex items-center gap-2">
-                <Clock size={16} />
-                Your license expires in {remainingDays} days. Consider renewing soon.
+            {remainingDays > 0 && remainingDays <= 30 && (
+              <div className="mt-4 p-3 rounded-xl bg-[hsl(45,100%,51%)]/5 border-[hsl(45,100%,51%)]/20 border text-sm text-[hsl(45,100%,51%)] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} />
+                  Your license expires in {remainingDays} days.
+                </div>
+                <a href="/#pricing">
+                  <Button size="sm" variant="outline" className="gap-2 rounded-xl border-accent/30 text-accent hover:bg-accent/10">
+                    <CreditCard size={14} /> Renew
+                  </Button>
+                </a>
               </div>
             )}
           </motion.div>

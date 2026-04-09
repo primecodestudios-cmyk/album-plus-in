@@ -8,7 +8,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10" loading="lazy" width={512} height={512} />
+              <img src={alplumLogo} alt="Alplum Plus" className="h-11 w-11" loading="lazy" width={512} height={512} />
               <span className="font-display text-lg font-bold text-foreground">Alplum <span className="text-gradient-gold">Plus</span></span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">

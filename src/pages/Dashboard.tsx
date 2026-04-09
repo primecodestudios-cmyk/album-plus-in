@@ -15,12 +15,15 @@ import {
   CalendarClock,
   CreditCard,
   Code2,
+  MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { DeviceManagement } from "@/components/dashboard/DeviceManagement";
+import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
+import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
@@ -140,6 +143,9 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Profile Completion Banner for old users */}
+        <ProfileCompletionBanner />
+
         {/* Welcome */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
@@ -341,6 +347,11 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground py-4 text-center">No downloads yet</p>
             )}
           </motion.div>
+        </div>
+
+        {/* Support Tickets */}
+        <div className="mt-6">
+          <SupportTickets />
         </div>
       </main>
       {appSettings.enable_chat_widget && <ChatWidget />}

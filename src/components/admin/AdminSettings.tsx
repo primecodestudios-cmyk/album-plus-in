@@ -425,6 +425,32 @@ export function AdminSettings() {
 
           <div className="flex items-center justify-between py-2 border-t border-border">
             <div>
+              <p className="font-medium text-foreground flex items-center gap-2">
+                <Mic size={16} className="text-accent" /> Voice Input/Output
+              </p>
+              <p className="text-sm text-muted-foreground">Enable mic input and speaker output in chatbot</p>
+            </div>
+            <Switch
+              checked={settings.chatbot_voice_enabled}
+              onCheckedChange={(v) => update("chatbot_voice_enabled", v)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t border-border">
+            <div>
+              <p className="font-medium text-foreground flex items-center gap-2">
+                <Phone size={16} className="text-green-500" /> OTP Verification
+              </p>
+              <p className="text-sm text-muted-foreground">Require WhatsApp OTP before chatting</p>
+            </div>
+            <Switch
+              checked={settings.chatbot_otp_required}
+              onCheckedChange={(v) => update("chatbot_otp_required", v)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between py-2 border-t border-border">
+            <div>
               <p className="font-medium text-foreground">WhatsApp Button</p>
               <p className="text-sm text-muted-foreground">Show floating WhatsApp contact button</p>
             </div>

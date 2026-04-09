@@ -332,7 +332,26 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* Feature Toggles */}
+      {/* AI Chatbot Prompt Editor */}
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Bot size={20} className="text-emerald-500" /> AI Chatbot Prompt
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Edit the system prompt that controls the AI chatbot's behavior. Changes take effect on the next chat session.
+        </p>
+        <Textarea
+          rows={12}
+          placeholder="Enter the AI chatbot system prompt..."
+          value={settings.chatbot_system_prompt}
+          onChange={(e) => update("chatbot_system_prompt", e.target.value)}
+          className="font-mono text-sm"
+        />
+        <p className="text-xs text-muted-foreground">
+          Tip: Include product details, support contacts, pricing info, and behavior guidelines.
+        </p>
+      </div>
+
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Bell size={20} className="text-amber-500" /> Feature Toggles

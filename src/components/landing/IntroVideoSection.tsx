@@ -46,7 +46,7 @@ export function IntroVideoSection() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden border border-border shadow-elevated group"
+          className="relative max-w-5xl mx-auto rounded-xl md:rounded-2xl overflow-hidden border border-border shadow-elevated group"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30 z-10 pointer-events-none" />
 
@@ -60,11 +60,11 @@ export function IntroVideoSection() {
             />
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 z-20">
-            <h3 className="font-display text-lg md:text-2xl font-bold text-foreground drop-shadow-lg">
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-10 z-20">
+            <h3 className="font-display text-sm md:text-2xl font-bold text-foreground drop-shadow-lg">
               Alplum Plus — Smart Album Designing Software
             </h3>
-            <p className="text-sm text-muted-foreground mt-1 drop-shadow-lg">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1 drop-shadow-lg">
               Auto layout • Multi-camera • Batch processing • Professional output
             </p>
           </div>

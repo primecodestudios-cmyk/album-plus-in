@@ -18,18 +18,18 @@ export function Footer() {
       });
   }, []);
   return (
-    <footer className="border-t border-border py-12">
+    <footer className="border-t border-border py-10 md:py-12">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="flex flex-col items-center text-center md:text-left md:items-start md:grid md:grid-cols-4 gap-8"
         >
-          <div className="col-span-2 md:col-span-1">
+          <div className="w-full flex flex-col items-center md:items-start">
             <div className="flex items-center gap-2 mb-3">
-              <img src={alplumLogo} alt="Alplum Plus" className="h-11 w-11" loading="lazy" width={512} height={512} />
+              <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10 md:h-11 md:w-11" loading="lazy" width={512} height={512} />
               <span className="font-display text-lg font-bold text-foreground">
                 Alplum <span className="text-gradient-gold">Plus</span>
                 {appVersion && (
@@ -37,12 +37,12 @@ export function Footer() {
                 )}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Professional photo album design software for photographers worldwide.
             </p>
           </div>
 
-          <div>
+          <div className="w-full">
             <h4 className="font-display font-semibold text-foreground text-sm mb-3">Product</h4>
             <ul className="space-y-2">
               <li><a href="/#features" className="text-sm text-muted-foreground hover:text-accent transition-colors">Features</a></li>
@@ -53,7 +53,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="w-full">
             <h4 className="font-display font-semibold text-foreground text-sm mb-3">Company</h4>
             <ul className="space-y-2">
               <li><Link to="/support" className="text-sm text-muted-foreground hover:text-accent transition-colors">Support</Link></li>
@@ -62,7 +62,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="w-full">
             <h4 className="font-display font-semibold text-foreground text-sm mb-3">Legal</h4>
             <ul className="space-y-2">
               <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-accent transition-colors">Terms & Conditions</Link></li>
@@ -77,9 +77,10 @@ export function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground"
+          className="mt-8 pt-6 border-t border-border flex flex-col items-center gap-3 text-xs text-muted-foreground text-center"
         >
-          <span>© 2026 AlbumPlus{appVersion && ` — Version v${appVersion}`}. All rights reserved. Developed by <a href="https://fxtechie.in" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">FX Techie</a></span>
+          <span>© 2026 Album Plus{appVersion && ` — Version v${appVersion}`}. All rights reserved.</span>
+          <span>Developed by <a href="https://fxtechie.in" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">FX Techie</a></span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-accent transition-colors">Terms</Link>

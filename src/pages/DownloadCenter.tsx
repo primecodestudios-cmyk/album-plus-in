@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import { Button } from "@/components/ui/button";
+import { DownloadSectionSkeleton } from "@/components/skeletons/PageSkeletons";
 import {
   Download,
   Monitor,

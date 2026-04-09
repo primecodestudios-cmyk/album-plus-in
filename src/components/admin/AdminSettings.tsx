@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Settings,
   MessageSquare,
@@ -17,6 +18,7 @@ import {
   Shield,
   Bell,
   Palette,
+  Bot,
 } from "lucide-react";
 
 interface AppSettings {

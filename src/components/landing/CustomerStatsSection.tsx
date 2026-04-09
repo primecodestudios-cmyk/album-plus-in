@@ -48,7 +48,7 @@ const stats = [
   { icon: Users, end: 2000, suffix: "+", label: "Customers Using", description: "Active photographers worldwide" },
   { icon: Image, end: 50000, suffix: "+", label: "Album Sheets Designed", description: "Professional quality albums" },
   { icon: Camera, end: 1000000, suffix: "+", prefix: "", label: "Photos Processed", description: "High-resolution images handled" },
-  { icon: Globe, end: 3, suffix: "", label: "Countries", description: "India 🇮🇳 • Malaysia 🇲🇾 • Singapore 🇸🇬" },
+  { icon: Globe, end: 3, suffix: "", label: "Countries", description: "India • Malaysia • Singapore" },
 ];
 
 export function CustomerStatsSection() {

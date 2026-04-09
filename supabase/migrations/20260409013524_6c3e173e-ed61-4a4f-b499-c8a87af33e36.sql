@@ -1,0 +1,1 @@
+UPDATE public.demo_videos SET title = REPLACE(title, 'Album Plus', 'FX MinuteAlbum') WHERE title ILIKE '%Album Plus%';

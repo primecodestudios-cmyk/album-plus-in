@@ -41,7 +41,7 @@ export function PlatformSection() {
             More Than Just <span className="text-gradient-gold">Software</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Album Plus is a complete ecosystem — SaaS platform, PSD marketplace, and software sales hub, all in one.
+            Alplum Plus is a complete ecosystem — SaaS platform, PSD marketplace, and software sales hub, all in one.
           </p>
         </div>
 

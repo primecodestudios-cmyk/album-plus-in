@@ -334,7 +334,7 @@ export function AdminEnquiries() {
                     className="text-muted-foreground hover:text-accent hover:bg-accent/10"
                   >
                     <a
-                      href={`https://api.whatsapp.com/send?phone=${enquiry.phone.replace(/\D/g, "")}&text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                      href={`https://api.whatsapp.com/send?phone=${enquiry.phone.replace(/\D/g, "")}&text=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Alplum Plus regarding "${enquiry.subject}".\n\n`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -349,7 +349,7 @@ export function AdminEnquiries() {
                   className="text-muted-foreground hover:text-accent hover:bg-accent/10"
                 >
                   <a
-                    href={`mailto:${enquiry.email}?subject=Re: ${encodeURIComponent(enquiry.subject)}&body=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Album Plus regarding "${enquiry.subject}".\n\n`)}`}
+                    href={`mailto:${enquiry.email}?subject=Re: ${encodeURIComponent(enquiry.subject)}&body=${encodeURIComponent(`Hi ${enquiry.name},\n\nThank you for contacting Alplum Plus regarding "${enquiry.subject}".\n\n`)}`}
                   >
                     <Mail size={16} />
                   </a>

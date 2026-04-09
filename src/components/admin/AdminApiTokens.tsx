@@ -296,7 +296,7 @@ export function AdminApiTokens() {
                 id="token-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g., albumplus, cpanel-sync"
+                placeholder="e.g., alplumplus, cpanel-sync"
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               />
             </div>

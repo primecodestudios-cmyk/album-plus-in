@@ -70,7 +70,7 @@ export function ExitPopup() {
               Wait! Don't Leave Empty-Handed 🎁
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Download the <strong className="text-foreground">Free Demo</strong> and try Album Plus with no commitment. Plus get a special discount on your first purchase!
+              Download the <strong className="text-foreground">Free Demo</strong> and try Alplum Plus with no commitment. Plus get a special discount on your first purchase!
             </p>
 
             <div className="space-y-3">

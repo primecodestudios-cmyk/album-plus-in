@@ -64,13 +64,13 @@ const Signup = () => {
       >
         <div className="text-center mb-8">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            Album <span className="text-gradient-gold">Plus</span>
+            Alplum <span className="text-gradient-gold">Plus</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">
             Create Your Account
           </h1>
           <p className="text-sm text-muted-foreground">
-            Get started with Album Plus today
+            Get started with Alplum Plus today
           </p>
         </div>
 

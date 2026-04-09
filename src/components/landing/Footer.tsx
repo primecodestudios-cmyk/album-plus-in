@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <div className="font-display text-lg font-bold text-foreground mb-3">
-              Album <span className="text-gradient-gold">Plus</span>
+              Alplum <span className="text-gradient-gold">Plus</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Professional photo album design software for photographers worldwide.
@@ -44,7 +44,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <span>© 2026 Album Plus. All rights reserved.</span>
+          <span>© 2026 Alplum Plus. All rights reserved.</span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-accent transition-colors">Terms</Link>

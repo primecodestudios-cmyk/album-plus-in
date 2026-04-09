@@ -6,7 +6,7 @@ const TermsAndConditions = () => (
     <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-display text-xl font-bold text-foreground">
-          Album <span className="text-gradient-gold">Plus</span>
+          Alplum <span className="text-gradient-gold">Plus</span>
         </Link>
         <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> Back to Home
@@ -28,12 +28,12 @@ const TermsAndConditions = () => (
       <div className="prose-custom space-y-6 text-sm text-muted-foreground leading-relaxed">
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">1. Acceptance of Terms</h2>
-          <p>By downloading, installing, or using Album Plus software ("Software"), you agree to be bound by these Terms & Conditions. If you do not agree, do not use the Software.</p>
+          <p>By downloading, installing, or using Alplum Plus software ("Software"), you agree to be bound by these Terms & Conditions. If you do not agree, do not use the Software.</p>
         </section>
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">2. License Grant</h2>
-          <p>Album Plus grants you a non-exclusive, non-transferable, revocable license to use the Software for personal or commercial photo album design purposes, subject to the terms of your purchased plan. Each license key is valid for one device only unless otherwise specified in your plan.</p>
+          <p>Alplum Plus grants you a non-exclusive, non-transferable, revocable license to use the Software for personal or commercial photo album design purposes, subject to the terms of your purchased plan. Each license key is valid for one device only unless otherwise specified in your plan.</p>
         </section>
 
         <section>
@@ -48,12 +48,12 @@ const TermsAndConditions = () => (
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">4. Intellectual Property</h2>
-          <p>All content, design, graphics, compilation, and other materials related to Album Plus are the intellectual property of Album Plus and are protected under applicable Indian copyright and trademark laws. PSD templates provided with the Software are licensed for use within Album Plus only.</p>
+          <p>All content, design, graphics, compilation, and other materials related to Alplum Plus are the intellectual property of Alplum Plus and are protected under applicable Indian copyright and trademark laws. PSD templates provided with the Software are licensed for use within Alplum Plus only.</p>
         </section>
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">5. Payment & Pricing</h2>
-          <p>All prices are listed in Indian Rupees (INR). Prices are subject to change without prior notice. Payment must be completed before license activation. Album Plus reserves the right to modify pricing for future purchases at any time.</p>
+          <p>All prices are listed in Indian Rupees (INR). Prices are subject to change without prior notice. Payment must be completed before license activation. Alplum Plus reserves the right to modify pricing for future purchases at any time.</p>
         </section>
 
         <section>
@@ -63,12 +63,12 @@ const TermsAndConditions = () => (
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">7. Termination</h2>
-          <p>Album Plus reserves the right to terminate or suspend your license at any time if you violate these Terms. Upon termination, you must cease all use of the Software and destroy any copies in your possession.</p>
+          <p>Alplum Plus reserves the right to terminate or suspend your license at any time if you violate these Terms. Upon termination, you must cease all use of the Software and destroy any copies in your possession.</p>
         </section>
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">8. Limitation of Liability</h2>
-          <p>Album Plus shall not be liable for any indirect, incidental, or consequential damages arising from the use or inability to use the Software. Our total liability shall not exceed the amount paid by you for the Software license.</p>
+          <p>Alplum Plus shall not be liable for any indirect, incidental, or consequential damages arising from the use or inability to use the Software. Our total liability shall not exceed the amount paid by you for the Software license.</p>
         </section>
 
         <section>

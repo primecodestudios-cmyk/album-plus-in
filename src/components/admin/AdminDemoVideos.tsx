@@ -85,6 +85,7 @@ export function AdminDemoVideos() {
       description: newDesc,
       youtube_id: ytId,
       duration: newDuration,
+      category: newCategory,
       sort_order: videos.length + 1,
       is_active: true,
     } as any);
@@ -94,7 +95,7 @@ export function AdminDemoVideos() {
     } else {
       toast({ title: "Video added!" });
       setShowAdd(false);
-      setNewTitle(""); setNewDesc(""); setNewYoutubeId(""); setNewDuration("");
+      setNewTitle(""); setNewDesc(""); setNewYoutubeId(""); setNewDuration(""); setNewCategory("tutorial");
       fetchVideos();
     }
     setAdding(false);
@@ -106,6 +107,7 @@ export function AdminDemoVideos() {
     setEditDesc(v.description);
     setEditYoutubeId(v.youtube_id);
     setEditDuration(v.duration);
+    setEditCategory(v.category || "tutorial");
   };
 
   const handleSaveEdit = async () => {
@@ -119,6 +121,7 @@ export function AdminDemoVideos() {
         description: editDesc,
         youtube_id: ytId,
         duration: editDuration,
+        category: editCategory,
       } as any)
       .eq("id", editVideo.id);
 
@@ -271,6 +274,12 @@ export function AdminDemoVideos() {
               <Label>Duration</Label>
               <Input value={newDuration} onChange={(e) => setNewDuration(e.target.value)} placeholder="e.g., 12:45" />
             </div>
+            <div>
+              <Label>Category</Label>
+              <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                {categoryOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
@@ -304,6 +313,12 @@ export function AdminDemoVideos() {
             <div>
               <Label>Duration</Label>
               <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                {categoryOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
             </div>
           </div>
           <DialogFooter>

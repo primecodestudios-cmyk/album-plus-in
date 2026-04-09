@@ -16,6 +16,7 @@ import {
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAppSettings } from "@/hooks/useAppSettings";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
   full_name: string;

@@ -6,57 +6,57 @@
 
 @layer base {
   :root {
-    /* Dark theme as default — black/dark grey bg, deep blue primary, gold accent */
-    --background: 220 20% 7%;
-    --foreground: 45 10% 92%;
+    /* Dark premium theme matched to colorful Alplum Plus logo */
+    --background: 225 25% 6%;
+    --foreground: 210 20% 95%;
 
-    --card: 220 18% 11%;
-    --card-foreground: 45 10% 92%;
+    --card: 225 22% 10%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 220 18% 11%;
-    --popover-foreground: 45 10% 92%;
+    --popover: 225 22% 10%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 220 70% 45%;
+    --primary: 210 85% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 16%;
-    --secondary-foreground: 45 10% 90%;
+    --secondary: 225 22% 14%;
+    --secondary-foreground: 210 20% 90%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 225 18% 14%;
+    --muted-foreground: 220 12% 55%;
 
-    --accent: 42 90% 55%;
-    --accent-foreground: 220 20% 7%;
+    --accent: 145 70% 42%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 42 90% 55%;
+    --border: 225 18% 16%;
+    --input: 225 18% 16%;
+    --ring: 210 85% 50%;
 
     --radius: 0.75rem;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(220 60% 8%) 0%, hsl(225 50% 14%) 50%, hsl(230 45% 18%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(42 90% 55%) 0%, hsl(35 85% 48%) 100%);
-    --gradient-blue: linear-gradient(135deg, hsl(220 70% 40%) 0%, hsl(230 65% 50%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(220 18% 13%) 0%, hsl(220 18% 9%) 100%);
+    /* Gradients — logo-inspired rainbow spectrum */
+    --gradient-hero: linear-gradient(135deg, hsl(225 30% 6%) 0%, hsl(230 35% 12%) 50%, hsl(240 30% 16%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(15 90% 55%) 0%, hsl(40 95% 55%) 35%, hsl(145 70% 42%) 70%, hsl(210 85% 50%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(210 85% 45%) 0%, hsl(260 70% 50%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(225 22% 12%) 0%, hsl(225 22% 8%) 100%);
     --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.4);
     --shadow-elevated: 0 12px 40px -8px hsl(0 0% 0% / 0.6);
-    --shadow-gold: 0 4px 30px -4px hsl(42 90% 55% / 0.25);
+    --shadow-gold: 0 4px 30px -4px hsl(210 85% 50% / 0.3);
 
     --font-display: 'Poppins', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    --sidebar-background: 220 18% 9%;
-    --sidebar-foreground: 45 10% 90%;
-    --sidebar-primary: 220 70% 45%;
+    --sidebar-background: 225 22% 8%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 210 85% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 45 10% 90%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 42 90% 55%;
+    --sidebar-accent: 225 18% 14%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 225 18% 16%;
+    --sidebar-ring: 210 85% 50%;
   }
 }
 

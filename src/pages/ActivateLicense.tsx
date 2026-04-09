@@ -106,7 +106,7 @@ const ActivateLicense = () => {
             {/* License Key */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
-                <Key size={14} className="text-accent" /> License Key
+                <Mail size={14} className="text-accent" /> Mobile or Mail ID
               </label>
               <input
                 value={licenseKey}

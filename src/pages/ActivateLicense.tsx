@@ -152,7 +152,7 @@ const ActivateLicense = () => {
             {/* Info cards */}
             <div className="grid grid-cols-3 gap-3 pt-2">
               {[
-                { icon: Key, label: "License Key", desc: "Unique activation key" },
+                { icon: Mail, label: "Mobile / Mail ID", desc: "Unique activation key" },
                 { icon: Monitor, label: "Device ID", desc: "Hardware fingerprint" },
                 { icon: CalendarClock, label: "Expiry Date", desc: "Auto-checked" },
               ].map((item) => (

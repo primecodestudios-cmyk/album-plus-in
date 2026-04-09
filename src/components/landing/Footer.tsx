@@ -1,8 +1,22 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 export function Footer() {
+  const [appVersion, setAppVersion] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "app_version")
+      .single()
+      .then(({ data }: any) => {
+        if (data?.value) setAppVersion(data.value);
+      });
+  }, []);
   return (
     <footer className="border-t border-border py-12">
       <div className="container mx-auto px-4">

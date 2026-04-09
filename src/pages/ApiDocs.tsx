@@ -794,14 +794,30 @@ const ApiDocs = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"endpoints" | "code" | "guide">("endpoints");
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/login");
+      return;
     }
+    if (!user) return;
+
+    const checkAccess = async () => {
+      const [adminRes, devRes] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: user.id, _role: "admin" as any }),
+        supabase.rpc("has_role", { _user_id: user.id, _role: "developer" as any }),
+      ]);
+      if (adminRes.data || devRes.data) {
+        setAuthorized(true);
+      }
+      setCheckingRole(false);
+    };
+    checkAccess();
   }, [user, authLoading, navigate]);
 
-  if (authLoading || !user) {
+  if (authLoading || checkingRole) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -810,6 +826,34 @@ const ApiDocs = () => {
           </div>
           <p className="text-sm text-muted-foreground">Verifying access...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!user || !authorized) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md mx-auto p-8"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-5">
+            <Lock size={32} className="text-destructive" />
+          </div>
+          <h2 className="font-display text-xl font-bold text-foreground mb-2">Access Denied</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            API documentation is restricted to authorized developers and administrators only. Contact your admin to get developer access.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2 rounded-xl">
+              <ArrowLeft size={14} /> Dashboard
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/")} className="gap-2 rounded-xl">
+              Home
+            </Button>
+          </div>
+        </motion.div>
       </div>
     );
   }

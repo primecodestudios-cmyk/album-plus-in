@@ -35,7 +35,7 @@ serve(async (req) => {
 
     // Send OTP via centralized send-whatsapp function
     const cleanNum = phone.replace(/\D/g, "");
-    const message = `🔐 Your FXMinuteAlbum verification code is: *${otp}*\n\nThis code expires in 5 minutes. Do not share it with anyone.`;
+    const message = `🔐 Your AlbumPlus verification code is: *${otp}*\n\nThis code expires in 5 minutes. Do not share it with anyone.`;
 
     const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
       method: "POST",

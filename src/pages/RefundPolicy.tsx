@@ -6,7 +6,7 @@ const RefundPolicy = () => (
     <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-display text-xl font-bold text-foreground">
-          FX Minute<span className="text-gradient-gold">Album</span>
+          Album <span className="text-gradient-gold">Album</span>
         </Link>
         <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> Back to Home
@@ -31,7 +31,7 @@ const RefundPolicy = () => (
         <div>
           <h3 className="font-display font-bold text-foreground mb-1">No Refund Policy</h3>
           <p className="text-sm text-muted-foreground">
-            Because FX MinuteAlbum is a <strong className="text-foreground">Digital Product</strong>, refunds are not available after purchase. Once a license key has been generated and delivered, the sale is considered final.
+            Because Album Plus is a <strong className="text-foreground">Digital Product</strong>, refunds are not available after purchase. Once a license key has been generated and delivered, the sale is considered final.
           </p>
         </div>
       </div>
@@ -39,7 +39,7 @@ const RefundPolicy = () => (
       <div className="space-y-6 text-sm text-muted-foreground leading-relaxed">
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">1. Digital Product — No Refunds</h2>
-          <p>FX MinuteAlbum is a digital software product delivered electronically. Due to the nature of digital goods, we are unable to process refunds once a license key has been issued and delivered to your account. By completing your purchase, you acknowledge and agree to this no-refund policy.</p>
+          <p>Album Plus is a digital software product delivered electronically. Due to the nature of digital goods, we are unable to process refunds once a license key has been issued and delivered to your account. By completing your purchase, you acknowledge and agree to this no-refund policy.</p>
         </section>
 
         <section>
@@ -54,7 +54,7 @@ const RefundPolicy = () => (
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">3. Try Before You Buy</h2>
-          <p>We strongly recommend downloading and testing the <strong className="text-foreground">free demo version</strong> of FX MinuteAlbum before making a purchase. The demo includes limited features that allow you to evaluate the software's compatibility with your system and workflow.</p>
+          <p>We strongly recommend downloading and testing the <strong className="text-foreground">free demo version</strong> of Album Plus before making a purchase. The demo includes limited features that allow you to evaluate the software's compatibility with your system and workflow.</p>
         </section>
 
         <section>
@@ -74,7 +74,7 @@ const RefundPolicy = () => (
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">6. Contact Support</h2>
-          <p>If you have any billing issues or questions about your purchase, reach out to our support team via WhatsApp or through the contact options on our website. We are happy to assist with technical issues to ensure you get the most out of FX MinuteAlbum.</p>
+          <p>If you have any billing issues or questions about your purchase, reach out to our support team via WhatsApp or through the contact options on our website. We are happy to assist with technical issues to ensure you get the most out of Album Plus.</p>
         </section>
       </div>
     </main>

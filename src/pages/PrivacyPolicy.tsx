@@ -6,7 +6,7 @@ const PrivacyPolicy = () => (
     <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-display text-xl font-bold text-foreground">
-          FX Minute<span className="text-gradient-gold">Album</span>
+          Album <span className="text-gradient-gold">Album</span>
         </Link>
         <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> Back to Home
@@ -79,7 +79,7 @@ const PrivacyPolicy = () => (
 
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-2">7. Children's Privacy</h2>
-          <p>FX MinuteAlbum is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from minors.</p>
+          <p>Album Plus is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from minors.</p>
         </section>
 
         <section>

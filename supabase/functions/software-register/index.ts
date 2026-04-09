@@ -70,7 +70,7 @@ serve(async (req) => {
 
     const fullPhone = `${country_code}${whatsapp_number.replace(/\D/g, "")}`;
     // Use phone as a pseudo-email for auth (software users don't have email)
-    const email = `${whatsapp_number.replace(/\D/g, "")}@fxminutealbum.app`;
+    const email = `${whatsapp_number.replace(/\D/g, "")}@albumplus.app`;
 
     // ── Check duplicate ─────────────────────────────────────
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();

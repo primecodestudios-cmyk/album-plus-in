@@ -42,7 +42,7 @@ const defaultSettings: AppSettings = {
   enable_chat_widget: false,
   enable_whatsapp_button: false,
   maintenance_mode: false,
-  site_title: "FXMinuteAlbum",
+  site_title: "AlbumPlus",
   support_email: "",
   support_phone: "",
 };
@@ -84,14 +84,14 @@ export function AdminSettings() {
     }
 
     // Load localStorage settings (for cpanel_sync_url, sync_api_secret, auto_refresh_interval)
-    const SETTINGS_KEY = "fxminutealbum_admin_settings";
+    const SETTINGS_KEY = "albumplus_admin_settings";
     let localSettings: Record<string, any> = {};
     try {
       const saved = localStorage.getItem(SETTINGS_KEY);
       if (saved) localSettings = JSON.parse(saved);
     } catch {}
 
-    const legacySyncUrl = localStorage.getItem("fxminutealbum_sync_url");
+    const legacySyncUrl = localStorage.getItem("albumplus_sync_url");
 
     setSettings({
       enable_chat_widget: dbMap.enable_chat_widget === "true",
@@ -101,7 +101,7 @@ export function AdminSettings() {
       whatsapp_access_token: dbMap.whatsapp_access_token || "",
       support_phone: dbMap.support_phone || "",
       support_email: dbMap.support_email || "",
-      site_title: dbMap.site_title || "FXMinuteAlbum",
+      site_title: dbMap.site_title || "AlbumPlus",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,
@@ -121,14 +121,14 @@ export function AdminSettings() {
       }
 
       // Save local-only settings
-      const SETTINGS_KEY = "fxminutealbum_admin_settings";
+      const SETTINGS_KEY = "albumplus_admin_settings";
       const localData = {
         cpanel_sync_url: settings.cpanel_sync_url,
         sync_api_secret: settings.sync_api_secret,
         auto_refresh_interval: settings.auto_refresh_interval,
       };
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(localData));
-      localStorage.setItem("fxminutealbum_sync_url", settings.cpanel_sync_url);
+      localStorage.setItem("albumplus_sync_url", settings.cpanel_sync_url);
 
       toast({ title: "Settings saved", description: "All settings saved to database." });
     } catch {
@@ -150,7 +150,7 @@ export function AdminSettings() {
         body: JSON.stringify({
           number: testNumber.replace(/\D/g, ""),
           type: "text",
-          message: "✅ FXMinuteAlbum WhatsApp API test successful!",
+          message: "✅ AlbumPlus WhatsApp API test successful!",
           instance_id: settings.whatsapp_instance_id,
           access_token: settings.whatsapp_access_token,
         }),
@@ -309,7 +309,7 @@ export function AdminSettings() {
             <Input
               id="support_email"
               type="email"
-              placeholder="support@fxminutealbum.in"
+              placeholder="support@albumplus.in"
               value={settings.support_email}
               onChange={(e) => update("support_email", e.target.value)}
             />

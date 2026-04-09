@@ -80,7 +80,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             number: conv.phone,
-            message: `📩 *FXMinuteAlbum Support*\n\n${message}`,
+            message: `📩 *AlbumPlus Support*\n\n${message}`,
             category: "manual",
           }),
         });

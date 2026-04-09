@@ -75,14 +75,14 @@ async function streamChat({
 }
 
 const quickTemplates = [
-  { icon: BookOpen, label: "Album Demo", prompt: "Show me a demo of FX MinuteAlbum features and how to create a wedding album step by step" },
-  { icon: IndianRupee, label: "Pricing Plans", prompt: "What are the pricing plans available for FX MinuteAlbum? Show all plans with prices" },
+  { icon: BookOpen, label: "Album Demo", prompt: "Show me a demo of Album Plus features and how to create a wedding album step by step" },
+  { icon: IndianRupee, label: "Pricing Plans", prompt: "What are the pricing plans available for Album Plus? Show all plans with prices" },
   { icon: Headphones, label: "Support Help", prompt: "I need technical support. How can I contact your team and what are your support hours?" },
-  { icon: Download, label: "Download & Install", prompt: "How do I download and install FX MinuteAlbum? What are the system requirements?" },
+  { icon: Download, label: "Download & Install", prompt: "How do I download and install Album Plus? What are the system requirements?" },
   { icon: Shield, label: "License & Activation", prompt: "How do I activate my license key? Can I transfer it to another device?" },
-  { icon: HelpCircle, label: "Troubleshooting", prompt: "FX MinuteAlbum is running slow or showing errors. How can I fix common issues?" },
-  { icon: Sparkles, label: "Smart Features", prompt: "What are the smart automation features in FX MinuteAlbum? Tell me about PSD conversion and templates" },
-  { icon: MessageCircle, label: "Refund Policy", prompt: "What is the refund policy for FX MinuteAlbum? Can I get a refund after purchase?" },
+  { icon: HelpCircle, label: "Troubleshooting", prompt: "Album Plus is running slow or showing errors. How can I fix common issues?" },
+  { icon: Sparkles, label: "Smart Features", prompt: "What are the smart automation features in Album Plus? Tell me about PSD conversion and templates" },
+  { icon: MessageCircle, label: "Refund Policy", prompt: "What is the refund policy for Album Plus? Can I get a refund after purchase?" },
 ];
 
 type OtpStep = "phone" | "otp" | "verified";
@@ -349,7 +349,7 @@ export function ChatWidget() {
                 <Headphones size={20} className="text-accent" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground">FX MinuteAlbum Support</p>
+                <p className="text-sm font-semibold text-foreground">Album Plus Support</p>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
                   24/7 Online Support
@@ -381,7 +381,7 @@ export function ChatWidget() {
                       <Bot size={14} className="text-accent" />
                     </div>
                     <div className="bg-muted rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-foreground">
-                      👋 Hi! I'm <strong>FX MinuteAlbum AI Assistant</strong>. How can I help you today? Pick a topic below or type your question!
+                      👋 Hi! I'm <strong>Album Plus AI Assistant</strong>. How can I help you today? Pick a topic below or type your question!
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pl-0">

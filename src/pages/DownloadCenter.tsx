@@ -224,6 +224,9 @@ const DownloadCenter = () => {
           </div>
 
           {/* Sections */}
+          {loading ? (
+            <DownloadSectionSkeleton />
+          ) : (
           <div className="space-y-12">
             {sections.map((section) => (
               <div key={section.title}>

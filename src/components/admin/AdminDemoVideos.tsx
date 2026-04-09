@@ -47,8 +47,6 @@ export function AdminDemoVideos() {
   const [newDuration, setNewDuration] = useState("");
   const [newCategory, setNewCategory] = useState("tutorial");
   const [adding, setAdding] = useState(false);
-  const [newDuration, setNewDuration] = useState("");
-  const [adding, setAdding] = useState(false);
 
   const [editVideo, setEditVideo] = useState<DemoVideo | null>(null);
   const [editTitle, setEditTitle] = useState("");

@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 export function Footer() {
   return (
     <footer className="border-t border-border py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+        >
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
               <img src={alplumLogo} alt="Alplum Plus" className="h-11 w-11" loading="lazy" width={512} height={512} />
@@ -43,16 +50,22 @@ export function Footer() {
               <li><Link to="/refund-policy" className="text-sm text-muted-foreground hover:text-accent transition-colors">Refund Policy</Link></li>
             </ul>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground"
+        >
           <span>© 2026 Alplum Plus. All rights reserved.</span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-accent transition-colors">Terms</Link>
             <Link to="/refund-policy" className="hover:text-accent transition-colors">Refund</Link>
           </div>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );

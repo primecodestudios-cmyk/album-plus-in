@@ -45,7 +45,7 @@ const Login = () => {
       >
         <div className="text-center mb-8">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            Album <span className="text-gradient-gold">Album</span>
+            Album <span className="text-gradient-gold">Plus</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">
             Welcome Back

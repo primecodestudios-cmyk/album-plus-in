@@ -64,7 +64,7 @@ const ResetPassword = () => {
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md text-center">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            Album <span className="text-gradient-gold">Album</span>
+            Album <span className="text-gradient-gold">Plus</span>
           </Link>
           <div className="bg-card rounded-2xl border border-border p-8 shadow-card mt-8">
             <h1 className="font-display text-xl font-bold text-foreground mb-2">Invalid Reset Link</h1>
@@ -107,7 +107,7 @@ const ResetPassword = () => {
       >
         <div className="text-center mb-8">
           <Link to="/" className="font-display text-2xl font-bold text-foreground">
-            Album <span className="text-gradient-gold">Album</span>
+            Album <span className="text-gradient-gold">Plus</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground mt-6 mb-2">
             Set New Password

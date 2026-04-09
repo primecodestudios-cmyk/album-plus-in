@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <div className="font-display text-lg font-bold text-foreground mb-3">
-              Album <span className="text-gradient-gold">Album</span>
+              Album <span className="text-gradient-gold">Plus</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Professional photo album design software for photographers worldwide.

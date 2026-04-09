@@ -12,11 +12,14 @@ import {
   LogOut,
   Home,
   Settings,
+  CalendarClock,
+  CreditCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSettings } from "@/hooks/useAppSettings";
+import { DeviceManagement } from "@/components/dashboard/DeviceManagement";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
@@ -30,6 +33,7 @@ interface License {
   starts_at: string;
   expires_at: string;
   is_active: boolean;
+  max_devices: number;
 }
 
 interface Purchase {
@@ -181,12 +185,60 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* License Details */}
+        {activeLicense && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-card rounded-2xl border border-border p-6 shadow-card mb-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <ShieldCheck size={18} className="text-accent" />
+              <h2 className="font-display text-lg font-bold text-foreground">License Details</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { icon: ShieldCheck, label: "Plan", value: activeLicense.plan_name },
+                { icon: CalendarClock, label: "Activation Date", value: new Date(activeLicense.starts_at).toLocaleDateString("en-IN") },
+                { icon: Clock, label: "Expiry Date", value: new Date(activeLicense.expires_at).toLocaleDateString("en-IN") },
+                { icon: CreditCard, label: "Status", value: remainingDays > 0 ? `Active — ${remainingDays} days left` : "Expired" },
+              ].map((item) => (
+                <div key={item.label} className="p-3 rounded-xl bg-secondary/50 border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <item.icon size={14} className="text-accent" />
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider">{item.label}</span>
+                  </div>
+                  <div className="text-sm font-bold text-foreground">{item.value}</div>
+                </div>
+              ))}
+            </div>
+            {remainingDays <= 0 && (
+              <div className="mt-4 p-3 rounded-xl bg-destructive/5 border border-destructive/20 text-sm text-destructive flex items-center gap-2">
+                <Clock size={16} />
+                Your license has expired. Please renew to continue using the software.
+              </div>
+            )}
+            {remainingDays > 0 && remainingDays <= 7 && (
+              <div className="mt-4 p-3 rounded-xl bg-[hsl(45,100%,51%)]/5 border-[hsl(45,100%,51%)]/20 border text-sm text-[hsl(45,100%,51%)] flex items-center gap-2">
+                <Clock size={16} />
+                Your license expires in {remainingDays} days. Consider renewing soon.
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Device Management */}
+        <div className="mb-6">
+          <DeviceManagement maxDevices={activeLicense?.max_devices || 1} />
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Account Details */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4 }}
             className="bg-card rounded-2xl border border-border p-6 shadow-card"
           >
             <div className="flex items-center gap-2 mb-4">
@@ -212,7 +264,7 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.45 }}
             className="bg-card rounded-2xl border border-border p-6 shadow-card"
           >
             <div className="flex items-center gap-2 mb-4">

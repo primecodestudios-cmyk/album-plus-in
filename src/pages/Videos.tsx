@@ -74,7 +74,7 @@ const Videos = () => {
               🎬 Video Tutorials
             </div>
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
-              Learn <span className="text-gradient-gold">Alplum Plus</span>
+              Learn <span className="text-gradient-gold">Album Plus</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Step-by-step video guides for installation, activation, album design, and more.

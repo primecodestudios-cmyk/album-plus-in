@@ -14,6 +14,7 @@ import {
   Settings,
   CalendarClock,
   CreditCard,
+  Code2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -121,6 +122,11 @@ const Dashboard = () => {
             {isAdmin && (
               <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-2 text-destructive font-semibold">
                 <Settings size={16} /> Admin Panel
+              </Button>
+            )}
+            {(isAdmin || isDeveloper) && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/api/docs")} className="gap-2 text-accent font-semibold">
+                <Code2 size={16} /> API Docs
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">

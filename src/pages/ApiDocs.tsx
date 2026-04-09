@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowLeft, Send, Copy, Check, ChevronDown, ChevronRight, Code2, FileJson,
   Zap, Shield, Server, BookOpen, Monitor, Key, Activity, CreditCard,
@@ -779,16 +780,37 @@ const statusFlows = [
 /* ─── Component ───────────────────────────────────────────── */
 
 const ApiDocs = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState("All");
   const [expandedEndpoint, setExpandedEndpoint] = useState<string | null>(null);
   const [testingEndpoint, setTestingEndpoint] = useState<string | null>(null);
   const [testBodies, setTestBodies] = useState<Record<string, string>>({});
   const [testResponses, setTestResponses] = useState<Record<string, { status: number; body: string; time: number } | null>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [loadingReq, setLoadingReq] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"endpoints" | "code" | "guide">("endpoints");
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Shield size={24} className="text-accent" />
+          </div>
+          <p className="text-sm text-muted-foreground">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   const filtered = activeCategory === "All" ? endpoints : endpoints.filter((e) => e.category === activeCategory);
 
@@ -803,7 +825,7 @@ const ApiDocs = () => {
   };
 
   const handleTest = async (ep: ApiEndpoint) => {
-    setLoading((p) => ({ ...p, [ep.id]: true }));
+    setLoadingReq((p) => ({ ...p, [ep.id]: true }));
     setTestResponses((p) => ({ ...p, [ep.id]: null }));
     const body = testBodies[ep.id] || getDefaultBody(ep);
     const start = performance.now();
@@ -821,7 +843,7 @@ const ApiDocs = () => {
     } catch (err: any) {
       setTestResponses((p) => ({ ...p, [ep.id]: { status: 0, body: JSON.stringify({ error: err.message }, null, 2), time: 0 } }));
     }
-    setLoading((p) => ({ ...p, [ep.id]: false }));
+    setLoadingReq((p) => ({ ...p, [ep.id]: false }));
   };
 
   const copyText = (text: string, id: string) => {
@@ -1090,8 +1112,8 @@ const ApiDocs = () => {
                                     </div>
                                   )}
                                   <div className="flex items-center gap-3">
-                                    <Button onClick={() => handleTest(ep)} disabled={loading[ep.id]} className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl">
-                                      <Send size={14} /> {loading[ep.id] ? "Sending..." : "Send Request"}
+                                    <Button onClick={() => handleTest(ep)} disabled={loadingReq[ep.id]} className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl">
+                                      <Send size={14} /> {loadingReq[ep.id] ? "Sending..." : "Send Request"}
                                     </Button>
                                     <span className="text-[10px] text-muted-foreground">
                                       {ep.method} {BASE_URL}{ep.path}

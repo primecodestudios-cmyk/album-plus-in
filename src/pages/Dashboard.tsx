@@ -12,11 +12,14 @@ import {
   LogOut,
   Home,
   Settings,
+  CalendarClock,
+  CreditCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSettings } from "@/hooks/useAppSettings";
+import { DeviceManagement } from "@/components/dashboard/DeviceManagement";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
@@ -30,6 +33,7 @@ interface License {
   starts_at: string;
   expires_at: string;
   is_active: boolean;
+  max_devices: number;
 }
 
 interface Purchase {

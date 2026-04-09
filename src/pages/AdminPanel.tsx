@@ -38,6 +38,7 @@ import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { useToast } from "@/hooks/use-toast";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";

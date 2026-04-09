@@ -73,7 +73,7 @@ export function CustomerStatsSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -81,20 +81,20 @@ export function CustomerStatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="text-center bg-card/50 rounded-2xl border border-border p-6 md:p-8 hover:border-accent/30 hover:shadow-gold transition-all duration-300"
+              className="flex flex-col items-center justify-center text-center bg-card/50 rounded-2xl border border-border p-5 md:p-7 min-h-[180px] hover:border-accent/30 hover:shadow-gold transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                <stat.icon size={24} className="text-accent" />
+              <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center mb-3 shrink-0">
+                <stat.icon size={22} className="text-accent" />
               </div>
               <AnimatedCounter
                 end={stat.end}
                 suffix={stat.suffix}
                 prefix={stat.prefix}
               />
-              <div className="font-display text-sm font-semibold text-foreground mt-2">
+              <div className="font-display text-sm font-semibold text-foreground mt-2 leading-tight">
                 {stat.label}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-snug line-clamp-2">{stat.description}</p>
             </motion.div>
           ))}
         </div>

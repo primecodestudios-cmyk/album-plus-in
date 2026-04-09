@@ -34,6 +34,8 @@ interface AppSettings {
   support_email: string;
   support_phone: string;
   chatbot_system_prompt: string;
+  app_version: string;
+  intro_video_id: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -49,6 +51,8 @@ const defaultSettings: AppSettings = {
   support_email: "",
   support_phone: "",
   chatbot_system_prompt: "",
+  app_version: "1.0.0",
+  intro_video_id: "",
 };
 
 // Keys stored in DB (app_settings table)
@@ -62,6 +66,8 @@ const DB_KEYS = [
   "support_email",
   "site_title",
   "chatbot_system_prompt",
+  "app_version",
+  "intro_video_id",
 ];
 
 export function AdminSettings() {
@@ -108,6 +114,8 @@ export function AdminSettings() {
       support_email: dbMap.support_email || "",
       site_title: dbMap.site_title || "AlbumPlus",
       chatbot_system_prompt: dbMap.chatbot_system_prompt || "",
+      app_version: dbMap.app_version || "1.0.0",
+      intro_video_id: dbMap.intro_video_id || "",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,

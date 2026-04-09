@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import { Button } from "@/components/ui/button";
+import { DownloadSectionSkeleton } from "@/components/skeletons/PageSkeletons";
 import {
   Download,
   Monitor,
@@ -169,6 +171,13 @@ const item = {
 };
 
 const DownloadCenter = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -215,6 +224,9 @@ const DownloadCenter = () => {
           </div>
 
           {/* Sections */}
+          {loading ? (
+            <DownloadSectionSkeleton />
+          ) : (
           <div className="space-y-12">
             {sections.map((section) => (
               <div key={section.title}>
@@ -282,6 +294,7 @@ const DownloadCenter = () => {
               </div>
             ))}
           </div>
+          )}
         </div>
       </main>
 

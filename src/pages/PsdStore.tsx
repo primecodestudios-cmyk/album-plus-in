@@ -6,7 +6,8 @@ import { PsdProductCard } from "@/components/store/PsdProductCard";
 import { PsdDetailModal } from "@/components/store/PsdDetailModal";
 import { categories, templates as fallbackTemplates, categoryFallbackImages, defaultFallbackImage, PsdCategory, PsdTemplate } from "@/data/psdTemplates";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Loader2 } from "lucide-react";
+import { Search } from "lucide-react";
+import { StoreGridSkeleton } from "@/components/skeletons/PageSkeletons";
 import { motion } from "framer-motion";
 
 const PsdStore = () => {
@@ -111,10 +112,7 @@ const PsdStore = () => {
 
           {/* Results */}
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 size={24} className="animate-spin text-accent" />
-              <span className="ml-3 text-muted-foreground">Loading templates...</span>
-            </div>
+            <StoreGridSkeleton />
           ) : (
             <>
               <div className="text-sm text-muted-foreground mb-6">

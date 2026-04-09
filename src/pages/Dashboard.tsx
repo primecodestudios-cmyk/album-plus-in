@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
@@ -97,11 +98,7 @@ const Dashboard = () => {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (

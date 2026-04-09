@@ -779,16 +779,37 @@ const statusFlows = [
 /* ─── Component ───────────────────────────────────────────── */
 
 const ApiDocs = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState("All");
   const [expandedEndpoint, setExpandedEndpoint] = useState<string | null>(null);
   const [testingEndpoint, setTestingEndpoint] = useState<string | null>(null);
   const [testBodies, setTestBodies] = useState<Record<string, string>>({});
   const [testResponses, setTestResponses] = useState<Record<string, { status: number; body: string; time: number } | null>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [loadingReq, setLoadingReq] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"endpoints" | "code" | "guide">("endpoints");
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Shield size={24} className="text-accent" />
+          </div>
+          <p className="text-sm text-muted-foreground">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   const filtered = activeCategory === "All" ? endpoints : endpoints.filter((e) => e.category === activeCategory);
 

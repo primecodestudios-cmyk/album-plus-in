@@ -43,7 +43,7 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-6 right-4 z-40 flex flex-col items-end gap-2">
       <AnimatePresence>
         {showTooltip && (
           <motion.div
@@ -67,7 +67,7 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
         onClick={handleClick}
         disabled={sending}
         aria-label="Chat on WhatsApp"
-        className="w-14 h-14 rounded-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-[hsl(0,0%,100%)] flex items-center justify-center shadow-elevated transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-70"
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-[hsl(0,0%,100%)] flex items-center justify-center shadow-elevated transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-70"
       >
         <MessageCircle size={26} fill="currentColor" />
       </button>

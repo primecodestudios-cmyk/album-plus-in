@@ -61,6 +61,7 @@ const DB_KEYS = [
   "support_phone",
   "support_email",
   "site_title",
+  "chatbot_system_prompt",
 ];
 
 export function AdminSettings() {
@@ -105,7 +106,8 @@ export function AdminSettings() {
       whatsapp_access_token: dbMap.whatsapp_access_token || "",
       support_phone: dbMap.support_phone || "",
       support_email: dbMap.support_email || "",
-      site_title: dbMap.site_title || "AlplumPlus",
+      site_title: dbMap.site_title || "AlbumPlus",
+      chatbot_system_prompt: dbMap.chatbot_system_prompt || "",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,

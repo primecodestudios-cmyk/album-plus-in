@@ -68,6 +68,39 @@ export type Database = {
         }
         Relationships: []
       }
+      changelogs: {
+        Row: {
+          changes: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          release_date: string
+          sort_order: number
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          changes?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          release_date: string
+          sort_order?: number
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          changes?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          release_date?: string
+          sort_order?: number
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           id: string

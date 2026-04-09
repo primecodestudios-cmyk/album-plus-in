@@ -60,7 +60,7 @@ export function Footer() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground"
         >
-          <span>© 2026 Alplum Plus. All rights reserved.</span>
+          <span>© 2026 Album Plus. All rights reserved. Developed by <a href="https://fxtechie.in" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">FX Techie</a></span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-accent transition-colors">Terms</Link>

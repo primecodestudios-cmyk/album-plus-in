@@ -1,8 +1,22 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 export function Footer() {
+  const [appVersion, setAppVersion] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "app_version")
+      .single()
+      .then(({ data }: any) => {
+        if (data?.value) setAppVersion(data.value);
+      });
+  }, []);
   return (
     <footer className="border-t border-border py-12">
       <div className="container mx-auto px-4">
@@ -16,7 +30,12 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
               <img src={alplumLogo} alt="Alplum Plus" className="h-11 w-11" loading="lazy" width={512} height={512} />
-              <span className="font-display text-lg font-bold text-foreground">Alplum <span className="text-gradient-gold">Plus</span></span>
+              <span className="font-display text-lg font-bold text-foreground">
+                Alplum <span className="text-gradient-gold">Plus</span>
+                {appVersion && (
+                  <span className="ml-1.5 text-[10px] font-medium text-muted-foreground align-super">v{appVersion}</span>
+                )}
+              </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Professional photo album design software for photographers worldwide.
@@ -60,7 +79,7 @@ export function Footer() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground"
         >
-          <span>© 2026 Album Plus. All rights reserved. Developed by <a href="https://fxtechie.in" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">FX Techie</a></span>
+          <span>© 2026 AlbumPlus{appVersion && ` — Version v${appVersion}`}. All rights reserved. Developed by <a href="https://fxtechie.in" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">FX Techie</a></span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-accent transition-colors">Terms</Link>

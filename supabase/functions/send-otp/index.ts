@@ -12,6 +12,13 @@ serve(async (req) => {
   try {
     const { phone, conversation_id } = await req.json();
 
+    if (!phone || !conversation_id) {
+      return new Response(
+        JSON.stringify({ error: "phone and conversation_id are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -28,29 +35,54 @@ serve(async (req) => {
       .eq("id", conversation_id);
 
     if (updateErr) {
-      return new Response(JSON.stringify({ error: updateErr.message }), {
+      console.error("OTP save error:", updateErr);
+      return new Response(JSON.stringify({ error: "Failed to save OTP" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Send OTP via centralized send-whatsapp function
+    // Send OTP via WhatsApp
     const cleanNum = phone.replace(/\D/g, "");
-    const message = `🔐 Your AlplumPlus verification code is: *${otp}*\n\nThis code expires in 5 minutes. Do not share it with anyone.`;
+    const message = `🔐 *Album Plus* Verification Code\n\nYour OTP is: *${otp}*\n\nThis code expires in 5 minutes.\nDo not share it with anyone.\n\nIf you did not request this, please ignore this message.`;
 
-    const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-      },
-      body: JSON.stringify({ number: cleanNum, message, category: "otp" }),
-    });
+    let whatsappSent = false;
+    let whatsappError = "";
 
-    const waData = await waRes.json();
-    console.log("OTP send result:", waData);
+    try {
+      const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({ number: cleanNum, message, category: "otp" }),
+      });
+
+      const waData = await waRes.json();
+      whatsappSent = waRes.ok && waData.success;
+      if (!whatsappSent) whatsappError = waData.error || "WhatsApp send failed";
+      console.log("OTP WhatsApp result:", { sent: whatsappSent, data: waData });
+    } catch (e) {
+      whatsappError = e instanceof Error ? e.message : "WhatsApp error";
+      console.error("OTP WhatsApp error:", whatsappError);
+    }
+
+    // Log delivery result
+    if (!whatsappSent) {
+      console.error("OTP delivery failed - WhatsApp:", whatsappError);
+    }
 
     return new Response(
-      JSON.stringify({ success: true, message: "OTP sent" }),
+      JSON.stringify({
+        success: true,
+        message: whatsappSent
+          ? "OTP sent via WhatsApp"
+          : "OTP generated. If you did not receive it on WhatsApp, please verify your number and try again.",
+        whatsapp_sent: whatsappSent,
+        fallback_note: !whatsappSent
+          ? "If you did not receive the OTP, please check your WhatsApp or contact support."
+          : undefined,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

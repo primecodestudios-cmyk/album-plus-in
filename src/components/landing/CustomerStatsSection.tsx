@@ -38,7 +38,7 @@ function AnimatedCounter({ end, suffix = "", prefix = "", duration = 2000 }: Cou
   }, [end, duration]);
 
   return (
-    <div ref={ref} className="font-display text-3xl md:text-5xl font-bold text-accent tabular-nums">
+    <div ref={ref} className="font-display text-2xl sm:text-3xl md:text-5xl font-bold text-accent tabular-nums leading-none">
       {prefix}{count.toLocaleString()}{suffix}
     </div>
   );
@@ -81,7 +81,7 @@ export function CustomerStatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex flex-col items-center justify-center text-center bg-card/50 rounded-2xl border border-border p-5 md:p-7 min-h-[180px] hover:border-accent/30 hover:shadow-gold transition-all duration-300"
+              className="flex flex-col items-center justify-center text-center bg-card/50 rounded-2xl border border-border p-4 md:p-7 min-h-[160px] md:min-h-[180px] hover:border-accent/30 hover:shadow-gold transition-all duration-300 overflow-hidden"
             >
               <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center mb-3 shrink-0">
                 <stat.icon size={22} className="text-accent" />

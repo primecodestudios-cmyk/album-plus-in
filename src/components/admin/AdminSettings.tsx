@@ -122,6 +122,8 @@ export function AdminSettings() {
       chatbot_system_prompt: dbMap.chatbot_system_prompt || "",
       app_version: dbMap.app_version || "1.0.0",
       intro_video_id: dbMap.intro_video_id || "",
+      chatbot_voice_enabled: dbMap.chatbot_voice_enabled !== "false",
+      chatbot_otp_required: dbMap.chatbot_otp_required !== "false",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,

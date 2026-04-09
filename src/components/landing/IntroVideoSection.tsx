@@ -1,14 +1,24 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { VolumeX, Volume2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function IntroVideoSection() {
-  const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [videoId, setVideoId] = useState("");
 
-  // Using a placeholder YouTube embed for the intro video
-  const introVideoId = "dQw4w9WgXcQ"; // Placeholder — admin can change
+  useEffect(() => {
+    supabase
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "intro_video_id")
+      .single()
+      .then(({ data }: any) => {
+        if (data?.value) setVideoId(data.value);
+      });
+  }, []);
+
+  if (!videoId) return null;
 
   return (
     <section className="relative w-full bg-background overflow-hidden">
@@ -38,14 +48,11 @@ export function IntroVideoSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden border border-border shadow-elevated group"
         >
-          {/* Dark overlay with gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30 z-10 pointer-events-none" />
 
-          {/* YouTube Embed */}
           <div className="relative aspect-video">
             <iframe
-              ref={iframeRef}
-              src={`https://www.youtube.com/embed/${introVideoId}?autoplay=1&mute=1&loop=1&playlist=${introVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1`}
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1`}
               title="Alplum Plus - Software Overview"
               className="w-full h-full"
               allow="autoplay; encrypted-media"
@@ -53,7 +60,6 @@ export function IntroVideoSection() {
             />
           </div>
 
-          {/* Overlay Title */}
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 z-20">
             <h3 className="font-display text-lg md:text-2xl font-bold text-foreground drop-shadow-lg">
               Alplum Plus — Smart Album Designing Software
@@ -63,7 +69,6 @@ export function IntroVideoSection() {
             </p>
           </div>
 
-          {/* Play/Pause + Mute Controls */}
           <div className="absolute top-4 right-4 z-20 flex gap-2">
             <button
               onClick={() => setIsMuted(!isMuted)}

@@ -34,6 +34,8 @@ interface AppSettings {
   support_email: string;
   support_phone: string;
   chatbot_system_prompt: string;
+  app_version: string;
+  intro_video_id: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -49,6 +51,8 @@ const defaultSettings: AppSettings = {
   support_email: "",
   support_phone: "",
   chatbot_system_prompt: "",
+  app_version: "1.0.0",
+  intro_video_id: "",
 };
 
 // Keys stored in DB (app_settings table)
@@ -62,6 +66,8 @@ const DB_KEYS = [
   "support_email",
   "site_title",
   "chatbot_system_prompt",
+  "app_version",
+  "intro_video_id",
 ];
 
 export function AdminSettings() {
@@ -108,6 +114,8 @@ export function AdminSettings() {
       support_email: dbMap.support_email || "",
       site_title: dbMap.site_title || "AlbumPlus",
       chatbot_system_prompt: dbMap.chatbot_system_prompt || "",
+      app_version: dbMap.app_version || "1.0.0",
+      intro_video_id: dbMap.intro_video_id || "",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,
@@ -281,7 +289,44 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* General Settings */}
+      {/* Version & Video Control */}
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Globe size={20} className="text-cyan-500" /> Version & Homepage Video
+        </h3>
+        <p className="text-sm text-muted-foreground">Control the app version displayed on the site and the homepage intro video.</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="app_version">App Version Code</Label>
+            <Input
+              id="app_version"
+              placeholder="1.0.3"
+              value={settings.app_version}
+              onChange={(e) => update("app_version", e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Shown next to the logo as "v1.0.3"</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="intro_video_id">Homepage Intro Video (YouTube ID)</Label>
+            <Input
+              id="intro_video_id"
+              placeholder="dQw4w9WgXcQ or full YouTube URL"
+              value={settings.intro_video_id}
+              onChange={(e) => {
+                let val = e.target.value;
+                // Extract YouTube ID from URL
+                const match = val.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+                if (match) val = match[1];
+                update("intro_video_id", val);
+              }}
+            />
+            <p className="text-xs text-muted-foreground">Paste YouTube URL or video ID. Leave empty to hide section.</p>
+          </div>
+        </div>
+      </div>
+
+
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Palette size={20} className="text-purple-500" /> General Settings

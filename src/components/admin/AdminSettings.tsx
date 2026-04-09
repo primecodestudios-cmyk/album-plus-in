@@ -33,6 +33,7 @@ interface AppSettings {
   site_title: string;
   support_email: string;
   support_phone: string;
+  chatbot_system_prompt: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -44,9 +45,10 @@ const defaultSettings: AppSettings = {
   enable_chat_widget: false,
   enable_whatsapp_button: false,
   maintenance_mode: false,
-  site_title: "AlplumPlus",
+  site_title: "AlbumPlus",
   support_email: "",
   support_phone: "",
+  chatbot_system_prompt: "",
 };
 
 // Keys stored in DB (app_settings table)

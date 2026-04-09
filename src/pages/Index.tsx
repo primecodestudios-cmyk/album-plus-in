@@ -35,6 +35,7 @@ const Index = () => {
         <BeforeAfterSection />
         <DemoVideoSection />
         <TestimonialsSection />
+        <WhatsNewSection />
         <BonusSection />
         <PricingSection />
         <PlatformSection />

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Settings,
   MessageSquare,
@@ -17,6 +18,7 @@ import {
   Shield,
   Bell,
   Palette,
+  Bot,
 } from "lucide-react";
 
 interface AppSettings {
@@ -31,6 +33,7 @@ interface AppSettings {
   site_title: string;
   support_email: string;
   support_phone: string;
+  chatbot_system_prompt: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -42,9 +45,10 @@ const defaultSettings: AppSettings = {
   enable_chat_widget: false,
   enable_whatsapp_button: false,
   maintenance_mode: false,
-  site_title: "AlplumPlus",
+  site_title: "AlbumPlus",
   support_email: "",
   support_phone: "",
+  chatbot_system_prompt: "",
 };
 
 // Keys stored in DB (app_settings table)
@@ -57,6 +61,7 @@ const DB_KEYS = [
   "support_phone",
   "support_email",
   "site_title",
+  "chatbot_system_prompt",
 ];
 
 export function AdminSettings() {
@@ -101,7 +106,8 @@ export function AdminSettings() {
       whatsapp_access_token: dbMap.whatsapp_access_token || "",
       support_phone: dbMap.support_phone || "",
       support_email: dbMap.support_email || "",
-      site_title: dbMap.site_title || "AlplumPlus",
+      site_title: dbMap.site_title || "AlbumPlus",
+      chatbot_system_prompt: dbMap.chatbot_system_prompt || "",
       cpanel_sync_url: localSettings.cpanel_sync_url || legacySyncUrl || "",
       sync_api_secret: localSettings.sync_api_secret || "",
       auto_refresh_interval: localSettings.auto_refresh_interval || 30,
@@ -326,7 +332,26 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* Feature Toggles */}
+      {/* AI Chatbot Prompt Editor */}
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Bot size={20} className="text-emerald-500" /> AI Chatbot Prompt
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Edit the system prompt that controls the AI chatbot's behavior. Changes take effect on the next chat session.
+        </p>
+        <Textarea
+          rows={12}
+          placeholder="Enter the AI chatbot system prompt..."
+          value={settings.chatbot_system_prompt}
+          onChange={(e) => update("chatbot_system_prompt", e.target.value)}
+          className="font-mono text-sm"
+        />
+        <p className="text-xs text-muted-foreground">
+          Tip: Include product details, support contacts, pricing info, and behavior guidelines.
+        </p>
+      </div>
+
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Bell size={20} className="text-amber-500" /> Feature Toggles

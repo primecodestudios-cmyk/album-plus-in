@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,43 +7,41 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are Alplum Plus AI Assistant — a friendly, knowledgeable customer support chatbot for Alplum Plus, India's #1 wedding album designing software.
+const DEFAULT_PROMPT = `You are Album Plus AI Assistant — a friendly, knowledgeable customer support chatbot for Album Plus, India's #1 wedding album designing software.
 
-About Alplum Plus:
+About Album Plus:
 - Wedding album designing software for photographers
 - Compatible with Adobe Photoshop CS3 to CC 2026 (Windows only, Mac planned)
 - Features: smart automation tools, PSD template conversion, 500+ templates
 - Free demo version available with limited features
 
-License & Activation:
-- License key format: ALPM-XXXX-XXXX-XXXX
-- Each license is bound to one device
-- Activation: Go to Activate License page → enter key + device ID → click Activate
-- License expires → software switches to demo mode
-- Lost key? Check dashboard or contact support
-
-Pricing & Payment:
-- Accepts UPI, credit/debit cards, net banking, wallets
-- No refunds on digital products (recommend trying demo first)
-- Plan upgrades available via support
-
-Technical:
-- Minimum: 4GB RAM, dual-core processor
-- Run installer as Administrator if issues
-- Updates from Downloads page preserve settings
-
 Support Contacts:
 - WhatsApp: +91 88830 81855
-- Sales: +91 88709 97799
 - Email: support@alplumplus.in
-- Hours: Mon–Sat, 10 AM – 6 PM IST
 
 Guidelines:
 - Be concise, friendly, and helpful
-- Answer in the same language the user writes in (Hindi, Tamil, English, etc.)
+- Answer in the same language the user writes in
 - If you don't know something, direct them to WhatsApp or email support
 - Never make up pricing or feature details
 - Use markdown formatting for clarity`;
+
+async function getSystemPrompt(): Promise<string> {
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "chatbot_system_prompt")
+      .single();
+    return data?.value || DEFAULT_PROMPT;
+  } catch {
+    return DEFAULT_PROMPT;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -53,6 +52,8 @@ serve(async (req) => {
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const systemPrompt = await getSystemPrompt();
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -65,7 +66,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: systemPrompt },
             ...messages,
           ],
           stream: true,

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 const Login = () => {
   const navigate = useNavigate();

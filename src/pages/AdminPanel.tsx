@@ -38,6 +38,7 @@ import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { useToast } from "@/hooks/use-toast";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
@@ -111,7 +112,8 @@ const AdminPanel = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display text-xl font-bold text-foreground">
+          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
+            <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10" />
             Alplum <span className="text-gradient-gold">Plus</span>
             <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-bold">ADMIN</span>
           </Link>

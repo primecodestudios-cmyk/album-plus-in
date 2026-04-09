@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Key, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface ActivationResult {
   success: boolean;
@@ -75,7 +76,8 @@ const ActivateLicense = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display text-xl font-bold text-foreground">
+          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
+            <img src={alplumLogo} alt="Alplum Plus" className="h-10 w-10" />
             Alplum <span className="text-gradient-gold">Plus</span>
           </Link>
           <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">

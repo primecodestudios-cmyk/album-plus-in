@@ -19,6 +19,8 @@ import {
   Bell,
   Palette,
   Bot,
+  Mic,
+  Phone,
 } from "lucide-react";
 
 interface AppSettings {

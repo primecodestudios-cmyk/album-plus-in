@@ -38,10 +38,12 @@ import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { AdminChangelogs } from "@/components/admin/AdminChangelogs";
+import { AdminActivityLogs } from "@/components/admin/AdminActivityLogs";
+import { AdminTickets } from "@/components/admin/AdminTickets";
 import { useToast } from "@/hooks/use-toast";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "changelogs" | "settings";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "changelogs" | "settings" | "activity_logs" | "tickets";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -106,6 +108,8 @@ const AdminPanel = () => {
     { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "changelogs", label: "Changelogs", icon: FileStack },
+    { id: "activity_logs", label: "Activity Logs", icon: Monitor },
+    { id: "tickets", label: "Tickets", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -172,6 +176,8 @@ const AdminPanel = () => {
           {activeTab === "chat_logs" && <AdminChatLogs />}
           {activeTab === "whatsapp" && <AdminWhatsApp />}
           {activeTab === "changelogs" && <AdminChangelogs />}
+          {activeTab === "activity_logs" && <AdminActivityLogs />}
+          {activeTab === "tickets" && <AdminTickets />}
           {activeTab === "settings" && <AdminSettings />}
         </motion.div>
       </div>

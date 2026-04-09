@@ -22,9 +22,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setSession(session);
         setLoading(false);
+
+        // Log login activity
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            supabase.functions.invoke('activity-log', {
+              body: {
+                user_id: session.user.id,
+                action: 'login',
+                details: { method: 'web' },
+              },
+            }).catch(() => {});
+          }, 0);
+        }
       }
     );
 

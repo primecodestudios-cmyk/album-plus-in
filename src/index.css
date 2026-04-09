@@ -64,6 +64,9 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
@@ -103,5 +106,19 @@
   }
   .shadow-gold {
     box-shadow: var(--shadow-gold);
+  }
+
+  /* Micro-interaction utilities */
+  .tap-scale {
+    @apply transition-transform duration-150 active:scale-95;
+  }
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated;
+  }
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-gold hover:border-accent/30;
+  }
+  .press-effect {
+    @apply transition-all duration-150 active:scale-[0.97] active:opacity-90;
   }
 }

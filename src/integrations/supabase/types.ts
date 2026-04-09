@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          device_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          device_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          device_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_tokens: {
         Row: {
           created_at: string
@@ -399,6 +432,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           city: string | null
           country: string | null
@@ -407,12 +441,15 @@ export type Database = {
           id: string
           languages: string[] | null
           phone: string | null
+          pincode: string | null
           state: string | null
           studio_name: string | null
           updated_at: string
           user_id: string
+          whatsapp_numbers: string[] | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
@@ -421,12 +458,15 @@ export type Database = {
           id?: string
           languages?: string[] | null
           phone?: string | null
+          pincode?: string | null
           state?: string | null
           studio_name?: string | null
           updated_at?: string
           user_id: string
+          whatsapp_numbers?: string[] | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
@@ -435,10 +475,12 @@ export type Database = {
           id?: string
           languages?: string[] | null
           phone?: string | null
+          pincode?: string | null
           state?: string | null
           studio_name?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp_numbers?: string[] | null
         }
         Relationships: []
       }
@@ -495,6 +537,107 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      signup_otps: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          otp_code: string
+          otp_type: string
+          phone: string | null
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          otp_code: string
+          otp_type?: string
+          phone?: string | null
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          otp_type?: string
+          phone?: string | null
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ticket_replies: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_replies_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_devices: {
         Row: {

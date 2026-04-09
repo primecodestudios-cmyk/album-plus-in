@@ -37,10 +37,11 @@ import { AdminDemoVideos } from "@/components/admin/AdminDemoVideos";
 import { AdminChatLogs } from "@/components/admin/AdminChatLogs";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
+import { AdminChangelogs } from "@/components/admin/AdminChangelogs";
 import { useToast } from "@/hooks/use-toast";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "settings";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "changelogs" | "settings";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -104,6 +105,7 @@ const AdminPanel = () => {
     { id: "demo_videos", label: "Demo Videos", icon: Video },
     { id: "chat_logs", label: "Chat Logs", icon: MessageSquare },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
+    { id: "changelogs", label: "Changelogs", icon: FileStack },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -169,6 +171,7 @@ const AdminPanel = () => {
           {activeTab === "demo_videos" && <AdminDemoVideos />}
           {activeTab === "chat_logs" && <AdminChatLogs />}
           {activeTab === "whatsapp" && <AdminWhatsApp />}
+          {activeTab === "changelogs" && <AdminChangelogs />}
           {activeTab === "settings" && <AdminSettings />}
         </motion.div>
       </div>

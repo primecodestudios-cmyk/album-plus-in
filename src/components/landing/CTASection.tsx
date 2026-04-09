@@ -24,13 +24,15 @@ export function CTASection() {
               Join thousands of photographers who trust Alplum Plus. Start your free
               14-day trial — no credit card required.
             </p>
-            <Button
-              size="lg"
-              className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity gap-2 text-base px-8 h-14 rounded-xl shadow-gold"
-            >
-              Start Free Trial
-              <ArrowRight size={18} />
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                size="lg"
+                className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity gap-2 text-base px-8 h-14 rounded-xl shadow-gold"
+              >
+                Start Free Trial
+                <ArrowRight size={18} />
+              </Button>
+            </motion.div>
           </div>
         </motion.div>
       </div>

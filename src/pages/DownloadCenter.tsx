@@ -294,6 +294,7 @@ const DownloadCenter = () => {
               </div>
             ))}
           </div>
+          )}
         </div>
       </main>
 

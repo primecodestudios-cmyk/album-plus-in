@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck, Key, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldCheck, Mail, Monitor, CalendarClock, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 

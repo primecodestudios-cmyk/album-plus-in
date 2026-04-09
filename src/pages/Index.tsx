@@ -8,6 +8,7 @@ import { CustomerStatsSection } from "@/components/landing/CustomerStatsSection"
 import { BeforeAfterSection } from "@/components/landing/BeforeAfterSection";
 import { DemoVideoSection } from "@/components/landing/DemoVideoSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { WhatsNewSection } from "@/components/landing/WhatsNewSection";
 import { BonusSection } from "@/components/landing/BonusSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { PlatformSection } from "@/components/landing/PlatformSection";

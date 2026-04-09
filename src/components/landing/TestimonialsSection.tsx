@@ -7,7 +7,7 @@ const testimonials = [
     studio: "Sharma Studio, Jaipur",
     avatar: "RS",
     rating: 5,
-    text: "Album Plus has completely transformed our workflow. We now deliver wedding albums in half the time. The AI auto-design feature alone saves us 3-4 hours daily.",
+    text: "Alplum Plus has completely transformed our workflow. We now deliver wedding albums in half the time. The AI auto-design feature alone saves us 3-4 hours daily.",
   },
   {
     name: "Priya Patel",
@@ -21,7 +21,7 @@ const testimonials = [
     studio: "Royal Lens Studio, Hyderabad",
     avatar: "AR",
     rating: 5,
-    text: "We switched from manual designing to Album Plus and the difference is night and day. The oil painting effect and color correction tools are top-notch.",
+    text: "We switched from manual designing to Alplum Plus and the difference is night and day. The oil painting effect and color correction tools are top-notch.",
   },
   {
     name: "Meena Kumari",

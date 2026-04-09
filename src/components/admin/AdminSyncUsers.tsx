@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, Upload, UserPlus, Zap, Globe, CheckCircle2, AlertCircle } from "lucide-react";
 
-const SYNC_URL_KEY = "albumplus_sync_url";
+const SYNC_URL_KEY = "alplumplus_sync_url";
 
 export function AdminSyncUsers() {
   const { toast } = useToast();
@@ -196,7 +196,7 @@ export function AdminSyncUsers() {
                 id="sync-url"
                 value={syncUrl}
                 onChange={(e) => setSyncUrl(e.target.value)}
-                placeholder="https://yourdomain.com/albumplus/sync_users.php"
+                placeholder="https://yourdomain.com/alplumplus/sync_users.php"
                 className="flex-1"
               />
               <Button size="sm" onClick={handleSaveSyncUrl} disabled={!syncUrl.trim()}>

@@ -112,7 +112,7 @@ const AdminPanel = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="font-display text-xl font-bold text-foreground">
-            Album <span className="text-gradient-gold">Plus</span>
+            Alplum <span className="text-gradient-gold">Plus</span>
             <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-bold">ADMIN</span>
           </Link>
           <div className="flex items-center gap-3">

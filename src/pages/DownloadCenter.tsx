@@ -30,11 +30,11 @@ interface DownloadItem {
 const sections: { title: string; description: string; icon: typeof Download; items: DownloadItem[] }[] = [
   {
     title: "Software Setup",
-    description: "Download the latest Album Plus installer",
+    description: "Download the latest Alplum Plus installer",
     icon: Monitor,
     items: [
       {
-        title: "Album Plus Full Setup (64-bit)",
+        title: "Alplum Plus Full Setup (64-bit)",
         description: "Complete installer for Windows 10/11 — includes all features and data pack.",
         version: "v5.2.1",
         size: "245 MB",
@@ -44,7 +44,7 @@ const sections: { title: string; description: string; icon: typeof Download; ite
         tagColor: "bg-[hsl(142,70%,45%)]",
       },
       {
-        title: "Album Plus Full Setup (32-bit)",
+        title: "Alplum Plus Full Setup (32-bit)",
         description: "For older Windows 7/8 systems with 32-bit architecture.",
         version: "v5.2.1",
         size: "210 MB",
@@ -52,8 +52,8 @@ const sections: { title: string; description: string; icon: typeof Download; ite
         icon: Monitor,
       },
       {
-        title: "Album Plus Demo",
-        description: "Try Album Plus free with limited features. No license required.",
+        title: "Alplum Plus Demo",
+        description: "Try Alplum Plus free with limited features. No license required.",
         version: "v5.2.1",
         size: "180 MB",
         date: "March 2026",
@@ -90,7 +90,7 @@ const sections: { title: string; description: string; icon: typeof Download; ite
   },
   {
     title: "Plugins & Add-ons",
-    description: "Extend Album Plus with powerful plugins",
+    description: "Extend Alplum Plus with powerful plugins",
     icon: Puzzle,
     items: [
       {
@@ -185,7 +185,7 @@ const DownloadCenter = () => {
               <ArrowDown size={14} /> Download Center
             </div>
             <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Download <span className="text-gradient-gold">Album Plus</span>
+              Download <span className="text-gradient-gold">Alplum Plus</span>
             </h1>
             <p className="text-muted-foreground text-base max-w-xl mx-auto">
               Get the latest software, updates, plugins, and free template packs.

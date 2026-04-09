@@ -37,18 +37,18 @@ serve(async (req) => {
       );
     }
 
-    // Check active license for this device
+    // Get active license (any device)
     const { data: license } = await supabase
       .from("user_licenses")
       .select("*")
       .eq("user_id", user.id)
-      .eq("device_id", device_id)
+      .eq("is_active", true)
       .order("expires_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (!license) {
-      // Check if there's a pending request
+      // Check pending request
       const { data: pendingReq } = await supabase
         .from("device_requests")
         .select("id, status")
@@ -95,6 +95,38 @@ serve(async (req) => {
       );
     }
 
+    // ── Multi-device limit check ──────────────────────────
+    const maxDevices = license.max_devices || 1;
+
+    // Get active devices for this user
+    const { data: activeDevices } = await supabase
+      .from("user_devices")
+      .select("device_id, device_name, last_seen_at")
+      .eq("user_id", user.id)
+      .eq("is_active", true);
+
+    const isDeviceAlreadyActive = (activeDevices || []).some((d: any) => d.device_id === device_id);
+    const activeCount = (activeDevices || []).length;
+
+    // If this device is NOT already active and we've hit the limit
+    if (!isDeviceAlreadyActive && activeCount >= maxDevices) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: "device_limit_reached",
+          message: `You have reached your device limit (${maxDevices} PCs). Please deactivate an existing device first.`,
+          max_devices: maxDevices,
+          active_device_count: activeCount,
+          active_devices: (activeDevices || []).map((d: any) => ({
+            device_id: d.device_id,
+            device_name: d.device_name,
+            last_seen: d.last_seen_at,
+          })),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const remainingDays = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     // Auto-register/update device in user_devices table
@@ -104,7 +136,7 @@ serve(async (req) => {
         user_id: user.id,
         device_id: device_id,
         system_info: software_version || "",
-        is_active: license.is_active,
+        is_active: true,
         last_seen_at: new Date().toISOString(),
         license_id: license.id,
       }, { onConflict: "user_id,device_id" });
@@ -115,8 +147,10 @@ serve(async (req) => {
         status: "active",
         plan_name: license.plan_name,
         expiry_date: license.expires_at,
-        remaining_days: remainingDays,
         activation_date: license.starts_at,
+        remaining_days: remainingDays,
+        max_devices: maxDevices,
+        active_device_count: isDeviceAlreadyActive ? activeCount : activeCount + 1,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

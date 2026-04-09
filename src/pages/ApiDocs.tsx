@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowLeft, Send, Copy, Check, ChevronDown, ChevronRight, Code2, FileJson,
   Zap, Shield, Server, BookOpen, Monitor, Key, Activity, CreditCard,

@@ -825,7 +825,7 @@ const ApiDocs = () => {
   };
 
   const handleTest = async (ep: ApiEndpoint) => {
-    setLoading((p) => ({ ...p, [ep.id]: true }));
+    setLoadingReq((p) => ({ ...p, [ep.id]: true }));
     setTestResponses((p) => ({ ...p, [ep.id]: null }));
     const body = testBodies[ep.id] || getDefaultBody(ep);
     const start = performance.now();
@@ -843,7 +843,7 @@ const ApiDocs = () => {
     } catch (err: any) {
       setTestResponses((p) => ({ ...p, [ep.id]: { status: 0, body: JSON.stringify({ error: err.message }, null, 2), time: 0 } }));
     }
-    setLoading((p) => ({ ...p, [ep.id]: false }));
+    setLoadingReq((p) => ({ ...p, [ep.id]: false }));
   };
 
   const copyText = (text: string, id: string) => {
@@ -1112,8 +1112,8 @@ const ApiDocs = () => {
                                     </div>
                                   )}
                                   <div className="flex items-center gap-3">
-                                    <Button onClick={() => handleTest(ep)} disabled={loading[ep.id]} className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl">
-                                      <Send size={14} /> {loading[ep.id] ? "Sending..." : "Send Request"}
+                                    <Button onClick={() => handleTest(ep)} disabled={loadingReq[ep.id]} className="bg-gradient-gold text-accent-foreground font-semibold gap-2 rounded-xl">
+                                      <Send size={14} /> {loadingReq[ep.id] ? "Sending..." : "Send Request"}
                                     </Button>
                                     <span className="text-[10px] text-muted-foreground">
                                       {ep.method} {BASE_URL}{ep.path}

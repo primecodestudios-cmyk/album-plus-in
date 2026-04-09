@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User } from "lucide-react";
+import alplumLogo from "@/assets/alplum-plus-logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -20,8 +21,9 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link to="/" className="font-display text-xl font-bold tracking-tight text-foreground">
-          Alplum <span className="text-gradient-gold">Plus</span>
+        <Link to="/" className="flex items-center gap-2">
+          <img src={alplumLogo} alt="Alplum Plus" className="h-9 w-9" />
+          <span className="font-display text-xl font-bold tracking-tight text-foreground">Alplum <span className="text-gradient-gold">Plus</span></span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

@@ -10,6 +10,8 @@ export interface AppSettings {
   support_phone: string;
   support_email: string;
   site_title: string;
+  app_version: string;
+  intro_video_id: string;
 }
 
 const defaults: AppSettings = {
@@ -21,6 +23,8 @@ const defaults: AppSettings = {
   support_phone: "",
   support_email: "",
   site_title: "AlplumPlus",
+  app_version: "",
+  intro_video_id: "",
 };
 
 export function useAppSettings() {
@@ -44,6 +48,8 @@ export function useAppSettings() {
         support_phone: map.support_phone || "",
         support_email: map.support_email || "",
         site_title: map.site_title || "AlplumPlus",
+        app_version: map.app_version || "",
+        intro_video_id: map.intro_video_id || "",
       });
     }
     setLoading(false);

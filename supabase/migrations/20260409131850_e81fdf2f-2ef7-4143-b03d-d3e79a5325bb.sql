@@ -1,0 +1,1 @@
+UPDATE app_settings SET value = 'true' WHERE key = 'chatbot_otp_required';

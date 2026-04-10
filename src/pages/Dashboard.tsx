@@ -123,7 +123,7 @@ const Dashboard = () => {
           </Link>
           <div className="flex items-center gap-3">
             {isAdmin && (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-2 text-destructive font-semibold">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/adminfx2026lkjh")} className="gap-2 text-destructive font-semibold">
                 <Settings size={16} /> Admin Panel
               </Button>
             )}

@@ -40,10 +40,11 @@ import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { AdminChangelogs } from "@/components/admin/AdminChangelogs";
 import { AdminActivityLogs } from "@/components/admin/AdminActivityLogs";
 import { AdminTickets } from "@/components/admin/AdminTickets";
+import { AdminOtpLogs } from "@/components/admin/AdminOtpLogs";
 import { useToast } from "@/hooks/use-toast";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
-type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "changelogs" | "settings" | "activity_logs" | "tickets";
+type Tab = "stats" | "users" | "device_requests" | "pc_management" | "licenses" | "pricing" | "templates" | "enquiries" | "sync" | "activate" | "api_tokens" | "demo_videos" | "chat_logs" | "whatsapp" | "changelogs" | "settings" | "activity_logs" | "tickets" | "otp_logs";
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
 
 const AdminPanel = () => {
@@ -110,6 +111,7 @@ const AdminPanel = () => {
     { id: "changelogs", label: "Changelogs", icon: FileStack },
     { id: "activity_logs", label: "Activity Logs", icon: Monitor },
     { id: "tickets", label: "Tickets", icon: MessageSquare },
+    { id: "otp_logs", label: "OTP Logs", icon: Key },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -178,6 +180,7 @@ const AdminPanel = () => {
           {activeTab === "changelogs" && <AdminChangelogs />}
           {activeTab === "activity_logs" && <AdminActivityLogs />}
           {activeTab === "tickets" && <AdminTickets />}
+          {activeTab === "otp_logs" && <AdminOtpLogs />}
           {activeTab === "settings" && <AdminSettings />}
         </motion.div>
       </div>

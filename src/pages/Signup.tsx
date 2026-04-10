@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, ArrowRight, ArrowLeft, Camera, Plus, X, Check } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Camera, Plus, X, Check, Mail, Phone, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
@@ -21,10 +21,10 @@ const LANGUAGES = [
   { value: "Hindi", label: "Hindi (हिन्दी)" },
   { value: "Telugu", label: "Telugu (తెలుగు)" },
   { value: "Kannada", label: "Kannada (ಕನ್ನಡ)" },
-  { value: "Malayalam", label: "Malayalam (മലയാളം)" },
+  { value: "Malayalam", label: "Malayalam (മலയാളം)" },
 ];
 
-const STEPS = ["Personal", "Contact", "Professional", "Security"];
+const STEPS = ["Personal", "Contact", "Professional", "Security", "Verify OTP"];
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -35,6 +35,14 @@ const Signup = () => {
   const [step, setStep] = useState(0);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  // OTP state
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpMethod, setOtpMethod] = useState<"email" | "whatsapp" | "both">("both");
+  const [otpCountdown, setOtpCountdown] = useState(0);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -70,7 +78,6 @@ const Signup = () => {
 
   const handleWhatsAppChange = (index: number, value: string) => {
     const nums = [...form.whatsappNumbers];
-    // Only allow digits
     nums[index] = value.replace(/\D/g, "");
     setForm({ ...form, whatsappNumbers: nums });
   };
@@ -127,10 +134,87 @@ const Signup = () => {
     return null;
   };
 
+  const startCountdown = () => {
+    setOtpCountdown(60);
+    const timer = setInterval(() => {
+      setOtpCountdown((prev) => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const sendOtp = async () => {
+    setOtpLoading(true);
+    try {
+      const whatsappNum = form.whatsappNumbers.find((n) => n.trim()) || form.phone;
+      const { data, error } = await supabase.functions.invoke("signup-otp", {
+        body: {
+          email: form.email,
+          phone: whatsappNum,
+          otp_type: otpMethod,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        setOtpSent(true);
+        startCountdown();
+        toast({
+          title: "OTP Sent! 📨",
+          description: otpMethod === "whatsapp" 
+            ? "Check your WhatsApp for the verification code"
+            : otpMethod === "both"
+            ? "OTP sent to WhatsApp & Email"
+            : "Check your email for the verification code",
+        });
+      } else {
+        throw new Error(data?.error || "Failed to send OTP");
+      }
+    } catch (err: any) {
+      toast({ title: err.message || "Failed to send OTP", variant: "destructive" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      toast({ title: "Enter 6-digit OTP", variant: "destructive" });
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-signup-otp", {
+        body: { email: form.email, otp: otpCode },
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        setOtpVerified(true);
+        toast({ title: "Verified! ✅", description: "Your identity has been confirmed." });
+      } else {
+        throw new Error(data?.error || "Verification failed");
+      }
+    } catch (err: any) {
+      toast({ title: err.message || "Invalid OTP", variant: "destructive" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const nextStep = () => {
     const err = validateStep(step);
     if (err) {
       toast({ title: err, variant: "destructive" });
+      return;
+    }
+    // When entering OTP step, auto-send OTP
+    if (step === 3) {
+      setStep(4);
+      if (!otpSent) {
+        setTimeout(() => sendOtp(), 300);
+      }
       return;
     }
     setStep(step + 1);
@@ -155,9 +239,9 @@ const Signup = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const err = validateStep(3);
-    if (err) {
-      toast({ title: err, variant: "destructive" });
+    
+    if (!otpVerified) {
+      toast({ title: "Please verify your OTP first", variant: "destructive" });
       return;
     }
 
@@ -194,8 +278,6 @@ const Signup = () => {
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         if (urlData?.publicUrl) {
-          // Update profile with avatar URL — will be set after email verification
-          // Store in user metadata for now
           await supabase.auth.updateUser({
             data: { avatar_url: urlData.publicUrl },
           });
@@ -248,7 +330,6 @@ const Signup = () => {
             {/* Step 0: Personal */}
             {step === 0 && (
               <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-                {/* Avatar */}
                 <div className="flex justify-center">
                   <div className="relative">
                     <div
@@ -434,6 +515,102 @@ const Signup = () => {
                 </div>
               </motion.div>
             )}
+
+            {/* Step 4: OTP Verification */}
+            {step === 4 && (
+              <motion.div key="s4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                    {otpVerified ? <Check size={32} className="text-green-500" /> : <Mail size={32} className="text-accent" />}
+                  </div>
+                  <h3 className="font-display text-lg font-bold text-foreground">
+                    {otpVerified ? "Verified!" : "Verify Your Identity"}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {otpVerified 
+                      ? "Your identity has been confirmed. Click Sign Up to continue."
+                      : `We'll send a 6-digit code to verify your identity`}
+                  </p>
+                </div>
+
+                {!otpVerified && (
+                  <>
+                    {/* OTP Method Selector */}
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Send OTP via:</label>
+                      <div className="flex gap-2">
+                        {[
+                          { value: "both" as const, label: "Both", icon: RefreshCw },
+                          { value: "whatsapp" as const, label: "WhatsApp", icon: Phone },
+                          { value: "email" as const, label: "Email", icon: Mail },
+                        ].map((m) => (
+                          <button
+                            key={m.value}
+                            type="button"
+                            onClick={() => setOtpMethod(m.value)}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                              otpMethod === m.value
+                                ? "bg-accent/20 border-accent text-accent"
+                                : "bg-secondary border-border text-muted-foreground hover:border-accent/30"
+                            }`}
+                          >
+                            <m.icon size={14} />
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Send / Resend OTP */}
+                    {!otpSent ? (
+                      <Button
+                        type="button"
+                        onClick={sendOtp}
+                        disabled={otpLoading}
+                        className="w-full h-12 rounded-xl bg-gradient-gold text-accent-foreground font-semibold gap-2"
+                      >
+                        {otpLoading ? "Sending..." : "Send OTP"} <ArrowRight size={16} />
+                      </Button>
+                    ) : (
+                      <>
+                        {/* OTP Input */}
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-1.5 block">Enter 6-digit OTP</label>
+                          <input
+                            type="text"
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                            placeholder="000000"
+                            maxLength={6}
+                            className={`${inputClass} text-center text-xl tracking-[0.5em] font-mono`}
+                          />
+                        </div>
+
+                        <Button
+                          type="button"
+                          onClick={verifyOtp}
+                          disabled={otpLoading || otpCode.length !== 6}
+                          className="w-full h-12 rounded-xl bg-gradient-gold text-accent-foreground font-semibold gap-2"
+                        >
+                          {otpLoading ? "Verifying..." : "Verify OTP"} <Check size={16} />
+                        </Button>
+
+                        <div className="text-center">
+                          <button
+                            type="button"
+                            onClick={sendOtp}
+                            disabled={otpCountdown > 0 || otpLoading}
+                            className="text-xs text-accent hover:underline disabled:text-muted-foreground disabled:no-underline"
+                          >
+                            {otpCountdown > 0 ? `Resend in ${otpCountdown}s` : "Resend OTP"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
           </AnimatePresence>
 
           {/* Navigation Buttons */}
@@ -443,16 +620,20 @@ const Signup = () => {
                 <ArrowLeft size={16} /> Back
               </Button>
             )}
-            {step < STEPS.length - 1 ? (
+            {step < 3 ? (
               <Button type="button" onClick={nextStep} className="flex-1 h-12 rounded-xl bg-gradient-gold text-accent-foreground font-semibold gap-2 hover:opacity-90 shadow-gold">
                 Next <ArrowRight size={16} />
               </Button>
-            ) : (
+            ) : step === 3 ? (
+              <Button type="button" onClick={nextStep} className="flex-1 h-12 rounded-xl bg-gradient-gold text-accent-foreground font-semibold gap-2 hover:opacity-90 shadow-gold">
+                Next — Verify OTP <ArrowRight size={16} />
+              </Button>
+            ) : step === 4 && otpVerified ? (
               <Button type="submit" disabled={loading} className="flex-1 h-14 rounded-xl font-semibold text-base bg-gradient-gold text-accent-foreground hover:opacity-90 shadow-gold gap-2">
                 {loading ? "Creating Account..." : "Sign Up"}
                 {!loading && <ArrowRight size={18} />}
               </Button>
-            )}
+            ) : null}
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-4">

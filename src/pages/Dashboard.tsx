@@ -24,6 +24,7 @@ import { useAppSettings } from "@/hooks/useAppSettings";
 import { DeviceManagement } from "@/components/dashboard/DeviceManagement";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
+import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
@@ -310,9 +311,16 @@ const Dashboard = () => {
                         {new Date(p.purchased_at).toLocaleDateString("en-IN")}
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-accent">
-                      {p.price === 0 ? "Free" : `₹${p.price}`}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-accent">
+                        {p.price === 0 ? "Free" : `₹${p.price}`}
+                      </span>
+                      <InvoiceDownload
+                        purchase={p}
+                        userName={profile?.full_name || "User"}
+                        userEmail={user?.email || ""}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

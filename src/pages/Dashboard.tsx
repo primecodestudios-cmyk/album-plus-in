@@ -25,6 +25,7 @@ import { DeviceManagement } from "@/components/dashboard/DeviceManagement";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
+import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
@@ -264,30 +265,13 @@ const Dashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Account Details */}
+          {/* Profile Editor */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-card rounded-2xl border border-border p-6 shadow-card"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <User size={18} className="text-accent" />
-              <h2 className="font-display text-lg font-bold text-foreground">Account Details</h2>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: "Name", value: profile?.full_name || "—" },
-                { label: "Email", value: user?.email || "—" },
-                { label: "Phone", value: profile?.phone || "—" },
-                { label: "Joined", value: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-IN") : "—" },
-              ].map((item) => (
-                <div key={item.label} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                  <span className="text-sm font-medium text-foreground">{item.value}</span>
-                </div>
-              ))}
-            </div>
+            <ProfileEditor />
           </motion.div>
 
           {/* Recent Purchases */}

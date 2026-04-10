@@ -356,6 +356,106 @@ const endpoints: ApiEndpoint[] = [
       { code: 404, meaning: "User not found" },
     ],
   },
+  {
+    id: "signup-otp",
+    name: "Send Signup OTP",
+    method: "POST",
+    path: "/signup-otp",
+    description: "Send a 6-digit OTP to verify user identity during signup. Supports WhatsApp, Email, or both delivery methods. OTP expires in 5 minutes.",
+    category: "Authentication",
+    notes: [
+      "OTP is stored in signup_otps table and must be verified before account creation.",
+      "WhatsApp delivery uses the configured WhatsApp API providers with automatic failover.",
+      "If WhatsApp delivery fails, the OTP is still stored and can be verified manually.",
+    ],
+    requestBody: {
+      email: { type: "string", required: true, description: "User email address", example: "user@example.com" },
+      phone: { type: "string", required: false, description: "WhatsApp number for OTP delivery", example: "9876543210" },
+      otp_type: { type: "string", required: false, description: "Delivery method: email, whatsapp, or both (default: email)", example: "both" },
+    },
+    sampleRequest: {
+      email: "user@example.com",
+      phone: "9876543210",
+      otp_type: "both",
+    },
+    sampleResponse: {
+      success: true,
+      message: "OTP sent via WhatsApp and Email",
+      whatsapp_sent: true,
+      email_sent: true,
+    },
+    statusCodes: [
+      { code: 200, meaning: "OTP generated and sent" },
+      { code: 400, meaning: "Missing email" },
+      { code: 500, meaning: "Failed to generate OTP" },
+    ],
+  },
+  {
+    id: "verify-signup-otp",
+    name: "Verify Signup OTP",
+    method: "POST",
+    path: "/verify-signup-otp",
+    description: "Verify a 6-digit OTP sent during signup. Must be verified before the account can be created.",
+    category: "Authentication",
+    notes: [
+      "OTP must match the most recent unverified OTP for the given email.",
+      "Expired OTPs (>5 minutes) are rejected — user must request a new one.",
+      "Once verified, the OTP record is marked as verified in the database.",
+    ],
+    requestBody: {
+      email: { type: "string", required: true, description: "Email used during OTP request", example: "user@example.com" },
+      otp: { type: "string", required: true, description: "6-digit OTP code", example: "123456" },
+    },
+    sampleRequest: {
+      email: "user@example.com",
+      otp: "123456",
+    },
+    sampleResponse: {
+      success: true,
+      message: "OTP verified successfully",
+    },
+    sampleErrorResponse: {
+      error: "OTP expired. Please request a new one.",
+    },
+    statusCodes: [
+      { code: 200, meaning: "OTP verified" },
+      { code: 400, meaning: "Invalid or expired OTP" },
+    ],
+  },
+  {
+    id: "activity-log",
+    name: "Log Activity",
+    method: "POST",
+    path: "/activity-log",
+    description: "Record user activity for tracking and audit purposes. Logs login/logout events, software open/close, device changes, and any custom actions with IP and device information.",
+    category: "Tracking",
+    notes: [
+      "IP address and user agent are automatically captured from the request headers.",
+      "The details field accepts any JSON object for flexible event data.",
+      "Common actions: login, logout, software_open, software_close, profile_update, device_activation.",
+    ],
+    requestBody: {
+      user_id: { type: "string", required: true, description: "User UUID", example: "550e8400-e29b-41d4-a716-446655440000" },
+      action: { type: "string", required: true, description: "Action type being logged", example: "software_open" },
+      device_id: { type: "string", required: false, description: "Device fingerprint", example: "DEV-A1B2C3D4" },
+      details: { type: "object", required: false, description: "Additional event data (JSON)", example: '{"version": "v5.2.1"}' },
+    },
+    sampleRequest: {
+      user_id: "550e8400-e29b-41d4-a716-446655440000",
+      action: "software_open",
+      device_id: "DEV-A1B2C3D4",
+      details: { version: "v5.2.1", session_id: "sess_abc123" },
+    },
+    sampleResponse: {
+      success: true,
+      message: "Activity logged",
+    },
+    statusCodes: [
+      { code: 200, meaning: "Activity logged successfully" },
+      { code: 400, meaning: "Missing user_id or action" },
+      { code: 500, meaning: "Failed to log activity" },
+    ],
+  },
 ];
 
 const categories = ["All", ...Array.from(new Set(endpoints.map((e) => e.category)))];

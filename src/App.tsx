@@ -40,7 +40,7 @@ const AnimatedRoutes = () => {
         <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
         <Route path="/downloads" element={<PageTransition><DownloadCenter /></PageTransition>} />
-        <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
+        <Route path="/adminfx2026lkjh" element={<PageTransition><AdminPanel /></PageTransition>} />
         
         <Route path="/terms" element={<PageTransition><TermsAndConditions /></PageTransition>} />
         <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />

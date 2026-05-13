@@ -6,20 +6,24 @@ import alplumLogo from "@/assets/alplum-plus-logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Videos", href: "/videos" },
-  { label: "PSD Store", href: "/store" },
-  { label: "Downloads", href: "/downloads" },
-  { label: "Support", href: "/support" },
-];
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLang } from "@/contexts/LanguageContext";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [appVersion, setAppVersion] = useState("");
   const { user } = useAuth();
+  const { t } = useLang();
+
+  const navLinks = [
+    { label: t("nav.features"), href: "/#features" },
+    { label: t("nav.pricing"), href: "/#pricing" },
+    { label: t("nav.videos"), href: "/videos" },
+    { label: t("nav.store"), href: "/store" },
+    { label: t("nav.downloads"), href: "/downloads" },
+    { label: t("nav.support"), href: "/support" },
+  ];
 
   useEffect(() => {
     supabase
@@ -67,27 +71,34 @@ export function Navbar() {
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
           {user ? (
             <Link to="/dashboard">
               <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity gap-2">
-                <User size={16} /> Dashboard
+                <User size={16} /> {t("nav.dashboard")}
               </Button>
             </Link>
           ) : (
             <>
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                  Log In
+                  {t("nav.login")}
                 </Button>
               </Link>
               <Link to="/signup">
                 <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
-                  Get Started
+                  {t("nav.signup")}
                 </Button>
               </Link>
             </>
           )}
+        </div>
+
+        <div className="md:hidden flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
         </div>
 
         <button
@@ -131,19 +142,19 @@ export function Navbar() {
               {user ? (
                 <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
                   <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold gap-2">
-                    <User size={16} /> Dashboard
+                    <User size={16} /> {t("nav.dashboard")}
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="ghost" size="lg" className="w-full justify-start text-muted-foreground">
-                      Log In
+                      {t("nav.login")}
                     </Button>
                   </Link>
                   <Link to="/signup" onClick={() => setMobileOpen(false)}>
                     <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold">
-                      Get Started
+                      {t("nav.signup")}
                     </Button>
                   </Link>
                 </>

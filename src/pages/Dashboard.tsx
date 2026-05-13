@@ -28,6 +28,8 @@ import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import { UsageNotice } from "@/components/UsageNotice";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface Profile {
   full_name: string;
@@ -140,6 +142,8 @@ const Dashboard = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">
               <Home size={16} /> Home
             </Button>
+            <LanguageSwitcher />
+            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
               <LogOut size={16} /> Logout
             </Button>

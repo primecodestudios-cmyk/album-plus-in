@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   LayoutDashboard,
   Users,
@@ -265,6 +267,13 @@ const AdminPanel = () => {
             <LogOut size={18} className="shrink-0" />
             {(!sidebarCollapsed || isMobile) && <span>Logout</span>}
           </button>
+
+          {(!sidebarCollapsed || isMobile) && (
+            <div className="flex items-center justify-around gap-1 px-1 py-2 border-t border-border/40 mt-1">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+          )}
 
           {/* Collapse toggle - desktop only */}
           {!isMobile && (

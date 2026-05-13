@@ -149,7 +149,8 @@ const Support = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-
+            <div className="lg:col-span-2 space-y-6" id="contact-form">
+              {faqs.map((section) => (
                 <motion.div
                   key={section.category}
                   initial={{ opacity: 0, y: 16 }}

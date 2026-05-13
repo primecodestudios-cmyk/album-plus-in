@@ -76,6 +76,7 @@ const navItems: NavItem[] = [
   { id: "licenses", label: "Subscriptions", icon: CreditCard, section: "Main" },
   { id: "pricing", label: "Pricing Plans", icon: CreditCard, section: "Main" },
   { id: "tickets", label: "Support Tickets", icon: TicketCheck, section: "Support" },
+  { id: "usage_notice", label: "90-Day Notice", icon: ShieldAlert, section: "Support" },
   { id: "chat_logs", label: "Chat Logs", icon: MessageSquare, section: "Support" },
   { id: "device_requests", label: "Device Requests", icon: Monitor, section: "Devices" },
   { id: "pc_management", label: "PC Management", icon: Monitor, section: "Devices" },

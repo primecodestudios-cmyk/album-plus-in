@@ -28,6 +28,8 @@ import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import { UsageNotice } from "@/components/UsageNotice";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface Profile {
   full_name: string;

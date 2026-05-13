@@ -42,8 +42,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useLang = () => {
+export const useLang = (): LangCtx => {
   const c = useContext(Ctx);
-  if (!c) throw new Error("useLang must be used within LanguageProvider");
-  return c;
+  if (c) return c;
+  // Safe fallback so missing-provider never crashes the app
+  return {
+    lang: "en",
+    setLang: () => {},
+    languages: LANGS,
+    t: (key: string) => (translations as any).en?.[key] ?? key,
+  };
 };

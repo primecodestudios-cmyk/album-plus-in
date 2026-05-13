@@ -20,6 +20,7 @@ import {
   FileStack,
   Video,
   Monitor,
+  ShieldAlert,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";

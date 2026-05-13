@@ -26,11 +26,14 @@ import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletio
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
+import { UsageNotice } from "@/components/UsageNotice";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
   full_name: string;
   phone: string;
+  created_at?: string;
+  usage_reset_at?: string | null;
 }
 
 interface License {

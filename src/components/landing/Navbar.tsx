@@ -6,15 +6,24 @@ import alplumLogo from "@/assets/alplum-plus-logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLang } from "@/contexts/LanguageContext";
 
-const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Videos", href: "/videos" },
-  { label: "PSD Store", href: "/store" },
-  { label: "Downloads", href: "/downloads" },
-  { label: "Support", href: "/support" },
-];
+export function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [appVersion, setAppVersion] = useState("");
+  const { user } = useAuth();
+  const { t } = useLang();
+
+  const navLinks = [
+    { label: t("nav.features"), href: "/#features" },
+    { label: t("nav.pricing"), href: "/#pricing" },
+    { label: t("nav.videos"), href: "/videos" },
+    { label: t("nav.store"), href: "/store" },
+    { label: t("nav.downloads"), href: "/downloads" },
+    { label: t("nav.support"), href: "/support" },
+  ];
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);

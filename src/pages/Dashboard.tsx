@@ -140,6 +140,8 @@ const Dashboard = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2 text-muted-foreground">
               <Home size={16} /> Home
             </Button>
+            <LanguageSwitcher />
+            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
               <LogOut size={16} /> Logout
             </Button>

@@ -38,6 +38,7 @@ import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminOtpLogs } from "@/components/admin/AdminOtpLogs";
+import { AdminUsageNotice } from "@/components/admin/AdminUsageNotice";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import alplumLogo from "@/assets/alplum-plus-logo.png";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle } from "lucide-react";
+import { ChevronDown, MessageCircle, Mail, Phone, HelpCircle, ShieldAlert, Clock, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/landing/Footer";
 import { ContactForm } from "@/components/support/ContactForm";

@@ -20,6 +20,7 @@ import {
   FileStack,
   Video,
   Monitor,
+  ShieldAlert,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
@@ -37,6 +38,7 @@ import { AdminWhatsApp } from "@/components/admin/AdminWhatsApp";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminPsdTemplates } from "@/components/admin/AdminPsdTemplates";
 import { AdminOtpLogs } from "@/components/admin/AdminOtpLogs";
+import { AdminUsageNotice } from "@/components/admin/AdminUsageNotice";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
@@ -56,6 +58,7 @@ type Tab =
   | "templates"
   | "whatsapp"
   | "otp_logs"
+  | "usage_notice"
   | "settings";
 
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";
@@ -73,6 +76,7 @@ const navItems: NavItem[] = [
   { id: "licenses", label: "Subscriptions", icon: CreditCard, section: "Main" },
   { id: "pricing", label: "Pricing Plans", icon: CreditCard, section: "Main" },
   { id: "tickets", label: "Support Tickets", icon: TicketCheck, section: "Support" },
+  { id: "usage_notice", label: "90-Day Notice", icon: ShieldAlert, section: "Support" },
   { id: "chat_logs", label: "Chat Logs", icon: MessageSquare, section: "Support" },
   { id: "device_requests", label: "Device Requests", icon: Monitor, section: "Devices" },
   { id: "pc_management", label: "PC Management", icon: Monitor, section: "Devices" },
@@ -306,6 +310,7 @@ const AdminPanel = () => {
               {activeTab === "licenses" && <AdminLicenses />}
               {activeTab === "pricing" && <AdminPricing />}
               {activeTab === "tickets" && <AdminTickets />}
+              {activeTab === "usage_notice" && <AdminUsageNotice />}
               {activeTab === "chat_logs" && <AdminChatLogs />}
               {activeTab === "device_requests" && <AdminDeviceRequests />}
               {activeTab === "pc_management" && <AdminDeviceManagement />}

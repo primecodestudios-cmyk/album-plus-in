@@ -71,3 +71,13 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## 90 Days Security Notice
+
+For user safety, AlbumPlus shows a **90 Days Security Notice** after 90 days of continuous account usage:
+
+- A non-aggressive **warning banner** appears on the user dashboard.
+- A **popup** is shown once per browser session with full instructions.
+- Users can reach support via **WhatsApp** or the **Request Support** button.
+- Remote support is provided via **AnyDesk / UltraViewer** during working hours.
+- Admins can review users in the **Admin Panel → 90-Day Notice** tab and **reset** an individual user's 90-day window after verification.

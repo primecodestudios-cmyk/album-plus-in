@@ -26,11 +26,14 @@ import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletio
 import { SupportTickets } from "@/components/dashboard/SupportTickets";
 import { InvoiceDownload } from "@/components/dashboard/InvoiceDownload";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
+import { UsageNotice } from "@/components/UsageNotice";
 import alplumLogo from "@/assets/alplum-plus-logo.png";
 
 interface Profile {
   full_name: string;
   phone: string;
+  created_at?: string;
+  usage_reset_at?: string | null;
 }
 
 interface License {
@@ -76,7 +79,7 @@ const Dashboard = () => {
   const fetchData = useCallback(async () => {
     if (!user) return;
     const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes, devRoleRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
+      supabase.from("profiles").select("full_name, phone, created_at, usage_reset_at").eq("user_id", user.id).single(),
       supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
       supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),
@@ -147,6 +150,14 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Profile Completion Banner for old users */}
         <ProfileCompletionBanner />
+
+        {/* 90-Day Security Notice */}
+        <UsageNotice
+          startDate={profile?.created_at}
+          resetDate={profile?.usage_reset_at}
+          sessionKey={user?.id || "anon"}
+        />
+
 
         {/* Welcome */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

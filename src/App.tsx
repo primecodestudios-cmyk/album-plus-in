@@ -24,6 +24,7 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import ApiDocs from "./pages/ApiDocs.tsx";
 import Videos from "./pages/Videos.tsx";
 import Changelogs from "./pages/Changelogs.tsx";
+import UserGuide from "./pages/UserGuide.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();

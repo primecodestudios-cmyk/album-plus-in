@@ -310,6 +310,7 @@ const AdminPanel = () => {
               {activeTab === "licenses" && <AdminLicenses />}
               {activeTab === "pricing" && <AdminPricing />}
               {activeTab === "tickets" && <AdminTickets />}
+              {activeTab === "usage_notice" && <AdminUsageNotice />}
               {activeTab === "chat_logs" && <AdminChatLogs />}
               {activeTab === "device_requests" && <AdminDeviceRequests />}
               {activeTab === "pc_management" && <AdminDeviceManagement />}

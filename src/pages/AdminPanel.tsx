@@ -266,6 +266,13 @@ const AdminPanel = () => {
             {(!sidebarCollapsed || isMobile) && <span>Logout</span>}
           </button>
 
+          {(!sidebarCollapsed || isMobile) && (
+            <div className="flex items-center justify-around gap-1 px-1 py-2 border-t border-border/40 mt-1">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+          )}
+
           {/* Collapse toggle - desktop only */}
           {!isMobile && (
             <button

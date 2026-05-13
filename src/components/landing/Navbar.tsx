@@ -25,11 +25,6 @@ export function Navbar() {
     { label: t("nav.support"), href: "/support" },
   ];
 
-export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [appVersion, setAppVersion] = useState("");
-  const { user } = useAuth();
-
   useEffect(() => {
     supabase
       .from("app_settings" as any)

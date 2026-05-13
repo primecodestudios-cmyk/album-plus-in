@@ -79,7 +79,7 @@ const Dashboard = () => {
   const fetchData = useCallback(async () => {
     if (!user) return;
     const [profileRes, licensesRes, purchasesRes, downloadsRes, roleRes, devRoleRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).single(),
+      supabase.from("profiles").select("full_name, phone, created_at, usage_reset_at").eq("user_id", user.id).single(),
       supabase.from("user_licenses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("user_purchases").select("*").eq("user_id", user.id).order("purchased_at", { ascending: false }),
       supabase.from("user_downloads").select("*").eq("user_id", user.id).order("downloaded_at", { ascending: false }),

@@ -58,6 +58,7 @@ type Tab =
   | "templates"
   | "whatsapp"
   | "otp_logs"
+  | "usage_notice"
   | "settings";
 
 type UserFilter = "all" | "active" | "inactive" | "blocked" | "expiring" | "expiring7" | "expired";

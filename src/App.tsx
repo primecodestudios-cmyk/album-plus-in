@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "@/components/PageTransition";
+import BackButton from "@/components/BackButton";
 import Index from "./pages/Index.tsx";
 import PsdStore from "./pages/PsdStore.tsx";
 import Signup from "./pages/Signup.tsx";
@@ -31,6 +32,7 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
+      <BackButton />
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/store" element={<PageTransition><PsdStore /></PageTransition>} />

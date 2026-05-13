@@ -103,9 +103,53 @@ const Support = () => {
             </p>
           </motion.div>
 
+          {/* Usage Limits & Support */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-6xl mx-auto mb-10 bg-amber-500/5 border border-amber-500/30 rounded-2xl p-5 md:p-6"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+                <ShieldAlert size={22} />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-display text-lg font-bold text-foreground mb-1">
+                  Usage Limits & Support — 90 Days Security Notice
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                  For your security, AlbumPlus shows a notice after 90 days of continuous usage.
+                  Access may be restricted until our team verifies your account. To continue using
+                  the software without interruption, please contact support before reaching the limit.
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1.5 mb-4">
+                  <li className="flex items-center gap-2"><Monitor size={14} className="text-amber-500" /> Remote support via AnyDesk or UltraViewer</li>
+                  <li className="flex items-center gap-2"><Clock size={14} className="text-amber-500" /> Available during working hours (Mon–Sat, 10 AM – 6 PM)</li>
+                  <li className="flex items-center gap-2"><MessageCircle size={14} className="text-amber-500" /> Contact us in advance for the quickest assistance</li>
+                </ul>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#25D366] hover:bg-[#25D366]/90 text-white text-sm font-semibold"
+                  >
+                    <MessageCircle size={14} /> WhatsApp Support
+                  </a>
+                  <a
+                    href="#contact-form"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold"
+                  >
+                    Request Support
+                  </a>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="lg:col-span-2 space-y-6">
-              {faqs.map((section) => (
+
                 <motion.div
                   key={section.category}
                   initial={{ opacity: 0, y: 16 }}

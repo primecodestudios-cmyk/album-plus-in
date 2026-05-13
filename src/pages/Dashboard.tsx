@@ -151,6 +151,14 @@ const Dashboard = () => {
         {/* Profile Completion Banner for old users */}
         <ProfileCompletionBanner />
 
+        {/* 90-Day Security Notice */}
+        <UsageNotice
+          startDate={profile?.created_at}
+          resetDate={profile?.usage_reset_at}
+          sessionKey={user?.id || "anon"}
+        />
+
+
         {/* Welcome */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">

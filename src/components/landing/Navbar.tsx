@@ -71,27 +71,34 @@ export function Navbar() {
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
           {user ? (
             <Link to="/dashboard">
               <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity gap-2">
-                <User size={16} /> Dashboard
+                <User size={16} /> {t("nav.dashboard")}
               </Button>
             </Link>
           ) : (
             <>
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                  Log In
+                  {t("nav.login")}
                 </Button>
               </Link>
               <Link to="/signup">
                 <Button size="sm" className="bg-gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
-                  Get Started
+                  {t("nav.signup")}
                 </Button>
               </Link>
             </>
           )}
+        </div>
+
+        <div className="md:hidden flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
         </div>
 
         <button

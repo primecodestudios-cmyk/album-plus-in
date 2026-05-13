@@ -445,6 +445,7 @@ export type Database = {
           state: string | null
           studio_name: string | null
           updated_at: string
+          usage_reset_at: string | null
           user_id: string
           whatsapp_numbers: string[] | null
         }
@@ -462,6 +463,7 @@ export type Database = {
           state?: string | null
           studio_name?: string | null
           updated_at?: string
+          usage_reset_at?: string | null
           user_id: string
           whatsapp_numbers?: string[] | null
         }
@@ -479,6 +481,7 @@ export type Database = {
           state?: string | null
           studio_name?: string | null
           updated_at?: string
+          usage_reset_at?: string | null
           user_id?: string
           whatsapp_numbers?: string[] | null
         }

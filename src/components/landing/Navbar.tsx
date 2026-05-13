@@ -142,19 +142,19 @@ export function Navbar() {
               {user ? (
                 <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
                   <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold gap-2">
-                    <User size={16} /> Dashboard
+                    <User size={16} /> {t("nav.dashboard")}
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="ghost" size="lg" className="w-full justify-start text-muted-foreground">
-                      Log In
+                      {t("nav.login")}
                     </Button>
                   </Link>
                   <Link to="/signup" onClick={() => setMobileOpen(false)}>
                     <Button size="lg" className="w-full bg-gradient-gold text-accent-foreground font-semibold">
-                      Get Started
+                      {t("nav.signup")}
                     </Button>
                   </Link>
                 </>
